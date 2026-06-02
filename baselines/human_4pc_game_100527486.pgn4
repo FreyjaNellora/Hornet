@@ -1,0 +1,47 @@
+[GameNr "100527486"]
+[TimeControl "4+0"]
+[Variant "FFA"]
+[RuleVariants "Anonymous DeadKingWalking EnPassant PromoteTo=D"]
+[StartFen4 "4PC"]
+[Red "OutlawedGangster"]
+[RedElo "3057"]
+[Blue "ChessMasterGS"]
+[BlueElo "2514"]
+[Yellow "dalay045"]
+[YellowElo "2340"]
+[Green "joshuapro2021"]
+[GreenElo "2452"]
+[Result "OutlawedGangster: 41 - ChessMasterGS: 54 - dalay045: 0 - joshuapro2021: 15"]
+[Termination "(Red +20)"]
+[Site "www.chess.com/variants/4-player-chess-championship-qualifier-arena/game/100527486"]
+[Date "Mon Apr 13 2026 21:12:29 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "85"]
+
+1. h2-h3 .. b7-c7 .. g13-g12 .. m8-l8
+2. Ne1-f3 .. b9-c9 .. d13-d11 .. Qn7-m8
+3. Qg1-h2 .. Qa8-b7 .. Qh14-f12 .. Qm8xh13+
+4. k2-k4 .. Qb7xg12+# .. Qh13xQg12
+5. Nj1-i3 .. Ba6xQg12 .. Nn5-l6
+6. d2-d4 .. Bg12-a6 .. m11-k11
+7. e2-e3 .. Na10-c11 .. m4-l4
+8. Bf1-e2 .. b4-c4 .. m5-k5
+9. O-O-O .. Na5-c6 .. Bn6-m5
+10. g2-g4 .. Nc6-d8 .. O-O-O
+11. g4-g5 .. b8-c8 .. k11-j11
+12. g5-g6 .. Ba9-b8 .. j11-i11
+13. g6-g7 .. Nd8-c10 .. i11-h11
+14. g7-g8=D .. O-O-O .. Kn6-n5
+15. j2-j3 .. Nc11-b9 .. Kn5-n4
+16. Ni3-k2 .. Ka9-a10 .. Nl6-n5
+17. Qg8-g5 .. c7-d7 .. m7-k7
+18. Nf3-e5 .. b6-d6 .. Bn9-k6
+19. Ne5-f3 .. Ba6-b7 .. Nn10-m8
+20. Nk2xl4 .. Ra4-a5 .. Nn5xNl4
+21. Qh2xk5 .. Bb7xNf3 .. Rn7-n5
+22. Be2xBf3 .. b5-c5 .. Kn4-m4
+23. d4-d5 .. c4xd5 .. h11-g11=D
+24. Bi1xNl4 .. Ra5-a4 .. Qg11xQg5
+25. Qk5xBk6+ .. d6-e6 .. Qg5-l5
+26. k4xQl5 .. Ra8-a6 .. m6xl5
+27. Bl4xBm5+ .. Ra4xKm4#
+28. Bm5xk7 .. R

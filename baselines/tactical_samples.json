@@ -1,0 +1,786 @@
+{
+  "version": "1.0",
+  "description": "Curated tactical test positions from 3000+ Elo human games. Each sample is a 5-6 move window with a clear right/wrong answer judged by game outcome.",
+  "notation": "chess.com 4PC (e.g., h2-h3, Ne1-f3, Qg1xj4). Convert to Freyja long-algebraic (e.g., h2h3, e1f3, g1j4) before feeding to engine.",
+  "sources": {
+    "93042729": {
+      "avg_elo": 2450,
+      "type": "mixed",
+      "players": "1746-2734"
+    },
+    "93042775": {
+      "avg_elo": 2646,
+      "type": "mixed",
+      "players": "1742-2803"
+    },
+    "93060137": {
+      "avg_elo": 3045,
+      "type": "strong",
+      "players": "2902-3422"
+    },
+    "93333795": {
+      "avg_elo": 3202,
+      "type": "strong",
+      "players": "2913-3443"
+    },
+    "93334455": {
+      "avg_elo": 3165,
+      "type": "strong",
+      "players": "2907-3456"
+    },
+    "93391655": {
+      "avg_elo": 3114,
+      "type": "strong",
+      "players": "2805-3476"
+    },
+    "93419919": {
+      "avg_elo": 2931,
+      "type": "strong",
+      "players": "2598-3465"
+    },
+    "95992584": {
+      "avg_elo": 3293,
+      "type": "strong",
+      "players": "3054-3434"
+    },
+    "96085550": {
+      "avg_elo": 3048,
+      "type": "strong",
+      "players": "2541-3438"
+    },
+    "96585003": {
+      "avg_elo": 2497,
+      "type": "weak",
+      "players": "2072-3068"
+    },
+    "96602063": {
+      "avg_elo": 2218,
+      "type": "weak",
+      "players": "1954-2709"
+    },
+    "96836735": {
+      "avg_elo": 2407,
+      "type": "weak",
+      "players": "2104-3077"
+    }
+  },
+  "games": {
+    "95992584": {
+      "moves": [
+        {
+          "round": 1,
+          "Red": "g2-g4",
+          "Blue": "b7-c7+",
+          "Yellow": "g13-g12",
+          "Green": "m6-l6"
+        },
+        {
+          "round": 2,
+          "Red": "f2-f3",
+          "Blue": "b9-c9",
+          "Yellow": "Qh14-f12",
+          "Green": "m7-k7"
+        },
+        {
+          "round": 3,
+          "Red": "k2-k4",
+          "Blue": "b4-d4",
+          "Yellow": "i13-i11",
+          "Green": "Nn10-l9"
+        },
+        {
+          "round": 4,
+          "Red": "Ne1-d3",
+          "Blue": "Ra4-c4",
+          "Yellow": "Qf12-f6",
+          "Green": "Qn7-m6"
+        },
+        {
+          "round": 5,
+          "Red": "Nd3-e5",
+          "Blue": "Na5-c6",
+          "Yellow": "d13-d11",
+          "Green": "Nn5-l4"
+        },
+        {
+          "round": 6,
+          "Red": "Ne5xRc4",
+          "Blue": "b5xNc4",
+          "Yellow": "Nj14-i12",
+          "Green": "m11-k11"
+        },
+        {
+          "round": 7,
+          "Red": "Qg1-g3",
+          "Blue": "Qa8-b7",
+          "Yellow": "Ne14-f12",
+          "Green": "Qm6-k8"
+        },
+        {
+          "round": 8,
+          "Red": "j2-j3",
+          "Blue": "Na10-c11",
+          "Yellow": "Rd14-d12",
+          "Green": "Nl4-n5"
+        },
+        {
+          "round": 9,
+          "Red": "Qg3-i5",
+          "Blue": "Nc11-b9",
+          "Yellow": "Rd12-e12",
+          "Green": "Qk8-m6"
+        },
+        {
+          "round": 10,
+          "Red": "Bf1-i4",
+          "Blue": "Nb9-d8",
+          "Yellow": "Ni12-h10",
+          "Green": "Nn5-m7"
+        },
+        {
+          "round": 11,
+          "Red": "Nj1-i3",
+          "Blue": "b8-c8",
+          "Yellow": "Qf6-h8",
+          "Green": "Nl9-j8"
+        },
+        {
+          "round": 12,
+          "Red": "Qi5-i9",
+          "Blue": "c7-d7",
+          "Yellow": "Re12-e9",
+          "Green": "Nm7-l9"
+        },
+        {
+          "round": 13,
+          "Red": "Ni3-g2",
+          "Blue": "Ba9-b8",
+          "Yellow": "h13-h11",
+          "Green": "m4-l4"
+        },
+        {
+          "round": 14,
+          "Red": "f3-f4",
+          "Blue": "Nc6-b4",
+          "Yellow": "Qh8-h5",
+          "Green": "m10-l10"
+        },
+        {
+          "round": 15,
+          "Red": "Bi1-j2",
+          "Blue": "Nb4-c6",
+          "Yellow": "k13-k12",
+          "Green": "Bn6-k9"
+        },
+        {
+          "round": 16,
+          "Red": "Qi9-i5",
+          "Blue": "Nd8-b9",
+          "Yellow": "Bi14-h13",
+          "Green": "Rn4-n5"
+        },
+        {
+          "round": 17,
+          "Red": "O-O",
+          "Blue": "Qb7-c7",
+          "Yellow": "Bf14-h12",
+          "Green": "Bn9-m10"
+        },
+        {
+          "round": 18,
+          "Red": "Qi5-g7",
+          "Blue": "Qc7-b7",
+          "Yellow": "Re9-e10",
+          "Green": "O-O"
+        },
+        {
+          "round": 19,
+          "Red": "Qg7-f6",
+          "Blue": "Ra11-a10",
+          "Yellow": "Qh5-g6",
+          "Green": "Qm6-k8"
+        },
+        {
+          "round": 20,
+          "Red": "Qf6xNc6",
+          "Blue": "Qb7xQc6",
+          "Yellow": "Qg6xQc6",
+          "Green": "Qk8xg4"
+        }
+      ]
+    },
+    "96085550": {
+      "moves": [
+        {
+          "round": 1,
+          "Red": "h2-h3",
+          "Blue": "b7-c7",
+          "Yellow": "g13-g12",
+          "Green": "m8-l8"
+        },
+        {
+          "round": 2,
+          "Red": "Ne1-f3",
+          "Blue": "Qa8-b7",
+          "Yellow": "Nj14-i12",
+          "Green": "m6-l6"
+        },
+        {
+          "round": 3,
+          "Red": "Qg1-h2",
+          "Blue": "b11-d11",
+          "Yellow": "Qh14-e11",
+          "Green": "Nn10-l9"
+        },
+        {
+          "round": 4,
+          "Red": "e2-e4",
+          "Blue": "b4-c4",
+          "Yellow": "j13-j12",
+          "Green": "m11-l11"
+        },
+        {
+          "round": 5,
+          "Red": "Nj1-i3",
+          "Blue": "Na10-c9",
+          "Yellow": "k13-k11",
+          "Green": "m5-k5"
+        },
+        {
+          "round": 6,
+          "Red": "k2-k3",
+          "Blue": "Na5-c6",
+          "Yellow": "Bi14-j13",
+          "Green": "Bn9-m8"
+        },
+        {
+          "round": 7,
+          "Red": "Qh2-f4",
+          "Blue": "b10-c10",
+          "Yellow": "Ne14-f12",
+          "Green": "Qn7-m6"
+        },
+        {
+          "round": 8,
+          "Red": "Bi1-h2",
+          "Blue": "Qb7-d9",
+          "Yellow": "O-O-O",
+          "Green": "Bm8-n7"
+        },
+        {
+          "round": 9,
+          "Red": "j2-j3",
+          "Blue": "Qd9-d8",
+          "Yellow": "Bf14-h12",
+          "Green": "m4-k4"
+        },
+        {
+          "round": 10,
+          "Red": "j3-j4",
+          "Blue": "Qd8-d7",
+          "Yellow": "d13-d12",
+          "Green": "k5xj4"
+        },
+        {
+          "round": 11,
+          "Red": "Qf4xj4",
+          "Blue": "Ba9-b10",
+          "Yellow": "Qe11-g9",
+          "Green": "m7-l7"
+        },
+        {
+          "round": 12,
+          "Red": "Bf1-e2",
+          "Blue": "Nc9-e8",
+          "Yellow": "Qg9-h10",
+          "Green": "Rn11-n10"
+        },
+        {
+          "round": 13,
+          "Red": "O-O-O",
+          "Blue": "Bb10-e7",
+          "Yellow": "Qh10-g10",
+          "Green": "Bn6-m7"
+        },
+        {
+          "round": 14,
+          "Red": "Qj4-g4",
+          "Blue": "Qd7xQg4",
+          "Yellow": "Qg10xNe8",
+          "Green": "Bn7-m8"
+        },
+        {
+          "round": 15,
+          "Red": "Ni3xQg4",
+          "Blue": "Be7-c9",
+          "Yellow": "Nf12-d13",
+          "Green": "l7-k7"
+        },
+        {
+          "round": 16,
+          "Red": "Rk1-j1",
+          "Blue": "Ba6-d9",
+          "Yellow": "Qe8-h8",
+          "Green": "l6-k6"
+        },
+        {
+          "round": 17,
+          "Red": "Bh2xBm7+",
+          "Blue": "O-O-O",
+          "Yellow": "Nd13-c11",
+          "Green": "Qm6xBm7"
+        },
+        {
+          "round": 18,
+          "Red": "Rj1-j9",
+          "Blue": "Bd9-c8",
+          "Yellow": "Qh8xBc8",
+          "Green": "Qm7xRg1+"
+        },
+        {
+          "round": 19,
+          "Red": "Nf3xQg1",
+          "Blue": "b9xQc8",
+          "Yellow": "e13-e12",
+          "Green": "Nn5-m7"
+        },
+        {
+          "round": 20,
+          "Red": "Rj9-g9",
+          "Blue": "Ka9-b10",
+          "Yellow": "e12xd11",
+          "Green": "k6-j6"
+        }
+      ]
+    }
+  },
+  "samples": [
+    {
+      "id": "S01",
+      "name": "Four-Queen Pileup",
+      "type": "chain_reaction",
+      "game": "95992584",
+      "round": 20,
+      "moves_to_replay": "g2g4 b7c7 g13g12 m6l6 f2f3 b9c9 h14f12 m7k7 k2k4 b4d4 i13i11 n10l9 e1d3 a4c4 f12f6 n7m6 d3e5 a5c6 d13d11 n5l4 e5c4 b5c4 j14i12 m11k11 g1g3 a8b7 e14f12 m6k8 j2j3 a10c11 d14d12 l4n5 g3i5 c11b9 d12e12 k8m6 f1i4 b9d8 i12h10 n5m7 j1i3 b8c8 f6h8 l9j8 i5i9 c7d7 e12e9 m7l9 i3g2 a9b8 h13h11 m4l4 f3f4 c6b4 h8h5 m10l10 i1j2 b4c6 k13k12 n6k9 i9i5 d8b9 i14h13 n4n5 h1j1 b7c7 f14h12 n9m10 i5g7 c7b7 e9e10 n8n10 g7f6 a11a10 h5g6 m6k8",
+      "position_after": "After R19 (all 4 moves). Red is about to play R20.",
+      "test_move": "Red's move",
+      "human_move": "Qf6xNc6",
+      "human_move_freyja": "f6c6",
+      "expected_category": "capture",
+      "consequence": "Triggers 3 more queen captures. Red loses queen but gains knight. Yellow survives with queen on c6. Chain favors Yellow.",
+      "what_to_check": "Does engine see the full capture chain? Does it evaluate whether starting the chain is worth it (Red loses queen for knight = -600cp)?",
+      "score": {
+        "match": 2,
+        "category_match": 1,
+        "neutral": 0,
+        "anti_pattern": -1
+      },
+      "fen4": "xxx3yK3yRxxx/xxx1yPyP1yB1yP1xxx/xxx2yNyPyB2yPxxx/1bP1yP3yPyP1gP3/bRbP2yR2yN3gPgBgK/1bNbP7gBgNgPgR/1bBbP6gNgQ1gP1/bKbQ1bP6gP3/bBbPbN2rQyQ4gP2/12gPgR/2bPbP1rPrP1rB1rPgP2/xxx6rP1xxx/xxxrPrP1rNrPrPrB1xxx/xxxrR4rRrK1xxx r y - -",
+      "nextturn": "Red"
+    },
+    {
+      "id": "S02",
+      "name": "Three-Way Exchange",
+      "type": "chain_reaction",
+      "game": "96085550",
+      "round": 17,
+      "moves_to_replay": "h2h3 b7c7 g13g12 m8l8 e1f3 a8b7 j14i12 m6l6 g1h2 b11d11 h14e11 n10l9 e2e4 b4c4 j13j12 m11l11 j1i3 a10c9 k13k11 m5k5 k2k3 a5c6 i14j13 n9m8 h2f4 b10c10 e14f12 n7m6 i1h2 b7d9 g14i14 m8n7 j2j3 d9d8 f14h12 m4k4 j3j4 d8d7 d13d12 k5j4 f4j4 a9b10 e11g9 m7l7 f1e2 c9e8 g9h10 n11n10 h1f1 b10e7 h10g10 n6m7 j4g4",
+      "position_after": "After Red plays Qj4-g4 in R14. Blue is about to respond.",
+      "test_move": "Blue's move",
+      "human_move": "Qd7xQg4",
+      "human_move_freyja": "d7g4",
+      "expected_category": "capture",
+      "consequence": "Blue captures Red's queen (+900cp). Yellow then captures knight Qg10xNe8 (+300cp). Blue won the game with 87pts. This is THE pivotal capture.",
+      "what_to_check": "Does engine immediately see the hanging queen? This is a 'free queen' position.",
+      "fen4": "xxxyR3yRyK2xxx/xxx1yPyP1yPyPyB1xxx/xxxyP1yNyPyByNyP1xxx/bR2bP6yPgP2/2bP3yQ5gPgR/1bP9gNgP1/1bP2bN6gP1gK/bK1bPbQbB6gPgBgB/bBbPbN8gPgQ1/1bP11gN/bR1bP1rP1rQ3gP2gR/xxx2rN1rPrN1rPxxx/xxxrPrBrPrPrBrP2xxx/xxx2rKrR3rRxxx b Bbg - -",
+      "nextturn": "Blue"
+    },
+    {
+      "id": "S03",
+      "name": "Three-Round Explosion",
+      "type": "chain_reaction",
+      "game": "93334455",
+      "round": 4,
+      "moves_to_replay": "h2h3 b9c9 g13g12 m8l8 g1j4 a8b9 i13i12 n7m8 f2f4 b7c7 d13d11 m4k4",
+      "position_after": "After R3 complete. Red's queen is on j4, Yellow's queen on h14, Green's queen on m8.",
+      "test_move": "Red's move R4",
+      "human_move": "Qj4-j9",
+      "human_move_freyja": "j4j9",
+      "expected_category": "queen_reposition",
+      "consequence": "Queen enters center. Yellow responds Qh14xm9+ capturing Green. This triggers a 3-round chain that eliminates Green and redistributes material. Red ends up with captured queen and bishop.",
+      "what_to_check": "Does engine see j9 as an aggressive queen placement? Does it anticipate the chain reactions that follow?",
+      "fen4": "xxxyRyNyByKyQyByNyRxxx/xxx1yPyP1yP1yPyPxxx/xxx3yP1yP2xxx/bRbP1yP8gPgR/bNbP10gPgN/bBbQbP9gPgB/1bP9gPgQgK/bK1bP9gP1/bBbP10gPgB/bNbP10gPgN/bRbP3rP3rQgP2gR/xxx4rP3xxx/xxxrPrP1rP1rPrPrPxxx/xxxrRrNrB1rKrBrNrRxxx r RrBbYyGg l4 g",
+      "nextturn": "Red"
+    },
+    {
+      "id": "S04",
+      "name": "Knight Wins Rook",
+      "type": "short_exchange",
+      "game": "95992584",
+      "round": 5,
+      "moves_to_replay": "g2g4 b7c7 g13g12 m6l6 f2f3 b9c9 h14f12 m7k7 k2k4 b4d4 i13i11 n10l9 e1d3 a4c4 f12f6 n7m6",
+      "position_after": "After R4 complete. Red's knight is on d3, Blue's rook is on c4.",
+      "test_move": "Red's move R5",
+      "human_move": "Nd3-e5",
+      "human_move_freyja": "d3e5",
+      "expected_category": "knight_advance",
+      "consequence": "Knight advances to e5 attacking Blue's rook on c4. Next move Ne5xRc4 wins the rook. Net +200cp for Red (rook minus knight after pawn recapture).",
+      "what_to_check": "Does engine see the knight advance as preparation for winning the rook? 2-move tactic.",
+      "fen4": "xxxyRyNyByK1yByNyRxxx/xxxyPyPyP1yP1yPyPxxx/xxx3yP4xxx/bRbP6yP3gPgR/bNbP10gP1/bB1bP8gNgPgB/bQbP10gPgK/bK1bP7gP3/bBbP3yQ5gPgQgB/bNbP10gPgN/2bRbP2rP3rP1gPgR/xxxrN1rP5xxx/xxxrPrP2rPrPrP1xxx/xxxrR1rBrQrKrBrNrRxxx r RrbYyGg - -",
+      "nextturn": "Red"
+    },
+    {
+      "id": "S05",
+      "name": "Queen Hangs - Free Material",
+      "type": "short_exchange",
+      "game": "96085550",
+      "round": 14,
+      "moves_to_replay": "h2h3 b7c7 g13g12 m8l8 e1f3 a8b7 j14i12 m6l6 g1h2 b11d11 h14e11 n10l9 e2e4 b4c4 j13j12 m11l11 j1i3 a10c9 k13k11 m5k5 k2k3 a5c6 i14j13 n9m8 h2f4 b10c10 e14f12 n7m6 i1h2 b7d9 g14i14 m8n7 j2j3 d9d8 f14h12 m4k4 j3j4 d8d7 d13d12 k5j4 f4j4 a9b10 e11g9 m7l7 f1e2 c9e8 g9h10 n11n10 h1f1 b10e7 h10g10 n6m7",
+      "position_after": "After R13 complete. Red is about to move.",
+      "test_move": "Red's move R14",
+      "human_move": "Qj4-g4",
+      "human_move_freyja": "j4g4",
+      "expected_category": "queen_blunder",
+      "is_negative": true,
+      "consequence": "Red (3438 Elo!) moves queen to g4 where Blue can capture it. Red ends with 32pts (worst). Even the best players blunder.",
+      "what_to_check": "Does engine see that g4 is attacked by Blue's queen on d7? Engine MUST NOT play this move. If it does, eval is broken.",
+      "fen4": "xxxyR3yRyK2xxx/xxx1yPyP1yPyPyB1xxx/xxxyP1yNyPyByNyP1xxx/bR2bP6yPgP2/2bP3yQ5gPgR/1bP9gNgP1/1bP2bN6gP1gK/bK1bPbQbB6gPgBgB/bBbPbN8gPgQ1/1bP11gN/bR1bP1rP4rQgP2gR/xxx2rN1rPrN1rPxxx/xxxrPrBrPrPrBrP2xxx/xxx2rKrR3rRxxx r Bbg - -",
+      "nextturn": "Red"
+    },
+    {
+      "id": "S06",
+      "name": "Bishop Sacrifice Cracks King",
+      "type": "king_hunt",
+      "game": "93391655",
+      "round": 11,
+      "moves_to_replay": "h2h3 b9c9 d13d11 m8l8 f2f4 b4d4 i13i12 m11k11 e1f3 a5c6 h13h11 n7k10 g1j4 b8d8 h14h12 n9m8 j1i3 a8b9 j14k12 n10l9 j4h6 b9d7 k12i11 k10k8 f3g5 b5c5 e14f12 n5l6 k2k4 a10c11 i11g10 l6j7 h6h10 a6b5 g10i9 j7i9 h10i9 a7a5 d14d12 l9j10 i9g9 a9d6 i14h13",
+      "position_after": "After R11 Red/Blue/Yellow. Green is about to play R11.",
+      "test_move": "Green's move R11",
+      "human_move": "Bm8xh3",
+      "human_move_freyja": "m8h3",
+      "expected_category": "sacrifice",
+      "consequence": "Bishop captures h3, cracking open Red's king shelter. Red never castles. 10 moves later Blue's queen invades through the crack (Qk7-f2, QxBg3, Qh2+) and Green's rook delivers checkmate (Rh4xNh3#). Red (3273 Elo) gets 9pts.",
+      "what_to_check": "Does engine evaluate this bishop capture correctly? It's not just +pawn material - it permanently damages Red's king safety. Engine should see this as high-value.",
+      "fen4": "xxx2yByK3yRxxx/xxx1yPyPyPyB1yPyPxxx/xxxyR1yN1yQyP2xxx/bRbPbNyP3yP2gP2gR/1bP7gN2gP1/2bP3rQ5gP1/3bP6gQgPgBgK/1bP1bQ8gP1/bRbPbNbB8gPgB/bKbBbP3rN5gP1/3bP1rP4rP1gPgR/xxx4rPrN2xxx/xxxrPrP1rP1rPrP1xxx/xxxrR1rB1rKrB1rRxxx g RryGg - -",
+      "nextturn": "Green"
+    },
+    {
+      "id": "S07",
+      "name": "Queen Invasion to Checkmate",
+      "type": "king_hunt",
+      "game": "93391655",
+      "round": 19,
+      "moves_to_replay": "h2h3 b9c9 d13d11 m8l8 f2f4 b4d4 i13i12 m11k11 e1f3 a5c6 h13h11 n7k10 g1j4 b8d8 h14h12 n9m8 j1i3 a8b9 j14k12 n10l9 j4h6 b9d7 k12i11 k10k8 f3g5 b5c5 e14f12 n5l6 k2k4 a10c11 i11g10 l6j7 h6h10 a6b5 g10i9 j7i9 h10i9 a7a5 d14d12 l9j10 i9g9 a9d6 i14h13 m8h3 g9m9 d6g9 h12j10 n8m9 g2h3 g9d12 j10i9 k8l9 h3h4 d12k5 i9l9 m10l9 f1h3 d7e7 f12e10 n11n10 d1e1 c11e10 d11e10 n10j10 h3g4 e7h10 h13i14 m7l7 h4h5 h10k7 k13k12 j10j4 e1g1",
+      "position_after": "After R18 + Red R19. Blue's queen is on k7. Red's king shelter is cracked (h-file open from R11 Bm8xh3). Red just played Re1-g1.",
+      "test_move": "Blue's move R19",
+      "human_move": "Qk7-f2",
+      "human_move_freyja": "k7f2",
+      "expected_category": "queen_invasion",
+      "consequence": "Queen enters Red's territory. Next: QxBg3 (captures bishop), Qh2+ (check). Combined with Green's Rh4+, delivers checkmate R21. Blue (3476 Elo, Gangster_H) won with 70pts.",
+      "what_to_check": "Does engine see f2 as a lethal invasion square? Or does it prefer a 'safe' queen move?",
+      "fen4": "xxx2yByK1yB1yRxxx/xxx1yPyPyP2yP1xxx/xxx5yP1yPxxx/bRbP5yP2gP3/1bP2yP9/2bP8gPgK1/3bP7gP2/1bP8bQgP2/bRbPbN9gPgB/bKbBbP3rNrP2bB1gP1/3bP1rPrB2gRrP1gPgR/xxx5rN2xxx/xxxrPrP3rPrP1xxx/xxx3rRrKrB1rRxxx b Ry - -",
+      "nextturn": "Blue"
+    },
+    {
+      "id": "S08",
+      "name": "Promotion into Checkmate",
+      "type": "promotion",
+      "game": "93334455",
+      "round": 24,
+      "moves_to_replay_note": "Full R1-R23 of game 93334455 needed",
+      "position_after": "After R23. Yellow's k-pawn is on k8. Green's king is walking (DKW since R5).",
+      "test_move": "Yellow's move R24",
+      "human_move": "k8-k7=D+",
+      "human_move_freyja": "k8k7q",
+      "expected_category": "promotion_with_check",
+      "consequence": "Pawn promotes to queen WITH CHECK. Next move: Qk7-j7# checkmate. 2-move sequence from promotion to mate.",
+      "what_to_check": "Does engine see promote-with-check into checkmate? Critical endgame pattern."
+    },
+    {
+      "id": "S09",
+      "name": "Castle During Chaos",
+      "type": "castling",
+      "game": "93419919",
+      "round": 16,
+      "moves_to_replay_note": "TURN MISALIGNED: 44 moves = R1-R11, next is Red R12 but test needs Red R16. Need R12-R15 (16 more moves from game 93419919)",
+      "position_after": "After R15 (all moves). Red is about to move R16. Red has material lead from queen captures. King still on h1.",
+      "test_move": "Red's move R16",
+      "human_move": "O-O",
+      "human_move_freyja": "h1j1",
+      "expected_category": "castling",
+      "consequence": "Red castles while Blue/Yellow/Green are fighting. Yellow checkmates Green next move (Qm10-n9+#). Red survives, promotes h-pawn R31, wins with 79pts.",
+      "what_to_check": "Does engine castle when it has a material lead and opponents are fighting? Or does it keep attacking and leave the king exposed?"
+    },
+    {
+      "id": "S10",
+      "name": "Castle R10 - Winner's Move",
+      "type": "castling",
+      "game": "93391655",
+      "round": 10,
+      "moves_to_replay": "h2h3 b9c9 d13d11 m8l8 f2f4 b4d4 i13i12 m11k11 e1f3 a5c6 h13h11 n7k10 g1j4 b8d8 h14h12 n9m8 j1i3 a8b9 j14k12 n10l9 j4h6 b9d7 k12i11 k10k8 f3g5 b5c5 e14f12 n5l6 k2k4 a10c11 i11g10 l6j7 h6h10 a6b5 g10i9 j7i9 h10i9",
+      "position_after": "After R10 Red's move. Blue is about to play R10 (castling).",
+      "test_move": "Blue's move R10",
+      "human_move": "O-O",
+      "human_move_freyja": "a7a5",
+      "expected_category": "castling",
+      "consequence": "Blue castles while 3 opponents are in tactical skirmishes. Blue (Gangster_H, 3476 Elo) won with 70pts. Every winner in the dataset castled. Every checkmated player did NOT castle.",
+      "what_to_check": "Does engine prioritize castling when developed? This is the single strongest predictor of survival in the dataset.",
+      "fen4": "xxxyR1yByK1yB1yRxxx/xxx1yPyPyP2yPyPxxx/xxx2yN1yQyP2xxx/bRbPbNyP3yP2gP2gR/1bP10gP1/bB1bP5rQ2gNgP1/3bP6gQgPgBgK/bKbP1bQ8gP1/1bPbN9gPgB/1bBbP3rN5gP1/bR2bP1rP4rP1gPgR/xxx4rPrN2xxx/xxxrPrP1rP1rPrP1xxx/xxxrR1rB1rKrB1rRxxx b RrBbYyGg - -",
+      "nextturn": "Blue"
+    },
+    {
+      "id": "S11",
+      "name": "Queen Sacrifice Enables Mate",
+      "type": "chain_reaction",
+      "game": "93060137",
+      "round": 8,
+      "moves_to_replay": "h2h3 b9c9 i13i11 m11k11 k2k4 b8d8 d13d11 m6l6 f2f4 b4d4 j14i12 m7k7 e2e4 a5c6 j13j11 n5l4 f1e2 a8b9 i11i10 n7l7 e2g4 b9b8 e14d12 n6m7 g1i3 b8d6 h14i13 m8l8",
+      "position_after": "After R7 complete. Green's queen is on l7, Red's pawn is on h3.",
+      "test_move": "Sequence test: R8 Green plays Ql7xh3+, then R9 Blue plays Qf4-f1+#",
+      "human_moves_sequence": [
+        "Ql7xh3+",
+        "g2xQh3",
+        "Qf4-f1+#"
+      ],
+      "expected_category": "sacrifice_into_mate",
+      "consequence": "Green sacrifices queen on h3 with check. Red MUST recapture (g2xQh3). This opens the f1 square. Blue's queen delivers checkmate on f1. Unintentional cooperation between Green and Blue kills Red. Red (2950 Elo) gets 9pts.",
+      "what_to_check": "1) Does engine see Ql7xh3+ as dangerous when playing as Red? 2) Does engine find Qf4-f1# when playing as Blue after g2xQh3? 3) Before R8, does Red's eval flag its king position as critically unsafe?",
+      "fen4": "xxxyR1yByK1yB1yRxxx/xxx1yPyPyPyPyQ1yPxxx/xxxyN4yN2xxx/bRbP1yP5yPgP2gR/bNbP6yP3gPgN/bB1bP9gPgB/3bP7gP1gK/bKbP8gPgQgB1/bBbPbNbQ7gP2/1bP10gP1/bR2bPrPrPrB3rPgNgPgR/xxx4rPrQ2xxx/xxxrP2rP1rPrP1xxx/xxxrRrN2rKrBrNrRxxx r RrBbYyGg - -",
+      "nextturn": "Red"
+    },
+    {
+      "id": "S12",
+      "name": "Promotion Immediately Captured",
+      "type": "promotion",
+      "game": "93060137",
+      "round": 18,
+      "moves_to_replay_note": "Full R1-R17 of game 93060137 needed",
+      "position_after": "Blue's e-pawn is on e7, ready to promote.",
+      "test_move": "Blue's move R18",
+      "human_move": "e7-e8=D",
+      "human_move_freyja": "e7e8q",
+      "expected_category": "promotion",
+      "consequence": "Blue promotes. Yellow immediately captures with Nd6xQe8. Blue recaptures with Re1xNe8. Net: Blue lost the new queen but has a rook deep on e8. Same pattern in game 93333795 R18-19.",
+      "what_to_check": "Does engine see that promotion will be immediately captured? Does it still promote (rook on e8 is valuable) or does it delay? Both can be correct depending on alternatives."
+    },
+    {
+      "id": "S13",
+      "name": "Bishop Cascade into Checkmate",
+      "type": "chain_reaction",
+      "game": "93333795",
+      "round": 7,
+      "moves_to_replay": "h2h3 b7c7 i13i11 m11k11 e1f3 b4d4 j14i12 n10l9 g1h2 b9d9 d13d11 m8l8 e2e4 a8c6 h13h12 l9k7 k2k4 a10c9 i14g12 m10l10 j1i3 d9e9 k13k12 n9m8",
+      "position_after": "After R6 complete. Multiple bishop exchanges about to happen.",
+      "test_move": "R7 sequence",
+      "human_moves_sequence": [
+        "Blue Ba6xBg12",
+        "Yellow f13xBg12",
+        "Green Bm8xNi12+"
+      ],
+      "expected_category": "exchange_chain",
+      "consequence": "Bishop exchanges cascade. By R9, Blue's knight delivers Ne13+# checkmate on Yellow (2913 Elo). Red (Gangster_H, 3443) stays OUT of the chain, develops calmly, wins with 60pts.",
+      "what_to_check": "Does engine understand that staying out of multi-player exchanges is often optimal? Red won by NOT participating.",
+      "fen4": "xxxyRyNyByKyQ2yRxxx/xxx1yPyPyP2yP1xxx/xxx3yByPyN1yPxxx/bRbP1yP4yP1gP2gR/1bP9gP2/bB1bN1bP7gP1/1bP9gPgBgK/bK1bP7gN1gPgQ/bBbPbQ9gPgB/bNbP10gPgN/bR2bPrP5rP1gPgR/xxx2rN1rPrN2xxx/xxxrP1rPrPrQrPrP1xxx/xxxrR1rB1rKrB1rRxxx r RrBbYyGg - -",
+      "nextturn": "Red"
+    },
+    {
+      "id": "S14",
+      "name": "Red Cleanup After Chain",
+      "type": "middlegame",
+      "game": "93333795",
+      "round": 10,
+      "moves_to_replay_note": "Full R1-R9 of game 93333795 needed. Yellow is checkmated.",
+      "position_after": "After R9 complete. Yellow is dead. Red has been developing while others fought.",
+      "test_move": "Red's move R10",
+      "human_move": "Be2xb5",
+      "human_move_freyja": "e2b5",
+      "expected_category": "capture_cleanup",
+      "consequence": "Red starts collecting material from weakened opponents. R11: QxQc5, R12: BxRa4. Red gained queen+rook in cleanup. Won with 60pts.",
+      "what_to_check": "After an opponent is eliminated, does engine shift to material collection? Or does it play passively?"
+    },
+    {
+      "id": "S15",
+      "name": "Pawn March to Promotion",
+      "type": "promotion",
+      "game": "93333795",
+      "round": 13,
+      "moves_to_replay_note": "Full R1-R12 of game 93333795 needed",
+      "position_after": "Red's e-pawn is on e4. Path to e8 is clearable.",
+      "test_moves_sequence": [
+        "R13: e4-e5",
+        "R14: e5-e6",
+        "R16: e6-e7",
+        "R18: e7-e8=D"
+      ],
+      "expected_category": "passed_pawn_push",
+      "consequence": "Red pushes e-pawn from e4 to promotion in 6 rounds. Promotion gets captured by knight, but Red recaptures with rook on e8 (strong placement). Red won with 60pts.",
+      "what_to_check": "Does engine see multi-move pawn promotion plans? Does it push passed pawns or leave them sitting?"
+    },
+    {
+      "id": "S16",
+      "name": "Bishop Checkmate Finish",
+      "type": "endgame",
+      "game": "93333795",
+      "round": 30,
+      "moves_to_replay_note": "Full game 93333795 to R30 needed",
+      "position_after": "After R30. Red's bishop is on d3, opponent's king is exposed.",
+      "test_move": "Red's move R31",
+      "human_move": "Bd3-f5+#",
+      "human_move_freyja": "d3f5",
+      "expected_category": "checkmate",
+      "consequence": "Bishop delivers checkmate. Game over. Red wins with 60pts.",
+      "what_to_check": "Does engine see bishop checkmate? Basic tactical pattern."
+    },
+    {
+      "id": "S17",
+      "name": "Gangster_H Signature Opening",
+      "type": "opening",
+      "game": "93334455",
+      "round": 2,
+      "moves_to_replay": "h2h3 b9c9 g13g12 m8l8",
+      "position_after": "After R1. All 4 players played one pawn move.",
+      "test_move": "Red's move R2",
+      "human_move": "Qg1-j4",
+      "human_move_freyja": "g1j4",
+      "expected_category": "queen_activation",
+      "consequence": "Queen out R2 to aggressive central square. Gangster_H plays this in 3 of 4 games as Red. Leads to queen captures by R5-8 in every case. Won 2 of 3 games with this opening.",
+      "what_to_check": "Does engine consider early queen deployment? Not necessarily j4, but does it activate the queen in first 3-4 moves?",
+      "fen4": "xxxyRyNyByKyQyByNyRxxx/xxxyPyPyP1yPyPyPyPxxx/xxx3yP4xxx/bRbP10gPgR/bNbP10gPgN/bB1bP9gPgB/bQbP9gP1gK/bKbP10gPgQ/bBbP10gPgB/bNbP10gPgN/bRbP10gPgR/xxx4rP3xxx/xxxrPrPrPrP1rPrPrPxxx/xxxrRrNrBrQrKrBrNrRxxx r RrBbYyGg - -",
+      "nextturn": "Red"
+    },
+    {
+      "id": "S18",
+      "name": "Queen Overextension - Fatal",
+      "type": "king_hunt",
+      "game": "93391655",
+      "round": 12,
+      "moves_to_replay": "h2h3 b9c9 d13d11 m8l8 f2f4 b4d4 i13i12 m11k11 e1f3 a5c6 h13h11 n7k10 g1j4 b8d8 h14h12 n9m8 j1i3 a8b9 j14k12 n10l9 j4h6 b9d7 k12i11 k10k8 f3g5 b5c5 e14f12 n5l6 k2k4 a10c11 i11g10 l6j7 h6h10 a6b5 g10i9 j7i9 h10i9 a7a5 d14d12 l9j10 i9g9 a9d6 i14h13 m8h3",
+      "position_after": "After R11 complete. Red's queen is on g9. Green just played Bm8xh3 cracking Red's king shelter.",
+      "test_move": "Red's move R12",
+      "human_move": "Qg9xm9+",
+      "human_move_freyja": "g9m9",
+      "expected_category": "overextension",
+      "is_negative": true,
+      "consequence": "Red captures a pawn with check instead of defending the cracked h-file. Queen is now stranded at m9, far from own king. Red never castles. Checkmated R21 with 9pts. Red (3273 Elo) should have defended instead.",
+      "what_to_check": "When king shelter is damaged, does engine prioritize defense over counter-attack? This is a 'don't do this' position.",
+      "fen4": "xxx2yByK3yRxxx/xxx1yPyPyPyB1yPyPxxx/xxxyR1yN1yQyP2xxx/bRbPbNyP3yP2gP2gR/1bP7gN2gP1/2bP3rQ5gP1/3bP6gQgP1gK/1bP1bQ8gP1/bRbPbNbB8gPgB/bKbBbP3rN5gP1/3bP1rP4rP1gPgR/xxx4gBrN2xxx/xxxrPrP1rP1rPrP1xxx/xxxrR1rB1rKrB1rRxxx r RryGg - -",
+      "nextturn": "Red"
+    },
+    {
+      "id": "S19",
+      "name": "King March to Death",
+      "type": "king_hunt",
+      "game": "96836735",
+      "round": 14,
+      "moves_to_replay_note": "Full R1-R13 of game 96836735 needed",
+      "position_after": "Red's king is on h1, not castled, pawns pushed forward.",
+      "test_move": "Red's move R14",
+      "human_move": "Kh1-g1",
+      "human_move_freyja": "h1g1",
+      "expected_category": "king_walk",
+      "is_negative": true,
+      "consequence": "King walks h1-g1-g2-f1. Checkmated R17 with 15pts. King movement without shelter = death in 4PC. 3 opponents can all attack the exposed king.",
+      "what_to_check": "Does engine ever voluntarily move the king without castling? If so, the king safety eval is too low."
+    },
+    {
+      "id": "S20",
+      "name": "Pawn Spam Opening",
+      "type": "opening",
+      "game": "96602063",
+      "round": 6,
+      "moves_to_replay": "n/a - test from start position",
+      "position_after": "Starting position.",
+      "test_move": "Does engine play 5+ pawn moves in first 6?",
+      "human_move": "Blue played b7-c7, b4-d4, b9-d9, b11-c11, b8-c8 (5 pawns in 6 moves)",
+      "is_negative": true,
+      "expected_category": "pawn_spam",
+      "consequence": "Blue (1954 Elo) queen never activated. Checkmated R14 with 3pts. Worst result in entire dataset. This is the absolute floor.",
+      "what_to_check": "Run engine self-play 10 moves. Count pawn ratio. If >45%, development weights need increase. Target: <=35%."
+    },
+    {
+      "id": "S21",
+      "name": "Deep Queen Raid - Aggression",
+      "type": "middlegame",
+      "game": "93419919",
+      "round": 7,
+      "moves_to_replay": "h2h3 b4d4 i13i12 m11k11 g1j4 b9c9 h13h11 m6l6 k2k4 b8d8 d13d11 m7k7 f2f4 a5c6 e14f12 n10l9 j1i3 b11c11 j14k12 n6k9 j4i5 a9c7 g13g11 k9f14",
+      "position_after": "After R6 complete. Red's queen is on i5. Green's pawn on m5 is undefended.",
+      "test_move": "Red's move R7",
+      "human_move": "Qi5xm5",
+      "human_move_freyja": "i5m5",
+      "expected_category": "capture",
+      "consequence": "Queen captures deep in Green's territory. Continues: R9 Qm5xl6, R10 Ql6xNm7+. Three captures in 4 moves = +700cp. Red won with 79pts.",
+      "what_to_check": "Does engine see deep queen raids into enemy territory as valuable? Or does it keep the queen 'safe' near home?",
+      "fen4": "xxxyR1gByKyQyB1yRxxx/xxx1yPyP3yPyPxxx/xxx2yN2yP1yNxxx/bR1bPyP2yPyP2gP2gR/bNbP10gP1/2bP8gNgPgB/bQ2bP8gPgK/bKbPbB7gP2gQ/bBbPbN8gP2/1bP6rQ3gPgN/bR2bP1rP4rP1gPgR/xxx4rPrN2xxx/xxxrPrP1rP1rPrP1xxx/xxxrRrNrB1rKrB1rRxxx r RrBbYyGg - -",
+      "nextturn": "Red"
+    },
+    {
+      "id": "S22",
+      "name": "Early Queen Activation - Yellow R2",
+      "type": "opening",
+      "game": "95992584",
+      "round": 2,
+      "moves_to_replay": "g2g4 b7c7 g13g12 m6l6 f2f3 b9c9",
+      "position_after": "After R2 Red+Blue. Yellow is about to play R2.",
+      "test_move": "Yellow's move R2",
+      "human_move": "Qh14-f12",
+      "human_move_freyja": "h14f12",
+      "expected_category": "queen_activation",
+      "consequence": "Queen active round 2. Yellow (3434 Elo, highest in lobby) tied for first with 73pts. Queen stayed active entire game, never captured.",
+      "what_to_check": "Does engine activate queen in first 3 moves? Every winner in the strong games had queen active by R5.",
+      "fen4": "xxxyRyNyByKyQyByNyRxxx/xxxyPyPyP1yPyPyPyPxxx/xxx3yP4xxx/bRbP10gPgR/bNbP10gPgN/bB1bP9gPgB/bQbP10gPgK/bK1bP9gPgQ/bBbP9gP1gB/bNbP10gPgN/bRbP4rP5gPgR/xxx2rP5xxx/xxxrPrP2rPrPrPrPxxx/xxxrRrNrBrQrKrBrNrRxxx y RrBbYyGg - -",
+      "nextturn": "Yellow"
+    },
+    {
+      "id": "S23",
+      "name": "Rook Lift R8",
+      "type": "opening",
+      "game": "95992584",
+      "round": 8,
+      "moves_to_replay": "g2g4 b7c7 g13g12 m6l6 f2f3 b9c9 h14f12 m7k7 k2k4 b4d4 i13i11 n10l9 e1d3 a4c4 f12f6 n7m6 d3e5 a5c6 d13d11 n5l4 e5c4 b5c4 j14i12 m11k11 g1g3 a8b7 e14f12 m6k8 j2j3 a10c11",
+      "position_after": "After R8 Red+Blue. Yellow is about to play R8.",
+      "test_move": "Yellow's move R8",
+      "human_move": "Rd14-d12",
+      "human_move_freyja": "d14d12",
+      "expected_category": "rook_activation",
+      "consequence": "Rook lift to d12, then d12-e12 (R9). Only player with early rook activity. Tied for 1st with 73pts.",
+      "what_to_check": "Does engine activate rooks early? Or leave them dormant on back rank?",
+      "fen4": "xxxyR1yByK1yB1yRxxx/xxx1yPyP1yP1yPyPxxx/xxx2yNyP1yN2xxx/bRbPbNyP4yP1gP2gR/1bP10gP1/bB1bP8gNgPgB/1bP8gQ1gPgK/bKbQbP7gP3/bBbPbN2yQ5gP1gB/12gP1/2bPbP2rP3rPgNgPgR/xxx2rPrQ2rP1xxx/xxxrPrP2rPrP2xxx/xxxrR1rB1rKrBrNrRxxx y RrbYyGg - -",
+      "nextturn": "Yellow"
+    },
+    {
+      "id": "S24",
+      "name": "Patient Development - Green Wins",
+      "type": "opening",
+      "game": "93042729",
+      "round": 4,
+      "moves_to_replay_note": "TURN MISALIGNED: 12 moves = R1-R3, next is Red R4 but test needs Green R4. Need R4 Red/Blue/Yellow (3 moves from game 93042729)",
+      "position_after": "After R3 complete. Green has one knight on l9.",
+      "test_move": "Green's move R4",
+      "human_move": "Nn5-l4",
+      "human_move_freyja": "n5l4",
+      "expected_category": "development",
+      "consequence": "Both knights out by R4. Green (EyeoftheTiger, 2734, #1 leaderboard) won with 64pts. Patient development, queen R8, rook R9, then cleanup.",
+      "what_to_check": "Does engine prioritize getting both knights out early?"
+    },
+    {
+      "id": "S25",
+      "name": "Endgame King Hunt",
+      "type": "endgame",
+      "game": "93060137",
+      "round": 84,
+      "moves_to_replay_note": "Full game to R83 needed",
+      "position_after": "Blue (Gangster_H) has king + bishop + knight. Green's rook is hunting.",
+      "test_moves_window": [
+        "R84: Green Rk6-k14+ (check)",
+        "R85: Blue Bd7-b9 (blocks)",
+        "R86: Green Rk13xf13+ (captures pawn with check)",
+        "R87: Green Rf13-g13 (presses)",
+        "R88: Green Rg13xNg7 (captures knight)"
+      ],
+      "expected_category": "rook_hunt",
+      "consequence": "Green's rook captures pawn and knight while checking Blue's king. Sustained pressure over 5 moves. Blue eventually gets checkmated R145 by Yellow.",
+      "what_to_check": "Does engine use rook checks to win material in the endgame? Does it combine checking with capturing?"
+    }
+  ]
+}
