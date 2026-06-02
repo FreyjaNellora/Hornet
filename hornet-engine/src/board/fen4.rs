@@ -132,6 +132,7 @@ pub fn parse(s: &str) -> Result<Board, Fen4Error> {
         }
     }
 
+    board.recompute_zobrist();
     Ok(board)
 }
 

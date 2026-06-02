@@ -9,14 +9,15 @@ pub mod pgn4;
 pub mod types;
 pub mod zobrist;
 
-use self::types::{Piece, PieceType, Player, Square, TOTAL_SQUARES};
+// Re-export the core board types from `crate::board` (convenience for downstream phases).
+pub use self::types::{Piece, PieceType, Player, Square, TOTAL_SQUARES};
 
 /// The game board: piece placement plus the state encoded by a FEN4 string.
 ///
 /// This is the I/O-focused core. Derived structures used by later phases (piece
 /// lists, cached king squares, zobrist hash, line maps) are **not** maintained here
 /// yet — they are added when move generation (P2) and line projection (P3) need them.
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, Debug)]
 pub struct Board {
     /// 14x14 grid indexed by [`Square::index`]; `None` = empty *or* invalid corner.
     pub squares: [Option<Piece>; TOTAL_SQUARES],
@@ -39,12 +40,30 @@ pub struct Board {
     /// Player whose double-push created the current `en_passant` target (needed to
     /// locate the capturable pawn). `None` when there is no en passant target.
     pub en_passant_pushing_player: Option<Player>,
+    /// Incrementally-maintained Zobrist hash (see [`zobrist`]). A cache derived from the
+    /// other fields, so it is **excluded from equality**.
+    pub zobrist: u64,
 }
+
+impl PartialEq for Board {
+    fn eq(&self, o: &Self) -> bool {
+        self.squares == o.squares
+            && self.side_to_move == o.side_to_move
+            && self.dead == o.dead
+            && self.castle_kingside == o.castle_kingside
+            && self.castle_queenside == o.castle_queenside
+            && self.points == o.points
+            && self.extra == o.extra
+            && self.en_passant == o.en_passant
+            && self.en_passant_pushing_player == o.en_passant_pushing_player
+    }
+}
+impl Eq for Board {}
 
 impl Board {
     /// An empty board: no pieces, Red to move, all rights cleared, `extra = "0"`.
     pub fn empty() -> Self {
-        Board {
+        let mut b = Board {
             squares: [None; TOTAL_SQUARES],
             side_to_move: Player::Red,
             dead: [false; 4],
@@ -54,7 +73,10 @@ impl Board {
             extra: "0".to_string(),
             en_passant: None,
             en_passant_pushing_player: None,
-        }
+            zobrist: 0,
+        };
+        b.zobrist = zobrist::hash(&b);
+        b
     }
 
     #[inline]
@@ -64,7 +86,19 @@ impl Board {
 
     #[inline]
     pub fn set_piece(&mut self, sq: Square, piece: Option<Piece>) {
+        if let Some(old) = self.squares[sq.index() as usize] {
+            self.zobrist ^= zobrist::key_piece(old, sq);
+        }
+        if let Some(new) = piece {
+            self.zobrist ^= zobrist::key_piece(new, sq);
+        }
         self.squares[sq.index() as usize] = piece;
+    }
+
+    /// Recompute the Zobrist hash from scratch. Call after manually mutating fields, since
+    /// the incremental updates assume the hash was correct beforehand.
+    pub fn recompute_zobrist(&mut self) {
+        self.zobrist = zobrist::hash(self);
     }
 
     /// Number of pieces a player currently has on the board.
@@ -200,6 +234,7 @@ pub struct UndoState {
     prev_side_to_move: Player,
     prev_dead: [bool; 4],
     prev_points: [u16; 4],
+    prev_zobrist: u64,
 }
 
 impl Board {
@@ -222,6 +257,7 @@ impl Board {
             prev_side_to_move: mover,
             prev_dead: self.dead,
             prev_points: self.points,
+            prev_zobrist: self.zobrist,
         };
 
         // Resolve the captured square (en passant differs from `to`).
@@ -244,6 +280,7 @@ impl Board {
             self.set_piece(csq, None);
             if cp.piece_type == PieceType::King {
                 self.dead[cp.player.index()] = true;
+                self.zobrist ^= zobrist::key_dead(cp.player);
             }
             self.clear_castle_right_if_rook_home(csq, cp);
         }
@@ -265,24 +302,39 @@ impl Board {
             self.set_piece(rto, Some(rook));
         }
 
-        // En passant target: cleared, then re-armed on a double push.
+        // En passant target: XOR out the old, clear, then re-arm (XOR in) on a double push.
+        if let Some(old_ep) = self.en_passant {
+            self.zobrist ^= zobrist::key_en_passant(old_ep);
+        }
         self.en_passant = None;
         self.en_passant_pushing_player = None;
         if mv.flags.double_push {
             let (dr, df) = pawn_forward(mover);
-            self.en_passant = offset(mv.from, dr, df);
+            let new_ep = offset(mv.from, dr, df);
+            if let Some(ep) = new_ep {
+                self.zobrist ^= zobrist::key_en_passant(ep);
+            }
+            self.en_passant = new_ep;
             self.en_passant_pushing_player = Some(mover);
         }
 
-        // Castling-right updates for king / rook moves.
+        // Castling-right updates for king / rook moves (XOR the key when a right flips off).
         if moved_piece.piece_type == PieceType::King {
-            self.castle_kingside[mover.index()] = false;
-            self.castle_queenside[mover.index()] = false;
+            if self.castle_kingside[mover.index()] {
+                self.zobrist ^= zobrist::key_castle_kingside(mover);
+                self.castle_kingside[mover.index()] = false;
+            }
+            if self.castle_queenside[mover.index()] {
+                self.zobrist ^= zobrist::key_castle_queenside(mover);
+                self.castle_queenside[mover.index()] = false;
+            }
         } else if moved_piece.piece_type == PieceType::Rook {
             self.clear_castle_right_if_rook_home(mv.from, moved_piece);
         }
 
-        self.side_to_move = self.next_live_player(mover);
+        let new_side = self.next_live_player(mover);
+        self.zobrist ^= zobrist::key_side(mover) ^ zobrist::key_side(new_side);
+        self.side_to_move = new_side;
         undo
     }
 
@@ -311,6 +363,7 @@ impl Board {
         self.points = undo.prev_points;
         self.dead = undo.prev_dead;
         self.side_to_move = undo.prev_side_to_move;
+        self.zobrist = undo.prev_zobrist;
     }
 
     /// Next player in turn order who is not eliminated.
@@ -330,10 +383,12 @@ impl Board {
             return;
         }
         let (ks, qs) = castle_rook_homes(piece.player);
-        if sq == ks {
+        if sq == ks && self.castle_kingside[piece.player.index()] {
+            self.zobrist ^= zobrist::key_castle_kingside(piece.player);
             self.castle_kingside[piece.player.index()] = false;
         }
-        if sq == qs {
+        if sq == qs && self.castle_queenside[piece.player.index()] {
+            self.zobrist ^= zobrist::key_castle_queenside(piece.player);
             self.castle_queenside[piece.player.index()] = false;
         }
     }

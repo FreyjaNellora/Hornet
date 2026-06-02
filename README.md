@@ -8,8 +8,9 @@ search backs up per-player components without ever collapsing them.
 > **Status: early.** The specification is at **v0.2**. Implemented so far: the board types and native
 > **FEN4 / PGN4** I/O (FEN4 round-trips the start position byte-identically; PGN4 structurally
 > round-trips all 16 corpus games), **legal move generation** (perft `20 / 395 / 7800 / 152050`,
-> matching the reference engine), and **per-piece line projection** (Hornet's foundational primitive).
-> The query engine, evaluation, search, and NNUE are not yet built.
+> matching the reference engine), **per-piece line projection**, the **query engine** + **evaluation**
+> (the `V` vector), and a **Max^n search** (transposition table + beam + MVV-LVA ordering). The full
+> position → move pipeline runs end-to-end. NNUE and the UCI-style protocol are the remaining pieces.
 
 ## Layout
 
@@ -26,7 +27,7 @@ search backs up per-player components without ever collapsing them.
 
 ```sh
 cd hornet-engine
-cargo test     # 36 unit + 1 integration test
+cargo test     # 59 unit + 3 integration tests
 cargo run      # prints a skeleton banner (protocol not yet wired)
 ```
 
