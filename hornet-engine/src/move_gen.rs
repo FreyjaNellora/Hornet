@@ -1,1 +1,641 @@
-//! Legal move generation. Phase 2.
+//! Pseudo-legal and legal move generation, plus perft. See spec §1.4–1.6.
+//!
+//! Coverage: pawn (push / double-push / diagonal capture / en passant with the §1.6
+//! orthogonality rule / promotion), knight, sliders (bishop / rook / queen), king steps,
+//! and castling (§1.5, with through-check legality). King-capture elimination is handled
+//! in `make_move`/`unmake_move`; **DKW move generation** (random dead-king moves, frozen
+//! walls, turn-taking for eliminated players) is **deferred** — it does not arise within
+//! shallow perft from the start.
+
+use crate::board::attacks::is_attacked_by;
+use crate::board::types::{PieceType, Player, Square};
+use crate::board::{
+    BISHOP_DIRS, Board, KING_DELTAS, KNIGHT_DELTAS, Move, MoveFlags, ROOK_DIRS, offset,
+    pawn_capture_deltas, pawn_forward,
+};
+
+/// Generate pseudo-legal moves for the side to move. Does **not** filter moves that
+/// leave the mover's own king in check — see [`generate_legal`].
+pub fn generate_pseudo_legal(board: &Board) -> Vec<Move> {
+    let mover = board.side_to_move;
+    let mut moves = Vec::with_capacity(48);
+    for i in 0..196u8 {
+        let from = Square::new(i);
+        if !from.is_valid() {
+            continue;
+        }
+        match board.piece_at(from) {
+            Some(p) if p.player == mover => match p.piece_type {
+                PieceType::Pawn => gen_pawn(board, mover, from, &mut moves),
+                PieceType::Knight => gen_steps(board, mover, from, &KNIGHT_DELTAS, &mut moves),
+                PieceType::King => {
+                    gen_steps(board, mover, from, &KING_DELTAS, &mut moves);
+                    gen_castles(board, mover, from, &mut moves);
+                }
+                PieceType::Bishop => gen_rays(board, mover, from, &BISHOP_DIRS, &mut moves),
+                PieceType::Rook => gen_rays(board, mover, from, &ROOK_DIRS, &mut moves),
+                PieceType::Queen | PieceType::PromotedQueen => {
+                    gen_rays(board, mover, from, &BISHOP_DIRS, &mut moves);
+                    gen_rays(board, mover, from, &ROOK_DIRS, &mut moves);
+                }
+            },
+            _ => {}
+        }
+    }
+    moves
+}
+
+/// Legal moves for the side to move (filters out moves leaving the mover in check).
+/// Takes `&mut Board` so it can make/unmake in place; the board is unchanged on return.
+pub fn generate_legal(board: &mut Board) -> Vec<Move> {
+    let mover = board.side_to_move;
+    let mut legal = Vec::new();
+    for mv in generate_pseudo_legal(board) {
+        let undo = board.make_move(mv);
+        if !in_check(board, mover) {
+            legal.push(mv);
+        }
+        board.unmake_move(undo);
+    }
+    legal
+}
+
+/// Count leaf nodes to `depth` plies (each ply is the next live player's move).
+pub fn perft(board: &mut Board, depth: u32) -> u64 {
+    if depth == 0 {
+        return 1;
+    }
+    let mover = board.side_to_move;
+    let mut nodes = 0;
+    for mv in generate_pseudo_legal(board) {
+        let undo = board.make_move(mv);
+        if !in_check(board, mover) {
+            nodes += perft(board, depth - 1);
+        }
+        board.unmake_move(undo);
+    }
+    nodes
+}
+
+/// Is `player`'s king currently attacked by any of its (live) opponents?
+fn in_check(board: &Board, player: Player) -> bool {
+    match board.king_square(player) {
+        Some(k) => player
+            .opponents()
+            .iter()
+            .any(|&opp| !board.dead[opp.index()] && is_attacked_by(board, k, opp)),
+        None => false,
+    }
+}
+
+fn gen_steps(board: &Board, mover: Player, from: Square, deltas: &[(i8, i8)], out: &mut Vec<Move>) {
+    for &(dr, df) in deltas {
+        if let Some(to) = offset(from, dr, df) {
+            if !to.is_valid() {
+                continue;
+            }
+            match board.piece_at(to) {
+                None => out.push(Move::quiet(from, to)),
+                Some(p) if p.player != mover => out.push(Move {
+                    from,
+                    to,
+                    promotion: None,
+                    flags: MoveFlags {
+                        capture: true,
+                        ..Default::default()
+                    },
+                }),
+                _ => {} // own piece blocks
+            }
+        }
+    }
+}
+
+fn gen_rays(board: &Board, mover: Player, from: Square, dirs: &[(i8, i8)], out: &mut Vec<Move>) {
+    for &(dr, df) in dirs {
+        let mut cur = from;
+        loop {
+            match offset(cur, dr, df) {
+                None => break,
+                Some(next) => {
+                    if !next.is_valid() {
+                        break;
+                    }
+                    cur = next;
+                    match board.piece_at(cur) {
+                        None => out.push(Move::quiet(from, cur)),
+                        Some(p) => {
+                            if p.player != mover {
+                                out.push(Move {
+                                    from,
+                                    to: cur,
+                                    promotion: None,
+                                    flags: MoveFlags {
+                                        capture: true,
+                                        ..Default::default()
+                                    },
+                                });
+                            }
+                            break; // any piece blocks the ray
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+fn gen_pawn(board: &Board, mover: Player, from: Square, out: &mut Vec<Move>) {
+    let (fdr, fdf) = pawn_forward(mover);
+
+    // Forward push (+ double push from the starting rank).
+    if let Some(one) = offset(from, fdr, fdf)
+        && one.is_valid()
+        && board.piece_at(one).is_none()
+    {
+        push_pawn_move(mover, from, one, MoveFlags::default(), out);
+        if on_start_rank(mover, from)
+            && let Some(two) = offset(one, fdr, fdf)
+            && two.is_valid()
+            && board.piece_at(two).is_none()
+        {
+            out.push(Move {
+                from,
+                to: two,
+                promotion: None,
+                flags: MoveFlags {
+                    double_push: true,
+                    ..Default::default()
+                },
+            });
+        }
+    }
+
+    // Diagonal captures and en passant.
+    for (cdr, cdf) in pawn_capture_deltas(mover) {
+        if let Some(to) = offset(from, cdr, cdf) {
+            if !to.is_valid() {
+                continue;
+            }
+            match board.piece_at(to) {
+                Some(p) if p.player != mover => {
+                    push_pawn_move(
+                        mover,
+                        from,
+                        to,
+                        MoveFlags {
+                            capture: true,
+                            ..Default::default()
+                        },
+                        out,
+                    );
+                }
+                None if board.en_passant == Some(to)
+                    && board
+                        .en_passant_pushing_player
+                        .is_some_and(|pusher| ep_orthogonal(mover, pusher)) =>
+                {
+                    out.push(Move {
+                        from,
+                        to,
+                        promotion: None,
+                        flags: MoveFlags {
+                            capture: true,
+                            en_passant: true,
+                            ..Default::default()
+                        },
+                    });
+                }
+                _ => {}
+            }
+        }
+    }
+}
+
+/// Emit a pawn move, expanding to the four promotion choices when `to` is on the
+/// player's promotion edge.
+fn push_pawn_move(mover: Player, from: Square, to: Square, flags: MoveFlags, out: &mut Vec<Move>) {
+    if on_promotion_edge(mover, to) {
+        for promo in [
+            PieceType::Queen,
+            PieceType::Rook,
+            PieceType::Bishop,
+            PieceType::Knight,
+        ] {
+            out.push(Move {
+                from,
+                to,
+                promotion: Some(promo),
+                flags,
+            });
+        }
+    } else {
+        out.push(Move {
+            from,
+            to,
+            promotion: None,
+            flags,
+        });
+    }
+}
+
+fn on_start_rank(player: Player, sq: Square) -> bool {
+    match player {
+        Player::Red => sq.rank() == 1,
+        Player::Blue => sq.file() == 1,
+        Player::Yellow => sq.rank() == 12,
+        Player::Green => sq.file() == 12,
+    }
+}
+
+fn on_promotion_edge(player: Player, sq: Square) -> bool {
+    match player {
+        Player::Red => sq.rank() == 13,
+        Player::Blue => sq.file() == 13,
+        Player::Yellow => sq.rank() == 0,
+        Player::Green => sq.file() == 0,
+    }
+}
+
+/// En passant is only legal between players whose pawns move on perpendicular axes
+/// (§1.6): Red↔Yellow and Blue↔Green (parallel axes) can never capture en passant.
+fn ep_orthogonal(a: Player, b: Player) -> bool {
+    let rank_axis = |p| matches!(p, Player::Red | Player::Yellow);
+    rank_axis(a) != rank_axis(b)
+}
+
+/// Castle specs for `player`: `(is_kingside, king_to, empties, king_path)` per §1.5.
+/// `empties` must be vacant; `king_path` (home, transit, destination) must be unattacked.
+#[allow(clippy::type_complexity)]
+fn castle_specs(
+    player: Player,
+) -> [(
+    bool,
+    &'static str,
+    &'static [&'static str],
+    &'static [&'static str],
+); 2] {
+    match player {
+        Player::Red => [
+            (true, "j1", &["i1", "j1"], &["h1", "i1", "j1"]),
+            (false, "f1", &["e1", "f1", "g1"], &["h1", "g1", "f1"]),
+        ],
+        Player::Blue => [
+            (true, "a5", &["a5", "a6"], &["a7", "a6", "a5"]),
+            (false, "a9", &["a8", "a9", "a10"], &["a7", "a8", "a9"]),
+        ],
+        Player::Yellow => [
+            (true, "e14", &["e14", "f14"], &["g14", "f14", "e14"]),
+            (false, "i14", &["h14", "i14", "j14"], &["g14", "h14", "i14"]),
+        ],
+        Player::Green => [
+            (true, "n10", &["n9", "n10"], &["n8", "n9", "n10"]),
+            (false, "n6", &["n5", "n6", "n7"], &["n8", "n7", "n6"]),
+        ],
+    }
+}
+
+/// Emit legal castle moves (king home, rights held, path empty, king not in/through/into check).
+fn gen_castles(board: &Board, mover: Player, king_from: Square, out: &mut Vec<Move>) {
+    let sq = |s: &str| Square::from_algebraic(s).expect("valid castle square");
+    for (is_kingside, king_to, empties, king_path) in castle_specs(mover) {
+        let has_right = if is_kingside {
+            board.castle_kingside[mover.index()]
+        } else {
+            board.castle_queenside[mover.index()]
+        };
+        if !has_right {
+            continue;
+        }
+        if king_from != sq(king_path[0]) {
+            continue; // king not on its home square
+        }
+        if empties.iter().any(|s| board.piece_at(sq(s)).is_some()) {
+            continue; // squares between king and rook not all empty
+        }
+        let attacked = king_path.iter().any(|s| {
+            mover
+                .opponents()
+                .iter()
+                .any(|&o| !board.dead[o.index()] && is_attacked_by(board, sq(s), o))
+        });
+        if attacked {
+            continue; // king is in / passes through / lands in check
+        }
+        out.push(Move {
+            from: king_from,
+            to: sq(king_to),
+            promotion: None,
+            flags: MoveFlags {
+                castle: true,
+                ..Default::default()
+            },
+        });
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::board::fen4;
+
+    fn start() -> Board {
+        fen4::parse(fen4::START_FEN4).unwrap()
+    }
+
+    #[test]
+    fn red_has_20_opening_moves() {
+        let b = start();
+        // No checks possible at the start, so pseudo-legal == legal here.
+        assert_eq!(generate_pseudo_legal(&b).len(), 20);
+        let mut b2 = b.clone();
+        assert_eq!(generate_legal(&mut b2).len(), 20);
+    }
+
+    #[test]
+    fn make_unmake_restores_board_for_all_opening_moves() {
+        let mut b = start();
+        let original = b.clone();
+        for mv in generate_pseudo_legal(&b) {
+            let undo = b.make_move(mv);
+            b.unmake_move(undo);
+            assert_eq!(b, original, "make/unmake changed the board for {mv:?}");
+        }
+    }
+
+    #[test]
+    fn double_push_sets_and_clears_en_passant() {
+        let mut b = start();
+        // Red d2-d4 (double push) should arm the EP target d3.
+        let d2 = Square::from_algebraic("d2").unwrap();
+        let mv = generate_pseudo_legal(&b)
+            .into_iter()
+            .find(|m| m.from == d2 && m.flags.double_push)
+            .expect("d2 double push exists");
+        let undo = b.make_move(mv);
+        assert_eq!(b.en_passant, Square::from_algebraic("d3"));
+        assert_eq!(b.en_passant_pushing_player, Some(Player::Red));
+        assert_eq!(b.side_to_move, Player::Blue);
+        b.unmake_move(undo);
+        assert_eq!(b.en_passant, None);
+        assert_eq!(b.side_to_move, Player::Red);
+    }
+
+    #[test]
+    fn perft_matches_known_values() {
+        // Independently reproduces Freyja's invariants (clean rebuild, zero shared code).
+        let mut b = start();
+        assert_eq!(perft(&mut b, 1), 20);
+        assert_eq!(perft(&mut b, 2), 395);
+        assert_eq!(perft(&mut b, 3), 7800);
+        assert_eq!(perft(&mut b, 4), 152050);
+    }
+
+    /// Documents why perft(2) = 395, not 400. Three Red openings reduce Blue's 20 replies:
+    /// - `d2-d4` (-1): occupancy — d4 blocks Blue's `b4-d4` double push.
+    /// - `f2-f3` / `f2-f4` (-2 each): vacating f2 opens the Red queen's g1-diagonal
+    ///   (g1-f2-e3-d4-c5-b6), **pinning Blue's b6 pawn against its king on a7** — both of
+    ///   b6's pushes become illegal. 1 + 2 + 2 = 5, so 400 - 5 = 395.
+    #[test]
+    fn opening_pin_explains_perft2() {
+        let mut b = start();
+        let child = |b: &mut Board, from: &str, to: &str| {
+            let mv = generate_pseudo_legal(b)
+                .into_iter()
+                .find(|m| {
+                    m.from == Square::from_algebraic(from).unwrap()
+                        && m.to == Square::from_algebraic(to).unwrap()
+                })
+                .unwrap();
+            let undo = b.make_move(mv);
+            let n = perft(b, 1);
+            b.unmake_move(undo);
+            n
+        };
+        assert_eq!(child(&mut b, "d2", "d4"), 19, "d4 blocks b4-d4");
+        assert_eq!(
+            child(&mut b, "f2", "f3"),
+            18,
+            "f2-f3 pins b6 via the g1 queen"
+        );
+        assert_eq!(
+            child(&mut b, "f2", "f4"),
+            18,
+            "f2-f4 pins b6 via the g1 queen"
+        );
+        // A control move that changes nothing for Blue.
+        assert_eq!(child(&mut b, "h2", "h3"), 20);
+    }
+
+    #[test]
+    fn make_unmake_handles_a_capture() {
+        use crate::board::types::{Piece, PieceType};
+        let mut b = Board::empty();
+        b.side_to_move = Player::Red;
+        let g7 = Square::from_algebraic("g7").unwrap();
+        let g10 = Square::from_algebraic("g10").unwrap();
+        b.set_piece(g7, Some(Piece::new(Player::Red, PieceType::Rook)));
+        b.set_piece(g10, Some(Piece::new(Player::Blue, PieceType::Knight)));
+        let original = b.clone();
+
+        let cap = generate_pseudo_legal(&b)
+            .into_iter()
+            .find(|m| m.from == g7 && m.to == g10)
+            .expect("rook can capture the knight on g10");
+        assert!(cap.flags.capture);
+
+        let undo = b.make_move(cap);
+        assert_eq!(
+            b.piece_at(g10),
+            Some(Piece::new(Player::Red, PieceType::Rook))
+        );
+        assert_eq!(b.piece_at(g7), None);
+        assert_eq!(
+            b.points[Player::Red.index()],
+            PieceType::Knight.ffa_points() as u16
+        );
+        b.unmake_move(undo);
+        assert_eq!(
+            b, original,
+            "capture make/unmake must fully restore the board"
+        );
+    }
+
+    #[test]
+    fn castling_generates_and_round_trips() {
+        use crate::board::types::{Piece, PieceType};
+        let mut b = Board::empty();
+        b.side_to_move = Player::Red;
+        b.castle_kingside[Player::Red.index()] = true;
+        let at = |s: &str| Square::from_algebraic(s).unwrap();
+        b.set_piece(at("h1"), Some(Piece::new(Player::Red, PieceType::King)));
+        b.set_piece(at("k1"), Some(Piece::new(Player::Red, PieceType::Rook)));
+        let original = b.clone();
+
+        let castle = generate_pseudo_legal(&b)
+            .into_iter()
+            .find(|m| m.flags.castle)
+            .expect("Red kingside castle should be generated");
+        assert_eq!(castle.to, at("j1"));
+
+        let undo = b.make_move(castle);
+        assert_eq!(
+            b.piece_at(at("j1")),
+            Some(Piece::new(Player::Red, PieceType::King))
+        );
+        assert_eq!(
+            b.piece_at(at("i1")),
+            Some(Piece::new(Player::Red, PieceType::Rook))
+        );
+        assert_eq!(b.piece_at(at("h1")), None);
+        assert_eq!(b.piece_at(at("k1")), None);
+        assert!(!b.castle_kingside[Player::Red.index()]);
+        b.unmake_move(undo);
+        assert_eq!(
+            b, original,
+            "castle make/unmake must fully restore the board"
+        );
+    }
+
+    #[test]
+    fn castling_blocked_through_check() {
+        use crate::board::types::{Piece, PieceType};
+        let mut b = Board::empty();
+        b.side_to_move = Player::Red;
+        b.castle_kingside[Player::Red.index()] = true;
+        let at = |s: &str| Square::from_algebraic(s).unwrap();
+        b.set_piece(at("h1"), Some(Piece::new(Player::Red, PieceType::King)));
+        b.set_piece(at("k1"), Some(Piece::new(Player::Red, PieceType::Rook)));
+        // Blue rook on i14 attacks down the i-file through i1 (the king's transit square).
+        b.set_piece(at("i14"), Some(Piece::new(Player::Blue, PieceType::Rook)));
+        assert!(
+            generate_pseudo_legal(&b).iter().all(|m| !m.flags.castle),
+            "must not castle through an attacked square"
+        );
+    }
+
+    #[test]
+    fn en_passant_make_unmake() {
+        use crate::board::types::{Piece, PieceType};
+        // Correct §1.4 geometry (the §7.3 example has a typo — see CO-002):
+        // Blue c4->e4 (East 2), EP target d4; Red pawn on e3 captures NW onto d4, removing e4.
+        let mut b = Board::empty();
+        b.side_to_move = Player::Red;
+        let at = |s: &str| Square::from_algebraic(s).unwrap();
+        b.set_piece(at("e3"), Some(Piece::new(Player::Red, PieceType::Pawn)));
+        b.set_piece(at("e4"), Some(Piece::new(Player::Blue, PieceType::Pawn)));
+        b.en_passant = Some(at("d4"));
+        b.en_passant_pushing_player = Some(Player::Blue);
+        let original = b.clone();
+
+        let ep = generate_pseudo_legal(&b)
+            .into_iter()
+            .find(|m| m.flags.en_passant)
+            .expect("Red e3 should capture en passant onto d4");
+        assert_eq!(ep.to, at("d4"));
+
+        let undo = b.make_move(ep);
+        assert_eq!(
+            b.piece_at(at("d4")),
+            Some(Piece::new(Player::Red, PieceType::Pawn))
+        );
+        assert_eq!(
+            b.piece_at(at("e4")),
+            None,
+            "the double-pushed Blue pawn is captured"
+        );
+        assert_eq!(b.piece_at(at("e3")), None);
+        b.unmake_move(undo);
+        assert_eq!(b, original, "EP make/unmake must fully restore the board");
+    }
+
+    #[test]
+    fn en_passant_rejected_between_parallel_players() {
+        use crate::board::types::{Piece, PieceType};
+        // Red and Yellow move on the same (rank) axis — EP between them is illegal (§1.6).
+        let mut b = Board::empty();
+        b.side_to_move = Player::Red;
+        let at = |s: &str| Square::from_algebraic(s).unwrap();
+        b.set_piece(at("e3"), Some(Piece::new(Player::Red, PieceType::Pawn)));
+        b.en_passant = Some(at("d4"));
+        b.en_passant_pushing_player = Some(Player::Yellow); // parallel axis
+        assert!(
+            generate_pseudo_legal(&b)
+                .iter()
+                .all(|m| !m.flags.en_passant),
+            "Red↔Yellow en passant must not be generated"
+        );
+    }
+
+    #[test]
+    fn promotion_make_unmake() {
+        use crate::board::types::{Piece, PieceType};
+        let mut b = Board::empty();
+        b.side_to_move = Player::Red;
+        let at = |s: &str| Square::from_algebraic(s).unwrap();
+        // Red pawn on d13 promotes by pushing to d14 (Red's promotion edge = rank 13).
+        b.set_piece(at("d13"), Some(Piece::new(Player::Red, PieceType::Pawn)));
+        let original = b.clone();
+
+        let moves = generate_pseudo_legal(&b);
+        assert_eq!(
+            moves
+                .iter()
+                .filter(|m| m.to == at("d14") && m.promotion.is_some())
+                .count(),
+            4,
+            "Q/R/B/N promotion choices"
+        );
+        let queen_promo = *moves
+            .iter()
+            .find(|m| m.promotion == Some(PieceType::Queen))
+            .unwrap();
+
+        let undo = b.make_move(queen_promo);
+        assert_eq!(
+            b.piece_at(at("d14")),
+            Some(Piece::new(Player::Red, PieceType::PromotedQueen)),
+            "a queen promotion lands as PromotedQueen"
+        );
+        assert_eq!(b.piece_at(at("d13")), None);
+        b.unmake_move(undo);
+        assert_eq!(b, original);
+    }
+
+    #[test]
+    fn king_capture_eliminates_and_unmake_restores() {
+        use crate::board::types::{Piece, PieceType};
+        let mut b = Board::empty();
+        b.side_to_move = Player::Red;
+        let at = |s: &str| Square::from_algebraic(s).unwrap();
+        b.set_piece(at("g7"), Some(Piece::new(Player::Red, PieceType::Rook)));
+        b.set_piece(at("g8"), Some(Piece::new(Player::Blue, PieceType::King)));
+        let original = b.clone();
+
+        let cap = generate_pseudo_legal(&b)
+            .into_iter()
+            .find(|m| m.to == at("g8"))
+            .expect("rook captures the Blue king on g8");
+        let undo = b.make_move(cap);
+        assert!(
+            b.dead[Player::Blue.index()],
+            "capturing the king eliminates Blue"
+        );
+        assert_eq!(
+            b.points[Player::Red.index()],
+            PieceType::King.ffa_points() as u16
+        );
+        assert_eq!(b.king_square(Player::Blue), None);
+        assert_eq!(
+            b.side_to_move,
+            Player::Yellow,
+            "dead Blue is skipped in rotation"
+        );
+        b.unmake_move(undo);
+        assert!(!b.dead[Player::Blue.index()]);
+        assert_eq!(
+            b, original,
+            "king-capture make/unmake must fully restore the board"
+        );
+    }
+}

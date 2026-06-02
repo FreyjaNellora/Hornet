@@ -5,11 +5,11 @@ projection** feeding a query engine that returns a per-player utility vector
 **V = ⟨U₁, U₂, U₃, U₄⟩** to a **Max^n** search. The evaluation contract is a vector, never a scalar —
 search backs up per-player components without ever collapsing them.
 
-> **Status: early.** The specification is at **v0.2**. The engine currently implements the board
-> types and the native **FEN4 / PGN4** I/O layer: the FEN4 parser round-trips the canonical starting
-> position byte-identically, and the PGN4 parser structurally round-trips all 16 real-game corpus
-> files. Move generation, line projection, the query engine, evaluation, search, and NNUE are not
-> yet built.
+> **Status: early.** The specification is at **v0.2**. Implemented so far: the board types and native
+> **FEN4 / PGN4** I/O (FEN4 round-trips the start position byte-identically; PGN4 structurally
+> round-trips all 16 corpus games), **legal move generation** (perft `20 / 395 / 7800 / 152050`,
+> matching the reference engine), and **per-piece line projection** (Hornet's foundational primitive).
+> The query engine, evaluation, search, and NNUE are not yet built.
 
 ## Layout
 
@@ -26,7 +26,7 @@ search backs up per-player components without ever collapsing them.
 
 ```sh
 cd hornet-engine
-cargo test     # 19 unit + 1 integration test (round-trips all 16 corpus games)
+cargo test     # 36 unit + 1 integration test
 cargo run      # prints a skeleton banner (protocol not yet wired)
 ```
 
