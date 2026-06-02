@@ -1,10 +1,9 @@
 //! PGN4 parser / serializer — the chess.com 4PC dialect. See spec §10.3.
 //!
-//! **Structural only.** This extracts the header tag-pairs and the move stream as raw
-//! per-ply tokens (e.g. `"h2-h3"`, `"Qb7xg12+#"`, `"O-O-O"`, `"Kh13-i14R"`, `"R"`).
-//! Decoding a ply into a concrete move (from/to squares, SAN disambiguation, legality)
-//! requires the board + move generator (P2) and is intentionally deferred — so ply
-//! tokens are preserved verbatim, which is exactly what a faithful round-trip needs.
+//! Parsing is **structural** — header tag-pairs + raw per-ply tokens (`"h2-h3"`,
+//! `"Qb7xg12+#"`, `"O-O-O"`, `"Kh13-i14R"`). [`decode_ply`] additionally decodes one ply
+//! token into a [`DecodedMove`] (from/to squares + promotion, or castle); matching that to a
+//! concrete legal move and applying it lives in the replay harness (it needs move generation).
 //!
 //! Grammar recap (corpus-derived): `[Key "Value"]` header lines, a blank line, then
 //! rounds `N. ply .. ply .. ply .. ply`. Rounds may have fewer than four plies once
@@ -12,6 +11,7 @@
 
 use super::Board;
 use super::fen4::{self, START_FEN4};
+use super::types::{PieceType, Square};
 use std::fmt;
 
 /// A parsed PGN4 game: ordered header tags plus the move stream as rounds of raw plies.
@@ -189,6 +189,79 @@ fn parse_moves(text: &str) -> Result<Vec<Pgn4Round>, Pgn4Error> {
         return Err(Pgn4Error::NoMoves);
     }
     Ok(rounds)
+}
+
+/// A structurally-decoded ply: from/to squares (+ promotion) or a castle. Turning this
+/// into a concrete legal [`crate::board::Move`] needs move generation (the replay harness).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DecodedMove {
+    Normal {
+        from: Square,
+        to: Square,
+        promotion: Option<PieceType>,
+    },
+    Castle {
+        kingside: bool,
+    },
+}
+
+/// Decode a single PGN4 ply token (chess.com notation) into a [`DecodedMove`].
+///
+/// Handles `O-O`/`O-O-O`, from-to (`d2-d4`), SAN-with-source (`Ne1-f3`), captures with an
+/// embedded captured-piece letter (`Bn6xBg13`), promotion (`=D` queen, `=N/=B/=R`), and
+/// trailing `+`/`#`/elimination markers. Returns `None` for non-move tokens (e.g. a bare
+/// result marker). The move's squares are the first and last algebraic squares in the token.
+pub fn decode_ply(token: &str) -> Option<DecodedMove> {
+    let t = token.trim_end_matches(['+', '#']);
+    match t {
+        "O-O" | "0-0" => return Some(DecodedMove::Castle { kingside: true }),
+        "O-O-O" | "0-0-0" => return Some(DecodedMove::Castle { kingside: false }),
+        _ => {}
+    }
+
+    let promotion = t.split('=').nth(1).and_then(|p| match p.chars().next()? {
+        'D' | 'Q' => Some(PieceType::Queen),
+        'N' => Some(PieceType::Knight),
+        'B' => Some(PieceType::Bishop),
+        'R' => Some(PieceType::Rook),
+        _ => None,
+    });
+
+    let squares = extract_squares(t);
+    if squares.len() < 2 {
+        return None;
+    }
+    Some(DecodedMove::Normal {
+        from: squares[0],
+        to: *squares.last().unwrap(),
+        promotion,
+    })
+}
+
+/// Extract every algebraic square (lowercase file `a..n` + rank `1..14`) from a token,
+/// in order. Uppercase piece letters and `x`/`-`/`=` separators are skipped naturally.
+fn extract_squares(s: &str) -> Vec<Square> {
+    let bytes = s.as_bytes();
+    let mut out = Vec::new();
+    let mut i = 0;
+    while i < bytes.len() {
+        if (b'a'..=b'n').contains(&bytes[i]) {
+            let start = i;
+            let mut j = i + 1;
+            while j < bytes.len() && bytes[j].is_ascii_digit() {
+                j += 1;
+            }
+            if j > start + 1
+                && let Some(sq) = Square::from_algebraic(&s[start..j])
+            {
+                out.push(sq);
+                i = j;
+                continue;
+            }
+        }
+        i += 1;
+    }
+    out
 }
 
 #[cfg(test)]

@@ -249,11 +249,14 @@ fn on_start_rank(player: Player, sq: Square) -> bool {
 }
 
 fn on_promotion_edge(player: Player, sq: Square) -> bool {
+    // chess.com 4PC promotes at the **central crossing** (the far edge of the player's own
+    // 8-square file/rank span), NOT the literal board edge. Spec §1.4 says the edge — that is
+    // wrong (see CO-003); confirmed by replaying the 16-game corpus.
     match player {
-        Player::Red => sq.rank() == 13,
-        Player::Blue => sq.file() == 13,
-        Player::Yellow => sq.rank() == 0,
-        Player::Green => sq.file() == 0,
+        Player::Red => sq.rank() == 7,
+        Player::Blue => sq.file() == 7,
+        Player::Yellow => sq.rank() == 6,
+        Player::Green => sq.file() == 6,
     }
 }
 
@@ -293,6 +296,13 @@ fn castle_specs(
             (false, "n6", &["n5", "n6", "n7"], &["n8", "n7", "n6"]),
         ],
     }
+}
+
+/// The king's destination square for a castle (useful for decoding `O-O` / `O-O-O`).
+pub fn castle_king_destination(player: Player, kingside: bool) -> Square {
+    let specs = castle_specs(player);
+    let (_, king_to, _, _) = if kingside { specs[0] } else { specs[1] };
+    Square::from_algebraic(king_to).expect("valid castle square")
 }
 
 /// Emit legal castle moves (king home, rights held, path empty, king not in/through/into check).
@@ -573,15 +583,15 @@ mod tests {
         let mut b = Board::empty();
         b.side_to_move = Player::Red;
         let at = |s: &str| Square::from_algebraic(s).unwrap();
-        // Red pawn on d13 promotes by pushing to d14 (Red's promotion edge = rank 13).
-        b.set_piece(at("d13"), Some(Piece::new(Player::Red, PieceType::Pawn)));
+        // Red pawn on d7 promotes by pushing to d8 (Red's promotion edge = internal rank 7).
+        b.set_piece(at("d7"), Some(Piece::new(Player::Red, PieceType::Pawn)));
         let original = b.clone();
 
         let moves = generate_pseudo_legal(&b);
         assert_eq!(
             moves
                 .iter()
-                .filter(|m| m.to == at("d14") && m.promotion.is_some())
+                .filter(|m| m.to == at("d8") && m.promotion.is_some())
                 .count(),
             4,
             "Q/R/B/N promotion choices"
@@ -593,11 +603,11 @@ mod tests {
 
         let undo = b.make_move(queen_promo);
         assert_eq!(
-            b.piece_at(at("d14")),
+            b.piece_at(at("d8")),
             Some(Piece::new(Player::Red, PieceType::PromotedQueen)),
             "a queen promotion lands as PromotedQueen"
         );
-        assert_eq!(b.piece_at(at("d13")), None);
+        assert_eq!(b.piece_at(at("d7")), None);
         b.unmake_move(undo);
         assert_eq!(b, original);
     }
