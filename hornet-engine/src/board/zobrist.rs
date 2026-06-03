@@ -4,9 +4,10 @@
 //! incrementally — Hard Rule #5 governs line projection, not the hash.
 //!
 //! Hashed: piece placement, side to move, castling rights, en-passant target, and the
-//! per-player dead flag (it changes the legal-move set). **Points are not hashed** (they
-//! are unbounded and don't affect move generation); revisit if the evaluator becomes
-//! points-sensitive at TT boundaries.
+//! per-player dead flag (it changes the legal-move set). **Points are not hashed** (they are
+//! unbounded) — this is safe for the transposition table because `eval_4vec` is currently
+//! points-independent (it reads `eval_value`/queries, never the FFA `points`). Revisit if the
+//! evaluator ever becomes points-sensitive at TT boundaries.
 
 use super::Board;
 use super::types::{Piece, Player, Square, TOTAL_SQUARES};
