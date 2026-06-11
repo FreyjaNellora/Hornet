@@ -18,10 +18,11 @@ parameterized. **C1 LANDED (EXP-022, user-authorized cross-lane): zero-weight qu
 pinned by test; `run_all_queries` stays full for texel_tune.** **B5 RUNNING (EXP-023):**
 `selfplay_games/` regenerating — flashlight d8 cap 1200 + objective layer (win 50, danger 100),
 200-ply cap, 150 games (config bases: SYNTHESIS shape, EXP-017 decisiveness; old tainted corpus
-preserved in git history at 6a2b6a9). All COs resolved + repo reconciled/pushed (6a2b6a9). Suite
-**115 lib + 3 integration green**. Open: EXP-023 completion stats → then Kimi C2 (re-anchored
-baselines) and C3 (on the new corpus). Prior: A-bucket suite repair; search-shape EXP-012; DKW
-EXP-011; recalibration EXP-005→009.)
+preserved in git history at 6a2b6a9). **B5 COMPLETE 2026-06-11:** 150/150 games, 37% decisive
+(old ~0), wide point spreads; first clean-data Texel fit confirms the deployed weight shape —
+tune-freeze lifted. All COs resolved + repo reconciled/pushed. Suite **115 lib + 3 integration
+green**. Open: Kimi C2 (re-anchored baselines) and C3 (on the new corpus). Prior: A-bucket suite
+repair; search-shape EXP-012; DKW EXP-011; recalibration EXP-005→009.)
 **State store — replaced, not appended.** History lives in `sessions/` and `dispatch_comms.jsonl`.
 
 Architecture/reference = `HORNET-BUILD-SPEC.md` (§9 file structure defines the module tree).
@@ -72,13 +73,14 @@ metric (`gate_ablation.rs`) on the recalibrated eval: ~1% capture-into-loss, avg
   guard test pins the defaults); `count_defenders` replaced by a real attack scan (cost ≈ 0,
   polarity regression test). **Re-baseline anything comparing to pre-flip maxn numbers** — new
   move_match baseline (arm iii): 13.5%/13.6%/13.6% at beams 4/10/30 (32 games, d4, S2).
-- **Corpus contamination (measured EXP-020) → REGENERATING (B5/EXP-023):** the old 133-game
-  corpus (maxn beam 4, inverted heuristic live = 11.6% of moves changed) is deleted from the
-  working tree (preserved in git at 6a2b6a9) and being regenerated: flashlight d8 cap 1200 +
-  objective layer (win 50, danger 100), 200-ply cap, 150 games. **Do not tune on
-  `selfplay_games/` until EXP-023 reports complete.** Wide-beam maxn: measured mildly affected
-  (0.9% beam 10, 0.6% beam 30). EXP-017/018 flashlight results CLEAN (`search_flashlight` never
-  calls `move_order`).
+- ✅ **Corpus REGENERATED (B5/EXP-023 complete, 2026-06-11):** `selfplay_games/` = 150 clean
+  games (flashlight d8 cap 1200 + objective layer win 50/danger 100, 200-ply cap, seeded).
+  **Decisiveness 55/150 = 37% ≥1 completed elimination** (old corpus ~0); wide point spreads.
+  First clean-data Texel fit confirms the deployed weight shape (P=S=0, O=1, M dominant; combined
+  corpus 241 games / 13,924 positions, MSE 0.1295). **Tune-freeze lifted — C3 unblocked.** Old
+  tainted corpus in git history (≤ 6a2b6a9). EXP-020 context: the old corpus's inverted heuristic
+  changed 11.6% of moves at beam 4 (0.9%/0.6% at 10/30); EXP-017/018 flashlight results were
+  always clean.
 - ✅ **Protocol `go` config RESOLVED (B3, Fable, 2026-06-10):** `go` plays
   `search_flashlight` at cap 1200 (SYNTHESIS: "flashlight + a generous cap (≥~1000), never the
   laser"); the deprecated maxn + 2M node-budget config is gone. Objective-layer knobs stay off

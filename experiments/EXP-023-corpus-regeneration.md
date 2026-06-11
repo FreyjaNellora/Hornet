@@ -1,6 +1,6 @@
 # EXP-023 — bootstrap corpus regeneration (B5): clean ordering + decisive config
 
-- **Date:** 2026-06-10 · **Status:** running
+- **Date:** 2026-06-10 → 11 · **Status:** **complete**
 - **Goal:** replace the tainted 133-game bootstrap corpus. The original (EXP-013) was generated on
   the **maxn path at beam 4 with the inverted free-capture heuristic live** — EXP-020 measured
   that bug changing **11.6% of played moves** at beam 4 — and was **drawish** (150-ply cap, few
@@ -30,15 +30,37 @@ derive from the game index, so ranges are collision-free; 6-core box, ~6–8 h w
 
 ## Results
 
-PENDING — fill in when the run completes: games, time/game, plies distribution, **decisiveness
-(% games with ≥1 elimination)** vs the original's ~0, and a first `texel_tune` read on the new
-corpus.
+- **150/150 games generated** (~6.5 h wall; ~13 min/game under 5-way parallelism — each 30-game
+  instance finished in 23,400–23,600 s).
+- **Plies:** min 198 / max 200 / avg 199.6 — every game reaches the 200-ply cap; no full
+  knockouts (3 deaths) within the cap.
+- **Decisiveness: ≥1 completed elimination (king captured) in 55/150 = 37%** of games, vs the
+  original corpus's ~0. Lower bound: the count detects deaths via the dead player's skipped turns
+  (moves < 200); checkmated-but-walking DKW players and last-rotation deaths don't register.
+  Eliminations convert **late** (shortest game is 198 moves — the DKW random walk takes time to
+  catch), which is why no game ends early outright.
+- **Label gradient:** point spreads are wide — winners up to 79 points, losers in single digits
+  (e.g. `[30,79,10,30]`, `[62,5,4,12]`, `[16,45,11,35]`) — a far stronger placement signal than
+  the old "points-ahead-at-cap" clusters.
+- **First `texel_tune` read (combined: 91 human + 150 self-play = 241 games, 13,924 positions):**
+  tuned weights **(4, 0, 0, 1)**, MSE 0.12950 vs baseline 0.12956 (−0.00007). The deployed shape
+  is confirmed on clean data — positional/safety still fit to **0**, crossfire 1, material
+  dominant (4 vs the deployed 6: both sit on the known flat optimum; EXP-015's move-agreement
+  picked 6). The new-corpus MSE (0.1295) is *higher* than the old corpus's 0.1146 — expected:
+  decisive, varied outcomes are a harder prediction target than drawish clustered labels, i.e.
+  **more discriminating data for feature gating**, not a regression.
 
 ## Conditions (after)
 
-PENDING.
+- `selfplay_games/` = 150 clean games (corrected ordering — flashlight path — and the decisive
+  config above). The **tune-freeze is lifted**: Texel/feature work may use the corpus.
+- Old 133-game corpus retrievable from git history (≤ commit 6a2b6a9).
+- `bootstrap` retains the `[N] [START]` range form for future parallel growth of the corpus.
 
 ## Conclusion
 
-PENDING. Downstream consumers once landed: Kimi C3 (relational terms, Texel-gated on this corpus),
-future NNUE data (P7, post-strength-gate).
+Both regeneration goals met: the ordering taint is gone (flashlight never calls `move_order`) and
+the labels are decisive (37% of games convert ≥1 elimination; wide point spreads). The deployed
+weight shape (M dominant, P=S=0, O=1) survives its first clean-data Texel fit unchanged — the
+feature program (Kimi C3: pawn structure first) now has its corpus. Future NNUE data (P7) builds
+on the same generator.
