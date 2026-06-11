@@ -3,7 +3,20 @@
 //! replay (like the human corpus) up to the first elimination; positions are labelled by the FINAL
 //! placement points.
 //!
-//! Run: cargo run --release --example bootstrap [N]   (default N = 200)
+//! **B5 regeneration config (2026-06-10).** The original 133-game corpus was generated on the
+//! maxn path at beam 4 with the inverted free-capture ordering heuristic live — EXP-020 measured
+//! that bug changing 11.6% of played moves at beam 4 — and was drawish (150-ply cap, few
+//! eliminations; EXP-013). This config replaces it: **flashlight d8 cap 1200** (SYNTHESIS
+//! recommendation, same shape protocol `go` plays; the flashlight never calls `move_order`) with
+//! the **objective layer on (win 50, king-danger 100, linear/banked)** — EXP-017 measured that
+//! layer lifting decisiveness 0/6 → 3/6 and doubling the depth win-rate — and a **200-ply cap**
+//! (EXP-013's own recommendation). The objective layer here is a data-quality choice (stronger
+//! outcome labels), recorded, not a shipped play default.
+//!
+//! Run: cargo run --release --example bootstrap [N] [START]   (defaults N = 150, START = 0)
+//! Generates games START..START+N (seeds derive from the game index, so disjoint ranges from
+//! parallel instances are collision-free — ~12 min/game single-threaded at this config, so the
+//! 150-game corpus is generated as several parallel range instances).
 //! Output: `selfplay_games/sp_game_NNNN.pgn4`
 
 use hornet_engine::board::Move;
@@ -39,14 +52,12 @@ fn move_str(m: &Move) -> String {
     s
 }
 
-/// One full game: `opening` random plies, then depth-8 laser (adaptive base 4, deep floor 1) to a
-/// survivor or the ply cap. Returns the move list (in play order) + final points.
+/// One full game: `opening` random plies, then **flashlight d8 cap 1200 + objective layer**
+/// (win 50, king-danger 100 — see the module docs for the measured basis) to a survivor or the
+/// ply cap. Returns the move list (in play order) + final points.
 fn play_game(seed: u64, opening: usize, cap: usize) -> (Vec<String>, [u16; 4]) {
-    let mut searcher = Searcher::new(32)
-        .with_beam_width(4)
-        .with_adaptive_beam(true)
-        .with_deep_floor(1)
-        .with_forward_pruning(true);
+    const FLASHLIGHT_CAP: usize = 1200;
+    let mut searcher = Searcher::new(32).with_win_term(50).with_king_danger(100);
     let mut game = Game::from_start(seed);
     let mut rng = seed | 1;
     let mut moves = Vec::new();
@@ -61,7 +72,11 @@ fn play_game(seed: u64, opening: usize, cap: usize) -> (Vec<String>, [u16; 4]) {
                 (!l.is_empty()).then(|| l[r % l.len()])
             })
         } else {
-            game.step(|b| searcher.search(b, 8).map(|(m, _)| m))
+            game.step(|b| {
+                searcher
+                    .search_flashlight(b, 8, |_| FLASHLIGHT_CAP)
+                    .map(|(m, _)| m)
+            })
         };
         if let TurnOutcome::Moved(mv) = outcome {
             moves.push(move_str(&mv));
@@ -101,36 +116,44 @@ fn validates(path: &PathBuf) -> bool {
 }
 
 fn main() {
-    let n: usize = std::env::args()
-        .nth(1)
-        .and_then(|a| a.parse().ok())
-        .unwrap_or(200);
+    let arg = |n: usize| {
+        std::env::args()
+            .nth(n)
+            .and_then(|a| a.parse::<usize>().ok())
+    };
+    let n = arg(1).unwrap_or(150);
+    let start_idx = arg(2).unwrap_or(0);
     let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("..")
         .join("selfplay_games");
     fs::create_dir_all(&dir).expect("create selfplay_games/");
 
     let start = Instant::now();
-    for i in 0..n {
+    for i in start_idx..start_idx + n {
         let seed = (i as u64 + 1).wrapping_mul(0x9E37_79B9_7F4A_7C15);
-        let (moves, pts) = play_game(seed, 12, 150);
+        let (moves, pts) = play_game(seed, 12, 200);
         let path = dir.join(format!("sp_game_{i:04}.pgn4"));
         write_pgn4(&path, &moves, pts);
-        let ok = if i == 0 { validates(&path) } else { true };
+        let first = i == start_idx;
+        let ok = if first { validates(&path) } else { true };
         eprintln!(
             "game {i:4}: {:3} plies  points {pts:?}  [{:.0}s total]{}",
             moves.len(),
             start.elapsed().as_secs_f64(),
-            if i == 0 && !ok {
+            if first && !ok {
                 "  !! VALIDATION FAILED"
             } else {
                 ""
             }
         );
-        if i == 0 && !ok {
+        if first && !ok {
             eprintln!("first game failed the PGN4 validation — stopping; fix the format.");
             return;
         }
     }
-    eprintln!("wrote {n} games to {}", dir.display());
+    eprintln!(
+        "wrote games {start_idx}..{} to {}",
+        start_idx + n,
+        dir.display()
+    );
 }

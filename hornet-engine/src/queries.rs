@@ -963,30 +963,55 @@ pub fn query_selective_intent(lines: &LineMap, board: &Board) -> [i16; 4] {
 // Master Query (§4.6)
 // ---------------------------------------------------------------------------
 
-/// Run all queries. This is the only function the evaluator calls.
+/// Run all queries — the **full** vector, every component computed regardless of the deployed
+/// eval weights. `texel_tune` and any weight-exploration tooling depend on this; the evaluator's
+/// hot path uses [`run_queries_gated`] instead (C1 / EXP-022).
 pub fn run_all_queries(lines: &LineMap, board: &Board) -> QueryVector {
+    run_queries_gated(lines, board, true, true)
+}
+
+/// Run the queries the caller actually consumes (C1 / EXP-022 — pure perf, output-identical).
+/// A component gated off returns zeros; under the eval's mean-relative × weight combination a
+/// zero-weight component contributes exactly 0 either way, so skipping it cannot change the eval
+/// output — it only skips the work (positional control + threats + PST, and the king-safety
+/// scan, at every leaf). The search-side king-danger term is unaffected: it calls
+/// [`query_king_safety`] directly, never through this function.
+pub fn run_queries_gated(
+    lines: &LineMap,
+    board: &Board,
+    need_positional: bool,
+    need_safety: bool,
+) -> QueryVector {
     let material = query_material(board);
-    let control = query_positional_control(lines);
-    // EXP-002: exchange-aware (SEE) threats when HORNET_SEE=1, else the flat target-value term.
-    let threats = if *SEE_THREATS {
-        query_threats_see(lines)
+    let positional = if need_positional {
+        let control = query_positional_control(lines);
+        // EXP-002: exchange-aware (SEE) threats when HORNET_SEE=1, else the flat target-value term.
+        let threats = if *SEE_THREATS {
+            query_threats_see(lines)
+        } else {
+            query_threats(lines)
+        };
+        // Positional = empty-square control + tactical threats (both reward activity)
+        [
+            control[0] + threats[0],
+            control[1] + threats[1],
+            control[2] + threats[2],
+            control[3] + threats[3],
+        ]
     } else {
-        query_threats(lines)
+        [0; 4]
     };
-    // Positional = empty-square control + tactical threats (both reward activity)
-    let positional = [
-        control[0] + threats[0],
-        control[1] + threats[1],
-        control[2] + threats[2],
-        control[3] + threats[3],
-    ];
-    let safety_raw = query_king_safety(lines, board);
-    let safety = [
-        safety_scalar(&safety_raw[0]),
-        safety_scalar(&safety_raw[1]),
-        safety_scalar(&safety_raw[2]),
-        safety_scalar(&safety_raw[3]),
-    ];
+    let safety = if need_safety {
+        let safety_raw = query_king_safety(lines, board);
+        [
+            safety_scalar(&safety_raw[0]),
+            safety_scalar(&safety_raw[1]),
+            safety_scalar(&safety_raw[2]),
+            safety_scalar(&safety_raw[3]),
+        ]
+    } else {
+        [0; 4]
+    };
     let crossfire = query_crossfire(lines);
     // Pawn structure ablated — Texel MSE drop was marginal (0.11445→0.11441, ~0.03%).
     // Code kept in query_pawn_structure for re-test with better features, but not wired.
@@ -998,14 +1023,19 @@ pub fn run_all_queries(lines: &LineMap, board: &Board) -> QueryVector {
     // With selective: baseline 0.11556, tuned 0.11450. Without: baseline 0.11453, tuned 0.11452.
     // The feature adds noise; tuning barely compensates. Not wired into eval.
 
-    // Piece-square tables: v3 zone-aware per-piece (rook edge bonus dropped).
-    let pst = query_pst(board);
-    let positional = [
-        positional[0] + pst[0],
-        positional[1] + pst[1],
-        positional[2] + pst[2],
-        positional[3] + pst[3],
-    ];
+    // Piece-square tables: v3 zone-aware per-piece (rook edge bonus dropped). Part of the
+    // positional component, so gated with it.
+    let positional = if need_positional {
+        let pst = query_pst(board);
+        [
+            positional[0] + pst[0],
+            positional[1] + pst[1],
+            positional[2] + pst[2],
+            positional[3] + pst[3],
+        ]
+    } else {
+        positional
+    };
 
     QueryVector {
         material,

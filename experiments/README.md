@@ -54,6 +54,17 @@ What the result means; falsified or confirmed; next step.
 *(Index gap: EXP-012…019 exist as files but were never indexed — see the experiment files
 directly; backfilling the hooks is an open hygiene item.)*
 
+- [EXP-023 — bootstrap corpus regeneration (B5)](EXP-023-corpus-regeneration.md) — *(running)*
+  replaces the tainted 133-game corpus (maxn beam-4 with the inverted heuristic, EXP-020 11.6%;
+  drawish labels). New config: **flashlight d8 cap 1200 + objective layer (win 50, danger 100),
+  200-ply cap, 150 games** — bases: SYNTHESIS (shape), EXP-017 (decisiveness), EXP-013
+  (cap recommendation). Old corpus preserved in git history.
+- [EXP-022 — zero-weight query gating (C1)](EXP-022-zero-weight-query-gating.md) — skip the
+  queries `W_POSITIONAL = W_SAFETY = 0` zero out (positional control, SEE threats, PST, the
+  king-safety scan) at every leaf. **+41% search throughput (median 64,337 → 90,777 nodes/sec),
+  node counts and best moves bit-identical** — pure perf, equality pinned by test;
+  `run_all_queries` stays full for texel_tune; the search-side king-danger term is independent
+  and unaffected. Queries auto-resume if a weight is un-zeroed.
 - [EXP-021 — count_defenders fix: polarity + measured cost](EXP-021-count-defenders-cost.md) —
   the inverted adjacency-only `count_defenders` replaced by a real attack scan
   (`board::attacks::is_attacked_by`); polarity regression test added. **Cost ≈ 0** (median

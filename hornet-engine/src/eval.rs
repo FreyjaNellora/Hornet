@@ -7,7 +7,7 @@
 use crate::board::Board;
 use crate::board::types::Player;
 use crate::lines::{LineMap, compute_lines};
-use crate::queries::{QueryVector, run_all_queries};
+use crate::queries::{QueryVector, run_queries_gated};
 
 // ---------------------------------------------------------------------------
 // v0 weights (from spec Appendix)
@@ -40,7 +40,11 @@ const W_CROSSFIRE: i16 = 1;
 /// `compute_lines` fills it in place (~110 KB, always-recompute per Hard Rule #5).
 pub fn eval_4vec(board: &Board, line_buffer: &mut LineMap) -> [i16; 4] {
     compute_lines(board, line_buffer);
-    let qv = run_all_queries(line_buffer, board);
+    // C1 / EXP-022: skip the query components the deployed weights zero out (pure perf —
+    // a zero-weight component contributes exactly 0 through mean-relative × weight, so the
+    // output is identical; pinned by `gated_queries_match_full_eval`). The flags are consts,
+    // so the gating itself is compile-time.
+    let qv = run_queries_gated(line_buffer, board, W_POSITIONAL != 0, W_SAFETY != 0);
     compute_utility(&qv)
 }
 
@@ -169,6 +173,43 @@ mod tests {
             avg_us < 3000.0,
             "eval_4vec average {avg_us:.1} µs — catastrophic regression (backstop 3000 µs; working budget 600 µs)"
         );
+    }
+
+    /// C1 / EXP-022 equality gate: the gated query path (skipping zero-weight components) must
+    /// produce the identical eval vector to the full path, across a seeded random-walk position
+    /// sweep — not just the start position. If a weight is ever un-zeroed, the gating flags in
+    /// `eval_4vec` flip with it (they are `W_* != 0`), so this holds by construction; the test
+    /// pins it against refactor drift.
+    #[test]
+    fn gated_queries_match_full_eval() {
+        use crate::move_gen::generate_legal;
+        use crate::queries::run_all_queries;
+
+        let mut xs = 0x9E37_79B9_7F4A_7C15u64;
+        let mut rng = || {
+            xs ^= xs << 13;
+            xs ^= xs >> 7;
+            xs ^= xs << 17;
+            xs
+        };
+
+        let mut lm = Box::new(LineMap::new());
+        for walk in 0..8 {
+            let mut b = start();
+            // Walk 0 checks the start position itself; others take 4..32 random plies.
+            for _ in 0..(walk * 4) {
+                let legal = generate_legal(&mut b);
+                if legal.is_empty() {
+                    break;
+                }
+                let mv = legal[rng() as usize % legal.len()];
+                b.make_move(mv);
+            }
+            let gated = eval_4vec(&b, &mut lm);
+            compute_lines(&b, &mut lm);
+            let full = compute_utility(&run_all_queries(&lm, &b));
+            assert_eq!(gated, full, "gated vs full eval diverged on walk {walk}");
+        }
     }
 
     /// Zero-sum invariant: Σᵢ Uᵢ ≈ 0 for any position (off by at most 3 from integer-mean

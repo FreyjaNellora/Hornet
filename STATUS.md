@@ -13,10 +13,15 @@ off vs 65.8k on) → fix kept, lever stays default-off. B3: protocol `go` now pl
 **flashlight at cap 1200** (SYNTHESIS recommendation); deprecated maxn + 2M node-budget config
 removed. B4: **CO-006** drafted (Hard Rule #6 "anything that changes the played move" amendment,
 Tier 2). New instruments: `selfplay_ab_maxn`, `move_diverge`; `move_match`/`bench_beam`
-parameterized. Suite **114 lib + 3 integration green**, REPL smoke-tested. Open: **B5 corpus
-regen** (unblocked, needs config decision with Kimi), **C1 zero-weight query gating** (Kimi),
-CO-004/005/006 (user). Prior: A-bucket suite repair (32-game corpus, env-flag parsing, zobrist
-resync); search-shape EXP-012; DKW EXP-011; recalibration EXP-005→009.)
+parameterized. **C1 LANDED (EXP-022, user-authorized cross-lane): zero-weight queries gated —
++41% search throughput (median 64,337 → 90,777 nodes/sec), node counts bit-identical, equality
+pinned by test; `run_all_queries` stays full for texel_tune.** **B5 RUNNING (EXP-023):**
+`selfplay_games/` regenerating — flashlight d8 cap 1200 + objective layer (win 50, danger 100),
+200-ply cap, 150 games (config bases: SYNTHESIS shape, EXP-017 decisiveness; old tainted corpus
+preserved in git history at 6a2b6a9). All COs resolved + repo reconciled/pushed (6a2b6a9). Suite
+**115 lib + 3 integration green**. Open: EXP-023 completion stats → then Kimi C2 (re-anchored
+baselines) and C3 (on the new corpus). Prior: A-bucket suite repair; search-shape EXP-012; DKW
+EXP-011; recalibration EXP-005→009.)
 **State store — replaced, not appended.** History lives in `sessions/` and `dispatch_comms.jsonl`.
 
 Architecture/reference = `HORNET-BUILD-SPEC.md` (§9 file structure defines the module tree).
@@ -67,12 +72,13 @@ metric (`gate_ablation.rs`) on the recalibrated eval: ~1% capture-into-loss, avg
   guard test pins the defaults); `count_defenders` replaced by a real attack scan (cost ≈ 0,
   polarity regression test). **Re-baseline anything comparing to pre-flip maxn numbers** — new
   move_match baseline (arm iii): 13.5%/13.6%/13.6% at beams 4/10/30 (32 games, d4, S2).
-- **Corpus contamination — now MEASURED (EXP-020):** the 133-game bootstrap corpus
-  (`selfplay_games/`, maxn beam 4) was generated with the inverted heuristic changing **11.6% of
-  played moves** (~1 in 9) → regenerate (**B5**, unblocked now that ordering is fixed; search
-  shape + aggression config to be decided with Kimi) before using for tuning. Wide-beam maxn:
-  measured mildly affected (0.9% at beam 10, 0.6% at beam 30). **EXP-017/018 flashlight results
-  are CLEAN** — `search_flashlight` never calls `move_order`; verified 2026-06-10.
+- **Corpus contamination (measured EXP-020) → REGENERATING (B5/EXP-023):** the old 133-game
+  corpus (maxn beam 4, inverted heuristic live = 11.6% of moves changed) is deleted from the
+  working tree (preserved in git at 6a2b6a9) and being regenerated: flashlight d8 cap 1200 +
+  objective layer (win 50, danger 100), 200-ply cap, 150 games. **Do not tune on
+  `selfplay_games/` until EXP-023 reports complete.** Wide-beam maxn: measured mildly affected
+  (0.9% beam 10, 0.6% beam 30). EXP-017/018 flashlight results CLEAN (`search_flashlight` never
+  calls `move_order`).
 - ✅ **Protocol `go` config RESOLVED (B3, Fable, 2026-06-10):** `go` plays
   `search_flashlight` at cap 1200 (SYNTHESIS: "flashlight + a generous cap (≥~1000), never the
   laser"); the deprecated maxn + 2M node-budget config is gone. Objective-layer knobs stay off

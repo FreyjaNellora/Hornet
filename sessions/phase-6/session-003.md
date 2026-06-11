@@ -67,3 +67,30 @@ end-to-end.
 
 B5 (corpus regen, joint config), C1 (Kimi, zero-weight gating), C2/C3 (Kimi, re-anchored),
 CO-004/CO-005/CO-006 (user, Tier 2).
+
+---
+
+## Addendum (same shift, user-authorized extensions)
+
+The user greenlit, in sequence: the Tier-2 CO landings, the repo push, and the remaining board
+items (C1 cross-lane + B5). All recorded in `dispatch_comms.jsonl`; cross-phase notes here rather
+than scattering one-entry session files.
+
+1. **CO-002…006 all landed** (spec §4.5 SEE crossfire / §2.5 as-built Board / §4.7 mean-relative +
+   `(6,0,0,1)` / appendix; Hard Rule #6 amended in PITCH + conduct). Each spec passage verified
+   against the as-built code before writing. CO files marked resolved.
+2. **Repo reconciled + pushed (6a2b6a9):** GitHub was stale at ee18a6f (2026-06-03); the only
+   local `.git` was a stray zero-commit init inside `hornet-engine/` (wrong root — the repo
+   tracks the project root). Stray removed, root repo laid on fetched history, LICENSE/README
+   restored (would have been deleted), full project state committed + pushed. **Canonical working
+   copy = Project_Hornet root, branch `main`.**
+3. **C1 landed (EXP-022, Kimi's files, user-authorized):** `run_queries_gated` skips the
+   zero-weight components in `eval_4vec` (compile-time const flags; auto-resume if a weight is
+   un-zeroed). **+41% search throughput** (median 64,337 → 90,777 nodes/sec), node counts
+   bit-identical, equality pinned by `gated_queries_match_full_eval`. `run_all_queries` unchanged
+   for texel_tune. Suite 115 lib + 3 green.
+4. **B5 launched (EXP-023):** old corpus deleted from the working tree (in git history),
+   regeneration running — flashlight d8 cap 1200 + objective layer (win 50 / danger 100, linear,
+   banked), 200-ply cap, 150 games, seeded. Config bases: SYNTHESIS (shape), EXP-017
+   (decisiveness 0/6 → 3/6 with the layer on), EXP-013 (raise the cap). EXP-023 results section
+   pending the run; **don't tune on `selfplay_games/` until it reports complete.**
