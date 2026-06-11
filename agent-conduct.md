@@ -42,8 +42,11 @@ violate.
    Adding a 5th component or merging two is a change order.
 5. **Line projection is always-recompute, never incremental.** No `piece_id` on Board. No
    inverse-index-maintenance-during-update code.
-6. **Additive discipline.** Every new lever ships **default-off** with an **ablation arm**. No
-   silent or unmeasured strength-affecting changes.
+6. **Additive discipline — anything that changes the played move.** Every lever that can change
+   the played move — eval features, move ordering, beam width/shape, LMR, killer/history,
+   TT best-move-hint usage — ships **default-off** with a **measured ablation arm**, the same
+   gate as eval changes. No silent or unmeasured strength-affecting changes. (CO-006; basis
+   EXP-020.)
 7. **Strength gate before NNUE training.** The hand-tuned evaluator must pass the tactical-fixture
    rate + direct human play before any student is trained. Teacher quality is the student's ceiling.
 8. **Distinct eval vs FFA value systems.** Centipawn eval values (`eval_value()`, used in SEE and

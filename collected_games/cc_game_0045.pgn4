@@ -1,0 +1,60 @@
+[GameNr "100665485"]
+[TimeControl "4+0"]
+[Variant "FFA"]
+[RuleVariants "Anonymous DeadKingWalking EnPassant PromoteTo=D"]
+[StartFen4 "4PC"]
+[Red "rojitto"]
+[RedElo "2866"]
+[Blue "dalay045"]
+[BlueElo "2412"]
+[Yellow "CookedByDgx102"]
+[YellowElo "2057"]
+[Green "HSCCCB"]
+[GreenElo "2836"]
+[Result "rojitto: 36 - dalay045: 7 - CookedByDgx102: 33 - HSCCCB: 71"]
+[Termination "Checkmate"]
+[Site "www.chess.com/variants/4-player-chess-championship-qualifier-arena/game/100665485"]
+[Date "Wed Apr 15 2026 22:16:30 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "126"]
+
+1. f2-f3 .. b7-c7 .. g13-g12 .. m8-l8
+2. g2-g4 .. b4-d4 .. i13-i12 .. m11-k11
+3. Qg1-g3 .. b9-c9 .. d13-d11 .. Bn9xBf1
+4. Qg3-f2 .. Qa8-d5 .. Nj14-k12 .. Bf1-n9
+5. Nj1-i3 .. Qd5-f7 .. Qh14-g13 .. Qn7-m8
+6. Ne1-g2 .. Ba6-b7 .. Ne14-d12 .. Nn5-l6
+7. k2-k4 .. Na5-c4 .. Nd12-f11 .. m5-k5
+8. Qf2xd4 .. Bb7xf3 .. Nf11-e9 .. Nl6xk4
+9. Rk1xNk4 .. Bf3xNg2+ .. Ne9xQf7 .. Kn8-n7
+10. Kh1-g1 .. Bg2-b7 .. Nf7-e9 .. Nn10-l9
+11. h2-h3 .. O-O .. Ne9-f7 .. Bn6-m5
+12. d2-d3 .. Nc4-d6 .. Nf7xNd6 .. Bm5-l6
+13. g4-g5 .. c7xNd6 .. Qg13-h12 .. m4-l4
+14. Qd4-b4+# .. Qh12-h11 .. l8-k8
+15. Rk4xl4 .. d11-d10 .. Rn4xRl4
+16. Qb4xRl4 .. d10-d9 .. Qm8-l7
+17. j2-j3 .. d9-d8 .. Kn7-m8
+18. Bi1-h2 .. d8-d7=D .. Nl9-k7
+19. Ql4-f4 .. Qd7-f9 .. m9-l9
+20. Qf4-g3 .. Qh11-f11 .. Km8-m9
+21. Ni3-g4 .. Rd14-d12 .. k5-j5
+22. Ng4-f6 .. Qf9xNf6 .. Bl6xBh2+
+23. Kg1xBh2 .. Qf6-f2+ .. j5-i5
+24. Qg3-g2 .. Qf2xi5 .. m6-k6
+25. Rd1-g1 .. Qf11-f4+ .. Bn9-m8
+26. Qg2-g3 .. Qi5xQg3+ .. k6-j6
+27. Rg1xQg3 .. Rd12-f12 .. j6-i6
+28. g5-g6 .. Qf4-f1 .. Nk7-j9
+29. Rg3-g2 .. Qf1-e1+ .. Nj9-l8
+30. g6-g7 .. Rf12-f1 .. i6-h6
+31. g7-g8=D .. Rf1-h1+ .. Ql7xh3+#
+32. Bf14xNl8+ .. m7xBl8
+33. Rh1-k1 .. h6-g6=D
+34. Nk12-i11 .. Qh3-i3
+35. Rk1-k4 .. Qi3xNi11
+36. j13-j12 .. k11xj12
+37. Rk4-m4 .. Qg6-d9
+38. Rm4xBm8+ .. Km9xRm8
+39. f13-f11 .. Qd9-d10
+40. Kg14-f13 .. Qi11-g13+
+41. Kf13-e14 .. Qg13-g14+#

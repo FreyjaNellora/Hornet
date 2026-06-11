@@ -1,0 +1,56 @@
+[GameNr "102141379"]
+[TimeControl "1+0"]
+[Variant "FFA"]
+[RuleVariants "DeadKingWalking EnPassant PromoteTo=D SemiAnonymous"]
+[StartFen4 "4PC"]
+[Red "KnightOwl102"]
+[RedElo "2133"]
+[Blue "LILY-295"]
+[BlueElo "1902"]
+[Yellow "J8ofHearts"]
+[YellowElo "2137"]
+[Green "Prathu_19"]
+[GreenElo "2758"]
+[Result "Prathu_19: 49 - LILY-295: 11 - KnightOwl102: 0 - J8ofHearts: 65"]
+[Termination "(Yellow +40)"]
+[Site "www.chess.com/variants/4-player-chess/game/102141379"]
+[Date "Fri May 08 2026 18:22:10 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "118"]
+
+1. h2-h3 .. b9-c9 .. g13-g12 .. m8-l8
+2. k2-k4 .. b10-d10 .. Qh14-g13 .. Qn7-m8
+3. f2-f4 .. b4-d4 .. Qg13-h12 .. Nn5-l6
+4. f4-f5 .. b8-d8 .. d13-d11 .. Nn10-l9
+5. g2-g3 .. b11-c11 .. Qh12-h6 .. m5-k5
+6. Ne1-f3 .. Ba9-c7 .. Qh6-i7 .. m4-l4
+7. Bf1-g2 .. Na5-c6 .. Qi7xi2+ .. Qm8xh3+#
+8. Qa8-c8 .. Qi2-i12 .. Qh3-m8
+9. Na10-b8 .. Ne14-g13 .. Bn6-m5
+10. d4-e4 .. Ng13-f11 .. O-O-O
+11. Qc8xf5 .. Qi12-h12 .. m7-k7
+12. Qf5-g4 .. Nj14-i12 .. k7-j7
+13. e4xNf3 .. Bf14-g13 .. Kn6-n5
+14. Qg4xg3 .. Bg13-f12 .. j7-i7
+15. f3xBg2 .. Nf11-h10 .. i7-h7
+16. g2xKh1=D .. Nh10-i8 .. Nl9-k7
+17. Qh1-h2 .. Ni8xNk7 .. l8xNk7
+18. Ra4-h4 .. Qh12-k9 .. m10-l10
+19. Ra11-a9 .. Qk9-j9 .. Rn11-n10
+20. Rh4xh7 .. k13-k11 .. Bn9-m10
+21. Qg3-h4 .. k11xl10 .. m11xl10
+22. Rh7xh13 .. O-O .. Bm10-k8
+23. Rh13xi13 .. Rk14xBk8 .. Nl6xRk8
+24. Ri13xBi14 .. Ni12-h14 .. Nk8-j6
+25. Ri14xNh14 .. Bf12xRh14 .. Qm8-l7
+26. Qh2-f4 .. Qj9xQl7 .. Nj6xQl7
+27. Qh4-e7 .. Bh14-f12 .. k7-j7
+28. Qf4-e5 .. e13-e12 .. Bm5xBf12
+29. Ka7-a8T .. Rf14-i14 .. Bf12-m5
+30. Ka8-a7 .. Ri14-i10 .. Nl7-j6
+31. Ka7xNb8 .. j13-j11 .. j7-i7
+32. Kb8-b9 .. Ri10xd10 .. i7-h7
+33. Kb9-c8 .. Rd10-g10 .. h7-g7=D
+34. Kc8-b8 .. Rg10xQg7 .. Rn7xRg7
+35. Kb8-b9 .. j11-j10 .. Rg7-i7
+36. Kb9-b8 .. f13-f11 .. Rn10-n11
+37. Kb8-c8 .. Ke14-f13 .. T

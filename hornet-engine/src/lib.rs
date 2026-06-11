@@ -5,7 +5,10 @@
 //! Max^n search. The eval contract is a vector, never a scalar.
 
 pub mod board;
+pub mod bounty;
 pub mod eval;
+pub mod game;
+pub mod intent;
 pub mod lines;
 pub mod move_gen;
 pub mod move_order;
@@ -14,3 +17,4 @@ pub mod protocol;
 pub mod queries;
 pub mod search;
 pub mod tt;
+pub mod zones;

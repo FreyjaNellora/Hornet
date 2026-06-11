@@ -1,0 +1,48 @@
+[GameNr "97967963"]
+[TimeControl "8+0"]
+[Variant "FFA"]
+[RuleVariants "DeadKingWalking EnPassant PromoteTo=D SemiAnonymous"]
+[StartFen4 "4PC"]
+[Red "Betelyuz"]
+[RedElo "2644"]
+[Blue "Howtobedone"]
+[BlueElo "2506"]
+[Yellow "COLEPALMER120"]
+[YellowElo "3231"]
+[Green "Winsby"]
+[GreenElo "2953"]
+[Result "COLEPALMER120: 57 - Winsby: 30 - Betelyuz: 3 - Howtobedone: 54"]
+[Termination "(Blue +20)"]
+[Site "www.chess.com/variants/4-player-chess/game/97967963"]
+[Date "Mon Mar 02 2026 18:23:37 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "112"]
+
+1. h2-h3 .. b7-c7 .. i13-i12 .. m11-k11
+2. Ne1-f3 .. b4-d4 .. h13-h11 .. m6-l6
+3. k2-k4 .. b9-d9 .. d13-d11 .. m7-k7
+4. e2-e4 .. Na10-c11 .. Rd14-d12 .. Nn10-l9
+5. Qg1-h2 .. Na5-c6 .. Ne14-f12 .. Qn7-l7
+6. Nj1-i3 .. Nc11-e10 .. Bi14xNe10 .. Nn5-l4
+7. Qh2-f4 .. d9xBe10 .. Qh14-h13 .. Ql7-j9
+8. Rk1-k3 .. b11-c11 .. Rd12-e12 .. m8-k8
+9. Qf4-g4 .. e10-f10 .. Re12-e10 .. Bn9-m8
+10. Qg4-g10 .. Qa8-b9 .. Nj14-k12 .. Nl9-j10
+11. Qg10-g8 .. b8-d8 .. Nk12xNj10 .. k11xNj10
+12. Bi1-h2 .. Nc6-e7 .. g13-g12 .. Nl4-j5
+13. Qg8-g5 .. Ne7-d9 .. Re10-c10 .. Nj5xRk3
+14. Qg5-h6 .. Qb9-b7 .. Rc10xc11 .. Qj9xj2
+15. g2-g3 .. Nd9xRc11 .. Qh13-i13 .. Qj2xi2+
+16. Kh1-g2 .. Nc11-d9 .. j13-j11 .. Rn11-n9
+17. Rd1-e1 .. Ba9-b8 .. Bf14-g13 .. Nk3-i4
+18. h3xNi4 .. Qb7-c8 .. k13-k11 .. Bm8xi4+
+19. Kg2-g1 .. Qc8-d7 .. k11xj10 .. Bi4xBf1
+20. Qh6-k9 .. b5-c5 .. Rk14-k10 .. Bn6xQk9
+21. R .. Qd7xQi2 .. Rk10xBk9 .. Bf1-l7
+22. Kg1xf2 .. Qi2-e6 .. e13-e12 .. m10-l10
+23. Kf2xg3 .. f10-g10 .. Rk9xNd9 .. Bl7-i4
+24. Kg3xBh2 .. Ba6xRd9 .. h11xg10 .. Bi4xBd9
+25. Kh2xNi3 .. Qe6xe4 .. Kg14-f14 .. Bd9-h5
+26. Ki3-j2 .. Qe4-f5 .. Qi13-h14 .. Bh5-j7
+27. Kj2-i1 .. Qf5xm5+ .. Qh14-h3# .. Rn4-n7
+28. O-O .. Qh3-m8+#
+29. Qm5xQm8 .. R

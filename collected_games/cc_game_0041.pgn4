@@ -1,0 +1,60 @@
+[GameNr "100667029"]
+[TimeControl "4+0"]
+[Variant "FFA"]
+[RuleVariants "Anonymous DeadKingWalking EnPassant PromoteTo=D"]
+[StartFen4 "4PC"]
+[Red "Prathu_19"]
+[RedElo "2795"]
+[Blue "DMQ_ChessRetaker4235"]
+[BlueElo "1550"]
+[Yellow "HSCCCB"]
+[YellowElo "2875"]
+[Green "MrDilbert"]
+[GreenElo "1752"]
+[Result "Prathu_19: 68 - DMQ_ChessRetaker4235: 18 - HSCCCB: 36 - MrDilbert: 0"]
+[Termination "(Red +20)"]
+[Site "www.chess.com/variants/4-player-chess-championship-qualifier-arena/game/100667029"]
+[Date "Wed Apr 15 2026 22:57:42 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "123"]
+
+1. f2-f3 .. b7-c7 .. i13-i12 .. Nn10-l9
+2. Qg1-e3 .. b9-c9 .. d13-d11 .. Nn5-l6
+3. Qe3-f2 .. b8-d8 .. Qh14xm9+#
+4. Qf2xQm9 .. Ba9-b8 .. k13-k11
+5. Qm9-f2 .. c7-d7 .. k11-k10
+6. k2-k4 .. d7-e7 .. k10xNl9
+7. k4-k5 .. e7-f7 .. l9xm8
+8. k5-k6 .. f7-g7 .. m8xQn7=D
+9. k6-k7 .. g7-h7=D .. Nj14-k12
+10. k7-k8=D .. Qh7-b7 .. g13-g12
+11. Qk8-i6 .. Qa8-b9 .. Qn7xm6
+12. g2-g4 .. Bb8-c7 .. Ne14-f12
+13. Rk1-k3 .. Na10-c11 .. Qm6-h11
+14. Ne1-g2 .. O-O-O .. e13-e11
+15. Nj1-i3 .. d8-e8 .. Bf14xNc11
+16. Rk3-j3 .. b10xBc11 .. d11-d10
+17. Ni3-h5 .. c9-d9 .. e11-e10
+18. Qi6-i3 .. Qb7-b8 .. e10xd9
+19. f3-f4 .. Ba6xd9 .. Nk12-i11
+20. Qi3-a11+ .. Qb9-a10 .. Qh11xc11+
+21. Qa11xQa10+ .. Ka9xQa10 .. Nf12-d11
+22. Qf2-i5 .. Bc7-d8 .. Nd11-c9+
+23. Qi5-i9 .. Bd8xNc9 .. Rd14-d11
+24. Qi9xBd9 .. Bc9xd10 .. Rd11xBd10+
+25. Qd9-e9 .. Qb8xRd10 .. Qc11-f14
+26. Qe9-i13 .. Qd10-b10 .. Qf14-g13
+27. Qi13-g11 .. Na5-b7 .. f13-f12
+28. Qg11-d11+ .. e8-f8 .. Kg14-h14
+29. Qd11-d7+ .. Ka10-a11 .. Kh14-i13
+30. Qd7-j7 .. f8-g8 .. Rk14-k12
+31. Qj7-j4 .. g8-h8=D .. g12-g11
+32. h2-h3 .. Qh8-d8 .. Ni11-g12
+33. Qj4-i5 .. b6-c6 .. Rk12-k1
+34. Qi5-m9+ .. Qd8-d13 .. Ki13-j14
+35. Qm9-g3 .. Qd13xQg13 .. Rk1-k12
+36. Qg3-i5 .. b11-d11 .. Ng12-i13
+37. Rj3-k3 .. Qb10-f14 .. Ni13-g12
+38. Rk3xRk12 .. Qg13-h12+ .. Ng12-i13
+39. Rk12-k10 .. Qf14xf12 .. j13-j11
+40. Qi5-c11+# .. j11xRk10
+41. Qc11-k3 .. R

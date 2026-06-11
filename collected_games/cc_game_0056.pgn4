@@ -1,0 +1,57 @@
+[GameNr "100788757"]
+[TimeControl "4+0"]
+[Variant "FFA"]
+[RuleVariants "DeadKingWalking EnPassant PromoteTo=D SemiAnonymous"]
+[StartFen4 "4PC"]
+[Red "Vahan"]
+[RedElo "2817"]
+[Blue "Prathu_19"]
+[BlueElo "2770"]
+[Yellow "rojitto"]
+[YellowElo "2865"]
+[Green "OutlawedGangster"]
+[GreenElo "3100"]
+[Result "Vahan: 65 - Prathu_19: 17 - rojitto: 21 - OutlawedGangster: 42"]
+[Termination "(Green +20)"]
+[Site "www.chess.com/variants/4-player-chess/game/100788757"]
+[Date "Fri Apr 17 2026 18:42:08 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "141"]
+
+1. h2-h3 .. b7-c7 .. i13-i12 .. m11-k11
+2. f2-f3 .. b4-d4 .. h13-h11 .. m6-l6
+3. k2-k4 .. b9-d9 .. d13-d11 .. m7-k7
+4. Qg1-h2 .. Na10-c9 .. Ne14-f12 .. Nn10-l9
+5. Nj1-i3 .. Qa8-d5 .. Qh14-i13 .. Qn7-l7
+6. Qh2-g3 .. Na5-c6 .. Nj14-k12 .. Bn6-k9
+7. Ne1-d3 .. Ba6-b7 .. Bi14-f11 .. Nn5-m7
+8. Qg3-g9 .. Nc9-e8 .. Bf11-g10 .. m10-l10
+9. Qg9-h8 .. Qd5-g5 .. e13-e12 .. Nl9-j8
+10. Bi1-h2 .. Qg5-e7 .. Bf14-e13 .. Bn9-m10
+11. Rk1-j1 .. b11-c11 .. O-O .. Nm7-l9
+12. Qh8-h5 .. Ra4-a5 .. Rk14-h14 .. O-O
+13. Nd3-f4 .. Qe7-d6 .. h11-h10 .. Rn4-n7
+14. Qh5-h4 .. Ne8-g7 .. h10-h9 .. k7-j7
+15. Qh4-g4 .. Ng7xh9 .. Bg10xNh9 .. Nj8xBh9
+16. Ni3-j5 .. Nc6-d8 .. Rh14xNh9 .. Bk9-j8
+17. Qg4-i4 .. d4-e4 .. Qi13-h13 .. l6-k6
+18. Nj5-i7 .. e4xf3 .. Rh9-h6 .. Ql7-l8
+19. e2xf3 .. Qd6-d4 .. Qh13-f11 .. Ql8-f2
+20. i2-i3 .. Nd8-c6 .. Rh6-h4 .. m5-l5
+21. Kh1-i2 .. Qd4-g7 .. Rh4-g4 .. Bj8xNi7
+22. Nf4-d5 .. Qg7-h7 .. Nk12-m11 .. Nl9xNm11
+23. Nd5xb6 .. b5-c5 .. Rg4-g3 .. Bi7-j6
+24. Nb6-c4 .. Ra5-a4 .. Rg3-g4 .. j7-i7
+25. d2-d4 .. c5xd4 .. Qf11-i11 .. Bj6-l8
+26. Bf1-d3 .. Qh7-e7 .. Qi11xQe7 .. Qf2-k7
+27. Bd3-e4 .. Nc6xQe7 .. Rg4-g7 .. k6-j6
+28. Be4xBb7 .. Ka7xBb7 .. Rg7xNe7 .. j6-i6
+29. Rd1xd4 .. Kb7-a7 .. Rf14-h14 .. i6-h6
+30. Qi4xd9 .. b8-c8 .. Re7xc7+ .. h6-g6=D
+31. Qd9xBa9+# .. Rc7-h7 .. Qk7xk4+
+32. Rd4xQk4 .. Rh7-h11 .. l5xRk4
+33. Nc4-e3 .. g13-g12 .. i7-h7
+34. Qa9-f4 .. j13-j12 .. h7-g7=D
+35. Qf4xk4 .. j12xk11 .. Qg7xg12
+36. Ne3-g4 .. f13xQg12 .. Qg6xg12+
+37. Qk4xd11# .. Qg12xNg4
+38. R

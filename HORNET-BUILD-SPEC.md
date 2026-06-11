@@ -86,7 +86,7 @@ R-0,0,0,0-1,1,1,1-1,1,1,1-0,0,0,0-0-3,yR,yN,yB,yK,yQ,yB,yN,yR,3/3,yP,yP,yP,yP,yP
 - Double push: 2 squares on first move only (both squares must be empty)
 - Capture: 1 square diagonally (must contain enemy piece)
 - En passant: See Section 1.6
-- Promotion: On reaching the player's promotion rank (Red→rank 13, Blue→file 13, Yellow→rank 0, Green→file 0), the pawn promotes. **Default: Queen** (PGN4 `=D`). **Underpromotion allowed:** `=N`, `=B`, `=R`. A queen produced by promotion is `PieceType::PromotedQueen`, a variant distinct from `Queen` (same values, but tracked separately).
+- Promotion: On reaching the player's promotion rank (Red→rank 7, Blue→file 7, Yellow→rank 6, Green→file 6), the pawn promotes. **Default: Queen** (PGN4 `=D`). **Underpromotion allowed:** `=N`, `=B`, `=R`. A queen produced by promotion is `PieceType::PromotedQueen`, a variant distinct from `Queen` (same values, but tracked separately).
 
 **Knight:** 8 L-jumps: `(±2, ±1)` and `(±1, ±2)`
 
@@ -275,28 +275,38 @@ pub struct Piece {
 
 **Equality:** Two pieces are equal if same type and same player. No unique ID.
 
-### 2.5 Board
+### 2.5 Board (as built — CO-005)
 
 ```rust
 pub struct Board {
-    squares: [Option<Piece>; 196],        // 14×14, None = empty or invalid
-    piece_lists: [[Option<(PieceType, Square)>; 32]; 4], // per player, max 32 pieces
-    piece_counts: [u8; 4],                // active pieces per player
-    king_squares: [u8; 4],                // king position per player, 255 = eliminated
-    zobrist: u64,                         // hash for TT
-    castling_rights: u8,                  // 8 bits (2 per player)
-    en_passant: Option<Square>,           // EP target square
-    en_passant_pushing_player: Option<Player>, // who created the EP opportunity
-    side_to_move: Player,                 // whose turn it is
-    dkw_flags: [bool; 4],                 // Dead King Walking flags
+    pub squares: [Option<Piece>; TOTAL_SQUARES], // 14×14 by Square::index; None = empty or invalid corner
+    pub side_to_move: Player,                    // FEN4 field 1
+    pub dead: [bool; 4],                         // fully eliminated (king captured); FEN4 field 2
+    pub dkw: [bool; 4],                          // Dead-King-Walking (§1.7); runtime-only, NOT in FEN4
+    pub castle_kingside: [bool; 4],              // FEN4 field 3
+    pub castle_queenside: [bool; 4],             // FEN4 field 4
+    pub points: [u16; 4],                        // FFA points; FEN4 field 5
+    pub extra: String,                           // FEN4 field 6, preserved verbatim (grammar unconfirmed)
+    pub en_passant: Option<Square>,              // EP target square
+    pub en_passant_pushing_player: Option<Player>, // whose double-push created it
+    pub zobrist: u64,                            // incrementally-maintained hash (a derived cache)
 }
 ```
 
-**Invariants:**
-- `squares` and `piece_lists` are always in sync
-- `king_squares[p] == 255` iff player p is eliminated
-- `piece_counts[p]` equals number of `Some` entries in `piece_lists[p]`
-- Zobrist hash is updated on every mutation
+**Invariants (as built):**
+- `zobrist` is a cache derived from the other fields: **excluded from `PartialEq`**, updated
+  incrementally on make/unmake, and verified against full recompute in tests. After any direct
+  field write that bypasses make/unmake (e.g. protocol replay's `side_to_move` self-sync), callers
+  must `recompute_zobrist()` before the board reaches a TT-keyed search.
+- `extra` is preserved verbatim so FEN4 round-trips stay **byte-exact** (its full grammar is
+  unconfirmed; it may encode the draw clock and/or EP).
+- `dkw` is mid-game runtime state: it round-trips FEN4 as all-false.
+
+**Deliberately not maintained** (CO-005; the v0.1 spec text described a structure that was never
+built): per-player piece lists, piece counts, cached king squares, and a packed `castling_rights`
+byte. King lookup is a scan (`king_square()`); piece iteration walks `squares`. This extends Hard
+Rule #5's always-recompute philosophy — no incremental indices until a *measured* need exists. Do
+not "restore" the piece lists from old spec text.
 
 ---
 
@@ -512,24 +522,44 @@ pub struct KingSafety {
 }
 ```
 
-### 4.5 Crossfire Query
+### 4.5 Crossfire Query — SEE material-at-risk
 
 ```rust
 fn query_crossfire(lines: &LineMap) -> [i16; 4]
 ```
 
-For each player's pieces, find squares where multiple enemies converge:
+For each player, the **material actually at risk** from enemy attacks, in centipawns — the net
+value the owner would lose if enemies cashed in their attacks, resolved by static exchange
+evaluation (SEE):
 
 ```
-for each piece pl of player:
-    reachers = lines.reachers_at(pl.square)
-    enemy_count = number of non-player pieces in reachers
-    enemy_value = sum of piece values of enemy reachers
-    if enemy_count >= 2:
-        penalty += enemy_value * enemy_count + piece_value(pl.piece_type)
+for each non-king piece `target` of each player:           // king excluded: its capture is
+    for each reacher of target.square:                      // terminal, handled by the search
+        skip unless it reaches DIRECTLY                     // X-ray attackers don't count:
+                                                            //   sliders only if target is their
+                                                            //   first blocker; knight/king/pawn
+                                                            //   always direct
+        owner's pieces  -> defender list (ascending value)
+        each other player's pieces -> that player's attacker list (ascending value)
+    for each attacking player p (separately):
+        see = see_swap(target_value, attackers_p, defenders)  // 2-sided swap: p initiates with
+                                                              // its least-valuable attacker,
+                                                              // owner recaptures, alternating;
+                                                              // either side may stop
+        if see > 0: total_risk += see                       // only profitable threats count
+    penalty += min(total_risk, target_value)                // can't lose more than the piece
 ```
 
-**Rationale:** Multiple enemies attacking the same piece = crossfire. Penalty scales with enemy count and their value, plus the value of the threatened piece.
+Third parties never enter an exchange: in 4PC nobody recaptures to save *another* player's piece,
+so each attacking player's SEE is computed against the owner's defenders alone.
+
+**Rationale:** the penalty is dimensionally centipawns and bounded by the victim's value, so
+crossfire sits on the same scale as material. This exclusion of the king is also what keeps
+crossfire complementary to the objective-layer king-danger term (ENGINE-MATH §7.5).
+
+**History (do not reintroduce):** v0.1 specified `enemy_value × enemy_count` here — a scale bug
+(≈ value² units) that swung the eval by thousands per quiet move and drowned material
+(EXP-005→008 diagnosed and removed it; CO-004 landed this text).
 
 ### 4.6 Master Query
 
@@ -539,22 +569,34 @@ fn run_all_queries(lines: &LineMap, board: &Board) -> QueryVector
 
 Runs all queries and returns `QueryVector`. This is the only function the evaluator calls.
 
-### 4.7 Utility Computation
+### 4.7 Utility Computation (as built — CO-005)
+
+The weighted sum is computed over **mean-relative** components, not raw query outputs:
 
 ```rust
-fn compute_utility(qv: &QueryVector, player: Player) -> i16 {
-    let pi = player.index();
-    let m = qv.material[pi];
-    let p = qv.positional[pi];
-    let s = qv.safety[pi];
-    let o = qv.crossfire[pi];
-    
-    // Uᵢ = w₁·Mᵢ + w₂·Pᵢ + w₃·Sᵢ − w₄·Oᵢ
-    m * W_MATERIAL + p * W_POSITIONAL + s * W_SAFETY - o * W_CROSSFIRE
+fn compute_utility(qv: &QueryVector) -> [i16; 4] {
+    // Per-component mean over the four players: X̄ = (Σᵢ Xᵢ) / 4, computed in i32.
+    // Uᵢ = w₁·ΔMᵢ + w₂·ΔPᵢ + w₃·ΔSᵢ − w₄·ΔOᵢ   where ΔXᵢ = Xᵢ − X̄
+    // Result clamped to i16 per player.
 }
 ```
 
-**v0 weights:** `W_MATERIAL = 1, W_POSITIONAL = 2, W_SAFETY = 1, W_CROSSFIRE = 1`
+**Why mean-relative:** in 4-player FFA captures remove material from the board (totals are not
+conserved). Deviation-from-mean makes `Σᵢ Uᵢ ≈ 0` (zero-sum), which is what enables
+Sturtevant–Korf shallow-pruning bounds (`SUM_UB = 0` exactly). The four query components stay
+independent and inspectable (Hard Rule #4); mean-relativity is post-processing. See ENGINE-MATH §2.
+
+**Deployed weights:** `W_MATERIAL = 6, W_POSITIONAL = 0, W_SAFETY = 0, W_CROSSFIRE = 1`
+— validated by EXP-015 move-agreement tuning and the Texel fit (EXP-009): positional's CI includes
+0 (noise as built), safety came out significantly *negative* as built. Both are **off pending the
+safety rebuild + relational positional terms** (see `REVIEW-claude-on-kimi-independent-plan.md`).
+Material is high because under mean-relativity a free piece nets only ~value/4 to the taker — it
+must out-weigh positional repositioning noise or the engine won't take free material. **Do not
+re-tune these by hand**; the weights are Texel-optimal for the current features (further gains are
+in the features).
+
+`Oᵢ` is the crossfire query alone (centipawns). The `ffa_points` bounty was lifted out of the eval
+(Hard Rule #8: the evaluator is points-blind; FFA-hunt preference lives in move ordering).
 
 ---
 
@@ -714,19 +756,19 @@ EP is possible only between orthogonal-neighbor players (§1.6). The four valid 
 
 **Test: Red-Blue EP**
 - Blue pawn at c4 pushes c4→e4 (East 2). EP target: d4.
-- Red pawn at d3 captures EP: d3→d4, removing Blue's e4 pawn.
+- Red pawn at **e3** captures EP: **e3→d4**, removing Blue's e4 pawn. *(was: d3→d4 — a forward push, not a diagonal capture)*
 
 **Test: Red-Green EP**
 - Green pawn at m4 pushes m4→k4 (West 2). EP target: l4.
-- Red pawn at l3 captures EP: l3→l4, removing Green's k4 pawn.
+- Red pawn at **k3** captures EP: **k3→l4**, removing Green's k4 pawn. *(was: l3→l4 — a forward push, not a diagonal capture)*
 
 **Test: Blue-Yellow EP**
 - Yellow pawn at e13 pushes e13→c13 (South 2). EP target: d13.
-- Blue pawn at d12 captures EP: d12→d13, removing Yellow's c13 pawn.
+- Blue pawn at **c14** captures EP: **c14→d13**, removing Yellow's c13 pawn. *(was: d12→d13 — wrong square; Blue's diagonal capture is from c14 or e14)*
 
 **Test: Yellow-Green EP**
 - Green pawn at m11 pushes m11→k11 (West 2). EP target: l11.
-- Yellow pawn at l12 captures EP: l12→l11, removing Green's k11 pawn.
+- Yellow pawn at **k12** captures EP: **k12→l11**, removing Green's k11 pawn. *(was: l12→l11 — wrong square; Yellow's diagonal capture is from k12 or m12)*
 
 **Test: Invalid pairs (assert no EP possible):** Red↔Yellow and Blue↔Green (parallel pawn axes).
 
@@ -911,10 +953,11 @@ pub const ROOK_VALUE: i16 = 500;
 pub const QUEEN_VALUE: i16 = 900;
 pub const KING_VALUE: i16 = 0;
 
-// Eval weights (v0)
-pub const W_MATERIAL: i16 = 1;
-pub const W_POSITIONAL: i16 = 2;
-pub const W_SAFETY: i16 = 1;
+// Eval weights — DEPLOYED (CO-005; EXP-015 move-agreement + EXP-009 Texel validated).
+// Positional/safety are 0 for measured reasons (§4.7) — do not re-tune by hand.
+pub const W_MATERIAL: i16 = 6;
+pub const W_POSITIONAL: i16 = 0;
+pub const W_SAFETY: i16 = 0;
 pub const W_CROSSFIRE: i16 = 1;
 
 // Search

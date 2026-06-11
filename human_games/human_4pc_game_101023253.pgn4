@@ -1,0 +1,60 @@
+[GameNr "101023253"]
+[TimeControl "8+0"]
+[Variant "FFA"]
+[RuleVariants "DeadKingWalking EnPassant PromoteTo=D SemiAnonymous"]
+[StartFen4 "4PC"]
+[Red "OutlawedGangster"]
+[RedElo "3453"]
+[Blue "ch333rz"]
+[BlueElo "2550"]
+[Yellow "DNSPhantom"]
+[YellowElo "2975"]
+[Green "ooooooops1"]
+[GreenElo "2675"]
+[Result "OutlawedGangster: 52 - ooooooops1: 38 - DNSPhantom: 43 - ch333rz: 2"]
+[Termination "(Green +20)"]
+[Site "www.chess.com/variants/4-player-chess/game/101023253"]
+[Date "Tue Apr 21 2026 17:36:54 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "138"]
+
+1. h2-h3 .. b7-c7 .. i13-i12 .. m8-l8
+2. Ne1-f3 .. Na5-c6 .. h13-h11 .. m11-k11
+3. d2-d4 .. b9-d9 .. d13-d11 .. Nn10-l9
+4. Qg1-h2 .. Nc6-e7 .. Ne14-f12 .. Qn7-m8
+5. e2-e3 .. b4-c4 .. Qh14-h12 .. Nn5-l6
+6. k2-k4 .. Na10-c9 .. Qh12-e9 .. Qm8-k6
+7. Qh2-f4 .. b8-d8 .. Qe9-e11 .. m5-k5
+8. Nj1-i3 .. Ba9-b8 .. Nj14-k12 .. Rn11-l11
+9. Qf4-g5 .. Ne7-f9 .. Qe11-f10 .. m4-l4
+10. Bi1-h2 .. Nf9-g11 .. Qf10xb10 .. Qk6-k7
+11. Bh2-g3 .. Ba6-b7 .. Qb10-g10 .. Qk7-j8
+12. Qg5xQj8 .. Ng11xf13 .. Kg14xNf13 .. Nl9xQj8
+13. Bf1-e2 .. Ra11-a10 .. Qg10xb5 .. Nj8-h9
+14. Nf3-e5 .. Ra4-a6 .. Kf13-e14 .. Nh9-g11
+15. Be2xc4 .. Bb7xg2+ .. Qb5xRa6+# .. Ng11-e12
+16. Bc4xQa6 .. Rd14-d12 .. Ne12xBf14
+17. Ba6-e2 .. Ke14xNf14 .. Bn6-m5
+18. O-O-O .. Rd12-d14 .. O-O-O
+19. Rk1-h1 .. d11-d10 .. m9-k9
+20. Ne5-d7 .. Nk12-i11 .. Rl11-m11
+21. h3-h4 .. Ni11-k10 .. Rm11-l11
+22. h4-h5 .. Nk10-m9 .. k11-j11
+23. h5-h6 .. Nm9xRn7 .. Nl6xNn7
+24. h6-h7 .. i12-i11 .. m10-k10
+25. h7-h8=D .. j13-j12 .. Rl11-m11
+26. Kf1-e1 .. Bi14xd9 .. Bn9-l7
+27. Qh8-g9 .. Rk14-g14 .. Rm11-m9
+28. Qg9xBd9 .. Rg14-h14 .. Nn7-l6
+29. Qd9-g6 .. h11-h10 .. k9-j9
+30. Bg3-f4 .. Rh14-h12 .. Bl7-m8
+31. Rg1xBg2 .. Rh12-h14 .. Bm8-n7
+32. Qg6xg13+ .. Kf14-e14 .. j9-i9
+33. Qg13xRh14+ .. Ke14-d13 .. i9-h9
+34. Qh14-i13 .. Rd14-e14 .. h9-g9=D
+35. Rg2xQg9 .. h10xRg9 .. k10-j10
+36. Qi13-f10 .. Nf12-d11 .. j10-i10
+37. Qf10xd10 .. e13-e12 .. Rm9-n9
+38. Nd7xNc9 .. Kd13-d12 .. Rn9-n10
+39. Nc9-e10+ .. Kd12-e13 .. i10-h10
+40. Bf4-j8 .. Ke13-f13 .. h10-g10=D
+41. Qd10-g13+# .. Qg10xQg13

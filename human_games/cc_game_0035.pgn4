@@ -1,0 +1,38 @@
+[GameNr "100706883"]
+[TimeControl "4+0"]
+[Variant "FFA"]
+[RuleVariants "Anonymous DeadKingWalking EnPassant PromoteTo=D"]
+[StartFen4 "4PC"]
+[Red "RajaBabulus"]
+[RedElo "2204"]
+[Blue "nagarjuna1997"]
+[BlueElo "1560"]
+[Yellow "NM_Antelacus"]
+[YellowElo "1665"]
+[Green "HSCCCB"]
+[GreenElo "2880"]
+[Result "RajaBabulus: 27 - nagarjuna1997: 8 - NM_Antelacus: 33 - HSCCCB: 36"]
+[Termination "(Yellow +20)"]
+[Site "www.chess.com/variants/4-player-chess-championship-qualifier-arena/game/100706883"]
+[Date "Thu Apr 16 2026 15:58:40 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "69"]
+
+1. Nj1-i3 .. Na5-c6 .. i13-i12 .. m11-k11
+2. Ne1-f3 .. b7-c7 .. e13-e12 .. m8-l8
+3. h2-h3 .. Ba6-c8 .. Bf14-e13 .. m6-l6
+4. g2-g4 .. Nc6-d8 .. Nj14-k12 .. Qn7-m8
+5. Bf1-g2 .. Qa8-c6 .. Nk12-i13 .. m4-k4
+6. k2-k3 .. Qc6-f6 .. Ne14-f12 .. Qm8-l7
+7. Nf3-h2 .. Na10-c9 .. g13-g12 .. m5-k5
+8. f2-f4 .. Nc9-e10 .. Ni13-h11 .. k4-j4
+9. Ni3-h5 .. Qf6-d6 .. Nf12xNe10 .. j4-i4
+10. h3xi4 .. Nd8xNe10 .. j13-j12 .. Ql7-f7
+11. Qg1-f2 .. b10-c10 .. f13-f11 .. Bn6-m5
+12. e2-e4 .. Ba9xBe13 .. Rd14-e14 .. Qf7-h9
+13. e4-e5 .. Qd6-d12 .. Qh14xb8+ .. Bn9xi4
+14. Qf2xb6+# .. Qb8xQb6 .. Bi4xBg2+
+15. Kh1xBg2 .. Qb6-c6+ .. Rn4xg4+
+16. Kg2-f2 .. Qc6-c5+ .. Qh9xNh5
+17. d2-d4 .. Qc5-d5 .. Rg4xf4+
+18. Kf2-e1 .. Qd5-h1+ .. Qh5xRd1+#
+19. Re14xBe13 .. R

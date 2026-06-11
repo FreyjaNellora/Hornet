@@ -1,0 +1,50 @@
+[GameNr "100786972"]
+[TimeControl "4+0"]
+[Variant "FFA"]
+[RuleVariants "DeadKingWalking EnPassant PromoteTo=D SemiAnonymous"]
+[StartFen4 "4PC"]
+[Red "Vahan"]
+[RedElo "2825"]
+[Blue "OutlawedGangster"]
+[BlueElo "3089"]
+[Yellow "rojitto"]
+[YellowElo "2891"]
+[Green "Prathu_19"]
+[GreenElo "2744"]
+[Result "Prathu_19: 16 - rojitto: 45 - Vahan: 21 - OutlawedGangster: 68"]
+[Termination "(Blue +20)"]
+[Site "www.chess.com/variants/4-player-chess/game/100786972"]
+[Date "Fri Apr 17 2026 18:16:24 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "99"]
+
+1. f2-f3 .. b7-c7 .. g13-g12 .. m8-l8
+2. g2-g4 .. Na10-c9 .. i13-i12 .. m6-k6
+3. k2-k4 .. Qa8-b7 .. Nj14-k12 .. m10-l10
+4. Nj1-i3 .. Na5-c6 .. Nk12-j10 .. m11-k11
+5. Qg1-g3 .. b10-d10 .. Nj10-h11 .. Qn7-l9
+6. Qg3-h4 .. Qb7-d9 .. d13-d11 .. Nn5-l4
+7. Rk1-k3 .. Ba9-b10 .. Ne14-f12 .. Nn10-m8
+8. Qh4-h7 .. Qd9-d8 .. Qh14-g13 .. Nm8-k9
+9. d2-d4 .. Ba6-b7 .. Nf12-e10 .. Bn9-l11
+10. Qh7-h5 .. Nc9xNe10 .. d11xNe10 .. Ql9xQh5
+11. Ni3xQh5 .. b11-d11 .. e10-e9 .. k11-j11
+12. d4-d5 .. d10xe9 .. Rd14xd11 .. Nl4-k2
+13. d5xNc6 .. Ra11xRd11 .. k13-k12 .. Nk2-i3+
+14. Rk3xNi3 .. Qd8xRd1 .. k12xBl11 .. j11xi12
+15. c6xBb7 .. Bb10-c9 .. Nh11-f12 .. Rn11xl11
+16. Ri3-i10 .. Rd11-d10 .. Rk14xNk9 .. l10xRk9
+17. Ri10-n10+ .. Rd10xRn10+ .. Qg13xk9 .. Kn8-m8
+18. Bf1xk6+ .. Qd1xNe1+ .. Qk9xl8+#
+19. Kh1-g2 .. Qe1xe2+ .. Ql8-k7
+20. Kg2-h3 .. Qe2-f1+# .. h13-h11
+21. b4-d4 .. Qk7xm9
+22. Rn10-d10 .. Qm9xe9
+23. d4-e4 .. g12-g11
+24. e4xf3 .. Qe9-e8
+25. f3xg4 .. e13-e11
+26. Rd10-d14 .. Qe8-e10
+27. b8-c8 .. Qe10-a10+
+28. Ka7-b8 .. Qa10xRa4
+29. Rd14xBf14+ .. Kg14xRf14
+30. g4xNh5=D .. Nf12-d11
+31. Qh5-c10 .. R

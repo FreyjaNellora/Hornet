@@ -92,9 +92,16 @@ violate.
    benchmark settled this. No `piece_id` on Board. No
    inverse-index-maintenance-during-update code.
 
-6. **Additive discipline.** Every new lever ships **default-off** and
-   has an **ablation arm**. Don't ship strength-affecting changes
-   silently or without measurement.
+6. **Additive discipline — anything that changes the played move.** Every
+   lever that can change the move the engine plays — eval features, **move
+   ordering, beam width/shape, LMR, killer/history heuristics, TT
+   best-move-hint usage** — ships **default-off** with a **measured
+   ablation arm** (self-play A/B or an equivalent recorded measurement),
+   the same gate as eval changes. No silent or unmeasured
+   strength-affecting changes. *(Amended by CO-006; measured basis:
+   EXP-020 — one ordering heuristic alone changed 11.6% of played moves at
+   beam 4. Corollary: future changes to killers/history/TT-hint fall under
+   this gate; the existing baselines stay.)*
 
 7. **Strength gate before NNUE training.** Hand-tuned evaluator must
    pass "humans-can't-routinely-beat-it" tactical fixture rate + direct

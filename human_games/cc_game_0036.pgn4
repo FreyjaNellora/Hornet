@@ -1,0 +1,49 @@
+[GameNr "100706537"]
+[TimeControl "4+0"]
+[Variant "FFA"]
+[RuleVariants "Anonymous DeadKingWalking EnPassant PromoteTo=D"]
+[StartFen4 "4PC"]
+[Red "LiquidFyre"]
+[RedElo "2679"]
+[Blue "HSCCCB"]
+[BlueElo "2875"]
+[Yellow "NM_Antelacus"]
+[YellowElo "1664"]
+[Green "Garfield_D_Horatio"]
+[GreenElo "1535"]
+[Result "LiquidFyre: 16 - HSCCCB: 62 - NM_Antelacus: 45 - Garfield_D_Horatio: 1"]
+[Termination "(Blue +20)"]
+[Site "www.chess.com/variants/4-player-chess-championship-qualifier-arena/game/100706537"]
+[Date "Thu Apr 16 2026 15:52:50 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "82"]
+
+1. h2-h3 .. b7-c7 .. i13-i12 .. m5-l5
+2. k2-k4 .. b9-d9 .. e13-e12 .. l5xk4
+3. Bi1-g3 .. b4-d4 .. Qh14xm9+#
+4. Bg3xQm9 .. Na5-c6 .. k13-k11
+5. Rk1xk4 .. Na10-c9 .. Ne14-f12
+6. Rk4xk11 .. b11-d11 .. Rk14xRk11
+7. Bm9xRk11 .. d11-e11 .. Nf12-h11
+8. j2-j4 .. b10-d10 .. Bf14xBa9
+9. Bk11xd4 .. Qa8xBa9 .. Rd14-e14
+10. Bd4-g7 .. d9-e9 .. Nj14-k12
+11. d2-d4 .. Nc9-e8 .. j13-j11
+12. Bg7-i5 .. e9-f9 .. Nk12-i11
+13. e2-e3 .. Ra11-a10 .. j11-j10
+14. j4-j5 .. f9-g9 .. Ni11-h9
+15. j5-j6 .. d10-e10 .. j10-j9
+16. Nj1-i3 .. e10-f10 .. j9-j8
+17. Ni3-g4 .. f10-g10 .. j8-j7=D
+18. Ne1-f3 .. g10-h10=D .. Qj7-k6
+19. Qg1-h2 .. Qh10-m5 .. Qk6-k1+
+20. Qh2-i1 .. Qm5xQi1+# .. Qk1xQi1
+21. Ne8-f10 .. Nh9xNf10
+22. e11xNf10 .. Qi1-m5
+23. f10-g10 .. Nh11xg9
+24. Qa9xNg9 .. Qm5-g11
+25. g10-h10=D .. Qg11xQg9
+26. Qh10xQg9 .. Bi14-k12
+27. Ra4xd4 .. d13-d11
+28. Qg9-e7 .. Bk12-j11
+29. Rd4xd11 .. Bj11-h9
+30. Qe7-e9 .. R

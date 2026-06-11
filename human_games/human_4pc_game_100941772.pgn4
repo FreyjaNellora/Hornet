@@ -1,0 +1,47 @@
+[GameNr "100941772"]
+[TimeControl "8+0"]
+[Variant "FFA"]
+[RuleVariants "DeadKingWalking EnPassant PromoteTo=D SemiAnonymous"]
+[StartFen4 "4PC"]
+[Red "OutlawedGangster"]
+[RedElo "3455"]
+[Blue "THEKILLER201"]
+[BlueElo "2718"]
+[Yellow "Kelechechukwu"]
+[YellowElo "2794"]
+[Green "Joobla"]
+[GreenElo "2636"]
+[Result "OutlawedGangster: 66 - THEKILLER201: 27 - Joobla: 13 - Kelechechukwu: 49"]
+[Termination "(Red +40)"]
+[Site "www.chess.com/variants/4-player-chess/game/100941772"]
+[Date "Mon Apr 20 2026 14:18:45 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "96"]
+
+1. h2-h3 .. b9-c9 .. g13-g12 .. m8-l8
+2. f2-f4 .. b8-d8 .. d13-d11 .. m6-l6
+3. Qg1-i3 .. Qa8-c8 .. i13-i12 .. m11-k11
+4. k2-k4 .. b4-d4 .. Nj14-k12 .. Qn7-k10
+5. Ne1-f3 .. Na10-c11 .. Rd14-d12 .. Nn10-m8
+6. Qi3-i9 .. Na5-c6 .. Nk12-j10 .. Nm8-l10
+7. Qi9xm9+ .. Qc8xg12+ .. h13xQg12 .. Kn8xQm9
+8. k4-k5 .. Nc11-b9 .. Qh14-h9+ .. Km9-n8
+9. k5xl6 .. b11-c11 .. Nj10-l9+ .. Qk10xNl9
+10. l6xm7+ .. c11xRd12 .. Qh9xQl9 .. Nn5xm7
+11. Bi1-h2 .. d12xe13 .. Ql9xNl10+ .. Kn8-n7
+12. Bh2xNm7 .. e13xBf14 .. Ql10-n8+ .. Kn7-m6
+13. Rk1-k6+ .. Ra11xd11 .. Qn8xBn6+ .. Km6-l5
+14. Nj1-k3+ .. Rd11-d14 .. Qn6-l6+#
+15. Bm7xQl6 .. Rd14xNe14 .. Bi14-h13
+16. Bl6-f12 .. Nb9-d10 .. j13-j11
+17. j2-j4 .. b5-c5 .. Rk14-j14
+18. j4-j5 .. Ba9xf4 .. j11-j10
+19. j5-j6 .. Bf4-c7 .. j10-j9
+20. j6-j7 .. d8-e8 .. Rj14-j11
+21. j7-j8=D .. Nd10-b9 .. Rj11-j13
+22. Qj8xl8 .. Bc7-h12 .. i12-i11
+23. Ql8-j6 .. Ba6-b5 .. i11-i10
+24. Qj6-d12 .. Nb9-c11 .. Bh13-l9
+25. Rk6-h6 .. Re14-e12 .. Bl9xNf3
+26. Qd12xf14+ .. Re12xBf12 .. Kg14-h13
+27. Qf14xBh12+ .. Rf12xBf3 .. Kh13-i14R
+28. e2xRf3

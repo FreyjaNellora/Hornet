@@ -1,0 +1,57 @@
+[GameNr "101003525"]
+[TimeControl "1+10"]
+[Variant "FFA"]
+[RuleVariants "Anonymous DeadKingWalking EnPassant PromoteTo=D"]
+[StartFen4 "4PC"]
+[Red "neoserbian"]
+[RedElo "3104"]
+[Blue "ANMemmedov"]
+[BlueElo "2604"]
+[Yellow "Nostromo8"]
+[YellowElo "2668"]
+[Green "OutlawedGangster"]
+[GreenElo "3461"]
+[Result "neoserbian: 18 - ANMemmedov: 35 - Nostromo8: 74 - OutlawedGangster: 33"]
+[Termination "Checkmate"]
+[Site "www.chess.com/variants/4-player-chess/game/101003525"]
+[Date "Tue Apr 21 2026 13:24:42 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "128"]
+
+1. h2-h3 .. b9-c9 .. d13-d11 .. m8-l8
+2. k2-k4 .. b7-c7 .. g13-g12 .. Qn7-m8
+3. f2-f3 .. Qa8-b7 .. i13-i12 .. Nn10-l9
+4. Nj1-i3 .. Na10-c11 .. Rd14-d12 .. Nn5-l6
+5. Qg1-f2 .. b4-d4 .. Ne14-f12 .. m10-l10
+6. Ne1-d3 .. Ra4-c4 .. Bf14-h12 .. m11-l11
+7. j2-j3 .. Na5-c6 .. Qh14-g13 .. Bn9-m10
+8. Bi1-j2 .. Nc11-b9 .. Rd12-d13 .. Nl6-k8
+9. Qf2-i5 .. Nb9-d8 .. j13-j12 .. Qm8-l7
+10. O-O .. Nd8-e6 .. k13-k11 .. l10-k10
+11. g2-g4 .. Ne6-c5 .. i12-i11 .. Ql7-k7
+12. Qi5xQk7 .. Nc5xNd3 .. Bi14xl11 .. Nl9xQk7
+13. e2xNd3 .. Rc4-c5 .. Bl11xBm10 .. Rn11-n10
+14. Rd1-e1 .. Rc5-k5 .. Bm10-j13 .. m5-l5
+15. Bj2xBn6 .. Nc6-e5 .. Bj13-h11 .. Rn4xBn6
+16. Bf1-g2 .. Qb7-c8 .. Nj14-i12 .. l5xk4
+17. Ni3xk4 .. Ne5xd3 .. d11-d10 .. Nk7-l5
+18. Re1-e8 .. Rk5xNk4 .. d10-d9 .. Nl5-k3+
+19. Kj1-j2 .. Qc8-d8+ .. Bh11xNk8 .. Nk3-i4+
+20. Kj2-j1 .. Qd8-j2+# .. Bk8-h11 .. Ni4xQj2
+21. Rk4xg4 .. d9xRe8 .. m4-k4
+22. b8-d8 .. Ni12-j10 .. Kn8-m8
+23. d4-e4 .. e8-e7=D .. k4xj3
+24. Nd3-c5 .. Qe7xNj2 .. m9-k9
+25. Rg4-j4 .. Qj2-i3 .. k9xNj10
+26. Rj4-j5 .. k11xj10 .. Rn6-n4
+27. b11-d11 .. Qi3xh3 .. Rn4-i4
+28. Rj5-j6 .. Nf12xd11 .. Rn10-n4
+29. Ba6-c8 .. Qh3xBc8 .. j3-i3
+30. c7-d7 .. Nd11xc9 .. Ri4-i7
+31. Ba9-b8 .. Bh12xd8 .. i3-h3
+32. b10xNc9 .. Bd8xc9 .. h3-g3=D
+33. Bb8xBc9 .. Qg13xBc9+# .. Rn4-h4
+34. Qc8-j8 .. Rh4xBh11
+35. Qj8xRi7 .. Rh11-h12
+36. Rk14xk10 .. Rh12xj12
+37. Rk10-m10+ .. Km8-n8
+38. Qi7xm7+#

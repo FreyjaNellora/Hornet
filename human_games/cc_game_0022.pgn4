@@ -1,0 +1,51 @@
+[GameNr "103682954"]
+[TimeControl "1+7"]
+[Variant "FFA"]
+[RuleVariants "DeadKingWalking EnPassant PromoteTo=D"]
+[StartFen4 "4PC"]
+[Red "HSCCCB"]
+[RedElo "3163"]
+[Blue "Bruscato"]
+[BlueElo "2054"]
+[Yellow "criuva"]
+[YellowElo "2300"]
+[Green "jcdam"]
+[GreenElo "2150"]
+[Result "HSCCCB: 60 - Bruscato: 29 - criuva: 52 - jcdam: 23"]
+[Termination "(Yellow +20)"]
+[Site "www.chess.com/variants/4-player-chess/game/103682954"]
+[Date "Mon Jun 01 2026 16:06:49 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "110"]
+
+1. k2-k4 .. b7-c7 .. g13-g12 .. m4-l4
+2. f2-f3 .. b4-d4 .. i13-i11 .. m8-l8
+3. h2-h3 .. b9-c9 .. i11-i10 .. Nn10-l9
+4. e2-e4 .. Na5-c6 .. Bf14xl8 .. Qn7-m8
+5. f3-f4 .. Ba6xg12 .. h13xBg12 .. Qm8xBl8
+6. Bf1xb5 .. Ra4-a5 .. d13-d11 .. Nn5-l6
+7. Bb5xNc6 .. Qa8xBc6 .. Ne14-f12 .. m11-l11
+8. Nj1-i3 .. b10-d10 .. Rd14-e14 .. Ql8-m8
+9. Ne1-f3 .. Qc6xe4 .. Bi14-h13 .. m7-k7
+10. Rd1-e1 .. Qe4-d3 .. Nj14-i12 .. Bn6-l8
+11. Re1-e8 .. Ba9xe13 .. Re14xBe13 .. O-O-O
+12. Re8-g8 .. Ra5-i5 .. Ni12-k11 .. Qm8-m7
+13. k4-k5 .. Na10-c11 .. Nk11xNl9 .. m10xNl9
+14. k5xNl6 .. Ri5xi10 .. Bh13xl9 .. Qm7-l7
+15. l6xk7 .. Ri10-f10 .. Bl9xRn7 .. Ql7xk7
+16. Rk1xQk7 .. Nc11-d9 .. Bn7-l9 .. Bl8xRk7
+17. Ni3-k4 .. Rf10xNf12 .. Qh14xRf12 .. Bk7xQf12
+18. Rg8-n8+# .. O-O-O .. O-O-O
+19. Nf3-g5 .. Qd3xd2 .. Rh14-h6
+20. Ng5-f3 .. Qd2-d3 .. Rh6xb6
+21. Rn8-g8 .. Qd3-h7 .. Bl9-i12
+22. Rg8-g4 .. Nd9-e11 .. Rb6-b4
+23. Nk4-i5 .. Qh7-h12 .. k13-k12
+24. Qg1-j4 .. Qh12-f14+ .. Ki14-i13
+25. f4-f5 .. Qf14xRe13 .. Bi12-c6
+26. Bi1xc7+ .. Qe13xf13+ .. Ki13-i12
+27. Bc7xb8+ .. Ra8xBb8 .. Rb4xRb8
+28. Rg4xd4 .. Ka9xRb8 .. Bc6-h11
+29. Qj4-j8+ .. Kb8-b9 .. g12-g11
+30. Rd4-b4+ .. Kb9-a10R .. Bh11-d7+
+31. Qj8-a8+# .. Bd7xf5
+32. R

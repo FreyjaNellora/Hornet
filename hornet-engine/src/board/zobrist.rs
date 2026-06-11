@@ -22,6 +22,7 @@ struct Keys {
     castle_kingside: [u64; 4],
     castle_queenside: [u64; 4],
     dead: [u64; 4],
+    dkw: [u64; 4],
     en_passant: [u64; TOTAL_SQUARES],
 }
 
@@ -58,6 +59,7 @@ impl Keys {
         let castle_kingside = fill4();
         let castle_queenside = fill4();
         let dead = fill4();
+        let dkw = fill4();
         let mut en_passant = [0u64; TOTAL_SQUARES];
         for x in en_passant.iter_mut() {
             *x = next();
@@ -69,6 +71,7 @@ impl Keys {
             castle_kingside,
             castle_queenside,
             dead,
+            dkw,
             en_passant,
         }
     }
@@ -97,6 +100,10 @@ pub(crate) fn key_dead(p: Player) -> u64 {
     KEYS.dead[p as usize]
 }
 #[inline]
+pub(crate) fn key_dkw(p: Player) -> u64 {
+    KEYS.dkw[p as usize]
+}
+#[inline]
 pub(crate) fn key_en_passant(sq: Square) -> u64 {
     KEYS.en_passant[sq.index() as usize]
 }
@@ -120,6 +127,9 @@ pub fn hash(board: &Board) -> u64 {
         }
         if board.dead[p] {
             h ^= KEYS.dead[p];
+        }
+        if board.dkw[p] {
+            h ^= KEYS.dkw[p];
         }
     }
     if let Some(ep) = board.en_passant {
@@ -220,5 +230,35 @@ mod tests {
         b.unmake_move(u2);
         b.unmake_move(u1);
         assert_eq!(b.zobrist, hash(&b));
+    }
+
+    #[test]
+    fn null_move_round_trips() {
+        use crate::move_gen::generate_pseudo_legal;
+        let mut b = fen4::parse(fen4::START_FEN4).unwrap();
+        // Arm an EP target so the null move exercises EP-clearing.
+        let dp = generate_pseudo_legal(&b)
+            .into_iter()
+            .find(|m| m.flags.double_push)
+            .unwrap();
+        let _ = b.make_move(dp);
+        assert!(b.en_passant.is_some());
+        let start = b.clone();
+
+        let u = b.make_null();
+        assert_ne!(
+            b.side_to_move, start.side_to_move,
+            "null move advances the turn"
+        );
+        assert!(b.en_passant.is_none(), "null move clears the EP target");
+        assert_eq!(
+            b.zobrist,
+            hash(&b),
+            "incremental hash matches a full recompute"
+        );
+
+        b.unmake_null(u);
+        assert_eq!(b, start, "unmake_null restores the board exactly");
+        assert_eq!(b.zobrist, start.zobrist);
     }
 }

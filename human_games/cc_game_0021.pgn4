@@ -1,0 +1,45 @@
+[GameNr "104038635"]
+[TimeControl "1+7"]
+[Variant "FFA"]
+[RuleVariants "Anonymous DeadKingWalking EnPassant PromoteTo=D"]
+[StartFen4 "4PC"]
+[Red "BlondieFlower"]
+[RedElo "2832"]
+[Blue "HSCCCB"]
+[BlueElo "3165"]
+[Yellow "PawndemoniumChess213"]
+[YellowElo "2530"]
+[Green "Caceco"]
+[GreenElo "2484"]
+[Result "BlondieFlower: 22 - HSCCCB: 61 - PawndemoniumChess213: 24 - Caceco: 0"]
+[Termination "(Yellow +20)"]
+[Site "www.chess.com/variants/4-player-chess/game/104038635"]
+[Date "Sun Jun 07 2026 03:13:23 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "79"]
+
+1. h2-h3 .. b7-c7 .. d13-d11 .. m11-k11
+2. Bi1-g3 .. b4-d4 .. Ne14-f12 .. m10-l10
+3. k2-k4 .. Qa8-d5 .. e13-e12 .. m5-l5
+4. Bg3xm9+ .. Qd5-d9# .. j13-j12
+5. Bm9-h4 .. Na10-c9 .. Bi14-j13
+6. k4xl5 .. Na5-c6 .. Nj14-i12
+7. l5-l6 .. b11-c11 .. Bf14-e13
+8. l6xm7 .. b10-d10 .. g13-g12
+9. m7xKn8=D .. Ba9-b10 .. h13-h11
+10. Qn8-m9 .. Qd9-c8 .. Qh14-h13
+11. j2-j4 .. Ba6-b7 .. k13-k12
+12. j4-j5 .. O-O-O .. O-O
+13. j5-j6 .. Nc6-e5 .. Rf14-g14
+14. Qg1-j4 .. Ne5-g6 .. Rk14-h14
+15. Bh4xNc9 .. b8xBc9 .. h11-h10
+16. Qj4-g4 .. Qc8xQg4 .. h10-h9
+17. h3xQg4 .. b5-d5 .. Ni12xk11
+18. Ne1-f3 .. Ra4-b4 .. Nk11-i12
+19. Nf3-h2 .. Ng6-e5 .. k12-k11
+20. j6-j7 .. b6-d6 .. h9-h8
+21. j7-j8=D .. Ne5xg4 .. h8-h7=D
+22. Qj8xRa8+ .. Bb7xQa8 .. Qh7xc7+
+23. Qm9-g3 .. Rb4-b8 .. Qc7-h12
+24. Qg3xNg4 .. Rb8-k8 .. Qh12xNh2+
+25. Nj1xQh2 .. Rk8xRk1+# .. Qh13-h6
+26. R

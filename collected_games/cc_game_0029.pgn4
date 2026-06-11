@@ -1,0 +1,53 @@
+[GameNr "100730338"]
+[TimeControl "4+0"]
+[Variant "FFA"]
+[RuleVariants "Anonymous DeadKingWalking EnPassant PromoteTo=D"]
+[StartFen4 "4PC"]
+[Red "HSCCCB"]
+[RedElo "2849"]
+[Blue "Kaal729"]
+[BlueElo "1374"]
+[Yellow "a1t19"]
+[YellowElo "2400"]
+[Green "jbolea"]
+[GreenElo "2833"]
+[Result "HSCCCB: 69 - Kaal729: 7 - a1t19: 24 - jbolea: 28"]
+[Termination "(Red +40)"]
+[Site "www.chess.com/variants/4-player-chess-championship-qualifier-arena/game/100730338"]
+[Date "Thu Apr 16 2026 21:14:45 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "133"]
+
+1. h2-h3 .. b7-d7 .. i13-i12 .. m11-k11
+2. f2-f3 .. b5-c5 .. d13-d11 .. m8-l8
+3. k2-k4 .. b10-c10 .. Ne14-f12 .. m6-l6
+4. Nj1-i3 .. Na10-c9 .. h13-h11 .. Nn5-l4
+5. d2-d4 .. c5-d5 .. Bi14xBa6 .. Qn7-l9
+6. g2-g4 .. Ka7xBa6 .. Qh14-h13+ .. Ql9-j7
+7. e2-e4+ .. Ka6-a7 .. Nj14-k12 .. Nn10-l9
+8. Rk1-k3 .. Qa8-b7 .. g13-g12 .. Bn9-m8
+9. e4-e5 .. Ka7-a8 .. h11-h10 .. m7-k7
+10. Qg1-f2 .. c10xd11 .. h10-h9 .. Bn6-m7
+11. Ne1-g2 .. d11-e11 .. Nf12-g10 .. k11-j11
+12. f3-f4 .. Ra11-a10 .. Qh13-h11 .. Rn11-l11
+13. f4-f5 .. e11-f11 .. g12xf11 .. j11xi12
+14. f5-f6 .. Ba9-c11 .. Qh11xRl11 .. m10xQl11
+15. f6-f7 .. Qb7xf11 .. Nk12-i11 .. Nl9-j10
+16. Qf2-f3 .. Qf11-g11+ .. Kg14-h14 .. Nj10xh9
+17. e5-e6 .. Qg11-h10+ .. Kh14-i13 .. O-O-O
+18. Qf3xd5+ .. b6-c6 .. Rk14-h14 .. Nl4-k6
+19. Qd5-e5 .. Ka8-a9 .. Rh14xQh10 .. Nh9xNi11
+20. Qe5xb8+ .. Ka9-b10 .. Ng10xNi11+ .. m4-l4
+21. Rk3-j3 .. Kb10-a11 .. Rh10-h11 .. Qj7-l9
+22. e6-e7 .. Bc11-e9+ .. Rh11-h12 .. Ql9xBe9
+23. f7-f8=D .. Na5-b7 .. f13-f12 .. Qe9-k9
+24. Qb8-h2 .. Nc9-e10 .. Rh12-g12 .. Qk9-l10+
+25. Qf8-f6 .. Ra4-a8 .. Ki13-i14 .. m9-k9
+26. e7-e8=D+ .. b9-c9 .. Bf14-h12 .. Ql10-m9
+27. Qe8-h5 .. Ka11-b10T .. Rd14-d11 .. k9-j9
+28. Ni3-j5 .. Kb10-b9 .. Bh12-i13 .. Qm9-m11
+29. k4-k5 .. Kb9-c8 .. Ni11xj9 .. l6xk5
+30. Nj5-k3 .. Kc8-b9 .. Nj9-i11 .. l4xNk3
+31. Rj3xk3 .. Kb9xRa8 .. Rd11xb11 .. Kn6-n5
+32. Qh5-a5+# .. Ki14-j14T .. Nk6-l4
+33. Rk3xk5 .. Kj14-k14 .. Bm7xRk5
+34. Qh2xBk5 .. Kk14xk13 .. R

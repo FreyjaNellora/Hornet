@@ -60,5 +60,6 @@ fn all_corpus_games_parse_and_round_trip() {
         count += 1;
     }
 
-    assert_eq!(count, 16, "expected 16 PGN4 corpus files, found {count}");
+    // Corpus size — keep in sync with CORPUS_GAMES in tests/pgn4_replay.rs (16 → 32 on 2026-06-10).
+    assert_eq!(count, 32, "expected 32 PGN4 corpus files, found {count}");
 }

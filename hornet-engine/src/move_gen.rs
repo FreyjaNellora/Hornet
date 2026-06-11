@@ -3,9 +3,11 @@
 //! Coverage: pawn (push / double-push / diagonal capture / en passant with the §1.6
 //! orthogonality rule / promotion), knight, sliders (bishop / rook / queen), king steps,
 //! and castling (§1.5, with through-check legality). King-capture elimination is handled
-//! in `make_move`/`unmake_move`; **DKW move generation** (random dead-king moves, frozen
-//! walls, turn-taking for eliminated players) is **deferred** — it does not arise within
-//! shallow perft from the start.
+//! in `make_move`/`unmake_move`. **Dead-King-Walking (§1.7) is implemented**: a `board.dkw[p]`
+//! mover generates king-only moves (no self-check filter; applied by `generate_legal`). A DKW or
+//! fully-dead player's non-king pieces are **fully-frozen walls** — they block but are un-capturable
+//! by anyone (`is_wall`; `in_check` ignores them too). Flip `DKW_PIECES_REMOVABLE` for the future
+//! "removable" variant. The full lifecycle lives in `game.rs`. See EXP-011.
 
 use crate::board::attacks::is_attacked_by;
 use crate::board::types::{PieceType, Player, Square};
@@ -14,11 +16,40 @@ use crate::board::{
     pawn_capture_deltas, pawn_forward,
 };
 
+/// Fully-frozen DKW rule (§1.7): while a player is **Dead-King-Walking**, its non-king pieces are
+/// **immovable, un-capturable walls** — they block movement but no one (not even the dead king) may
+/// take them. Once the player is fully eliminated (king captured/removed → `dead`), the pieces thaw
+/// and can be mopped up. Flip to `true` for the future "removable" variant (DKW walls capturable too).
+const DKW_PIECES_REMOVABLE: bool = false;
+
+/// Whether the piece on `sq` is a frozen wall — a non-king piece of a Dead-King-Walking player.
+/// Walls block movement but cannot be captured (the fully-frozen rule). Always `false` when pieces
+/// are removable.
+fn is_wall(board: &Board, sq: Square) -> bool {
+    if DKW_PIECES_REMOVABLE {
+        return false;
+    }
+    match board.piece_at(sq) {
+        Some(p) => p.piece_type != PieceType::King && board.dkw[p.player.index()],
+        None => false,
+    }
+}
+
 /// Generate pseudo-legal moves for the side to move. Does **not** filter moves that
 /// leave the mover's own king in check — see [`generate_legal`].
 pub fn generate_pseudo_legal(board: &Board) -> Vec<Move> {
     let mover = board.side_to_move;
     let mut moves = Vec::with_capacity(48);
+    if board.is_dkw(mover) {
+        // Dead-King-Walking (§1.7): only the king moves (the non-king pieces are fully-frozen walls,
+        // which `gen_steps`/`is_wall` block). King steps only — no castle. The no-self-check filter is
+        // applied by `generate_legal` (a DKW king may step into check). Captures earn no points
+        // (`make_move`), and the king cannot take its own/other frozen walls (they block).
+        if let Some(from) = board.king_square(mover) {
+            gen_steps(board, mover, from, &KING_DELTAS, &mut moves);
+        }
+        return moves;
+    }
     for i in 0..196u8 {
         let from = Square::new(i);
         if !from.is_valid() {
@@ -49,6 +80,11 @@ pub fn generate_pseudo_legal(board: &Board) -> Vec<Move> {
 /// Takes `&mut Board` so it can make/unmake in place; the board is unchanged on return.
 pub fn generate_legal(board: &mut Board) -> Vec<Move> {
     let mover = board.side_to_move;
+    if board.is_dkw(mover) {
+        // A DKW king walks randomly and may step into check (it is already eliminated), so every
+        // pseudo-legal king move counts as legal. (No-legal-moves here = DKW-king stalemate, §1.8.)
+        return generate_pseudo_legal(board);
+    }
     let mut legal = Vec::new();
     for mv in generate_pseudo_legal(board) {
         let undo = board.make_move(mv);
@@ -66,10 +102,11 @@ pub fn perft(board: &mut Board, depth: u32) -> u64 {
         return 1;
     }
     let mover = board.side_to_move;
+    let dkw = board.is_dkw(mover); // DKW king moves are all legal (no self-check filter)
     let mut nodes = 0;
     for mv in generate_pseudo_legal(board) {
         let undo = board.make_move(mv);
-        if !in_check(board, mover) {
+        if dkw || !in_check(board, mover) {
             nodes += perft(board, depth - 1);
         }
         board.unmake_move(undo);
@@ -77,15 +114,34 @@ pub fn perft(board: &mut Board, depth: u32) -> u64 {
     nodes
 }
 
-/// Is `player`'s king currently attacked by any of its (live) opponents?
-fn in_check(board: &Board, player: Player) -> bool {
-    match board.king_square(player) {
-        Some(k) => player
-            .opponents()
-            .iter()
-            .any(|&opp| !board.dead[opp.index()] && is_attacked_by(board, k, opp)),
-        None => false,
-    }
+/// Is `player`'s king currently attacked by an opponent that could actually capture it?
+///
+/// A **dead** opponent contributes nothing (king removed; its non-king pieces are inert walls). A
+/// **DKW** opponent threatens only with its randomly-walking king (its frozen pieces can't capture).
+/// A **live** opponent threatens with all its pieces.
+pub fn in_check(board: &Board, player: Player) -> bool {
+    let Some(k) = board.king_square(player) else {
+        return false;
+    };
+    player.opponents().iter().any(|&opp| {
+        let i = opp.index();
+        if board.dead[i] {
+            false
+        } else if board.dkw[i] {
+            king_adjacent(board, k, opp)
+        } else {
+            is_attacked_by(board, k, opp)
+        }
+    })
+}
+
+/// Is `by`'s king on a square adjacent to `sq`? (A DKW king's only threat is its king-step capture.)
+fn king_adjacent(board: &Board, sq: Square, by: Player) -> bool {
+    KING_DELTAS.iter().any(|&(dr, df)| {
+        offset(sq, dr, df)
+            .and_then(|s| board.piece_at(s))
+            .is_some_and(|p| p.player == by && p.piece_type == PieceType::King)
+    })
 }
 
 fn gen_steps(board: &Board, mover: Player, from: Square, deltas: &[(i8, i8)], out: &mut Vec<Move>) {
@@ -96,7 +152,7 @@ fn gen_steps(board: &Board, mover: Player, from: Square, deltas: &[(i8, i8)], ou
             }
             match board.piece_at(to) {
                 None => out.push(Move::quiet(from, to)),
-                Some(p) if p.player != mover => out.push(Move {
+                Some(p) if p.player != mover && !is_wall(board, to) => out.push(Move {
                     from,
                     to,
                     promotion: None,
@@ -105,7 +161,7 @@ fn gen_steps(board: &Board, mover: Player, from: Square, deltas: &[(i8, i8)], ou
                         ..Default::default()
                     },
                 }),
-                _ => {} // own piece blocks
+                _ => {} // own piece, or a frozen DKW/dead wall, blocks
             }
         }
     }
@@ -125,7 +181,7 @@ fn gen_rays(board: &Board, mover: Player, from: Square, dirs: &[(i8, i8)], out: 
                     match board.piece_at(cur) {
                         None => out.push(Move::quiet(from, cur)),
                         Some(p) => {
-                            if p.player != mover {
+                            if p.player != mover && !is_wall(board, cur) {
                                 out.push(Move {
                                     from,
                                     to: cur,
@@ -136,7 +192,7 @@ fn gen_rays(board: &Board, mover: Player, from: Square, dirs: &[(i8, i8)], out: 
                                     },
                                 });
                             }
-                            break; // any piece blocks the ray
+                            break; // any piece — enemy, own, or frozen wall — blocks the ray
                         }
                     }
                 }
@@ -178,7 +234,7 @@ fn gen_pawn(board: &Board, mover: Player, from: Square, out: &mut Vec<Move>) {
                 continue;
             }
             match board.piece_at(to) {
-                Some(p) if p.player != mover => {
+                Some(p) if p.player != mover && !is_wall(board, to) => {
                     push_pawn_move(
                         mover,
                         from,
@@ -646,6 +702,92 @@ mod tests {
         assert_eq!(
             b, original,
             "king-capture make/unmake must fully restore the board"
+        );
+    }
+
+    #[test]
+    fn dkw_king_walks_but_cannot_take_frozen_pieces() {
+        use crate::board::types::{Piece, PieceType};
+        let at = |s: &str| Square::from_algebraic(s).unwrap();
+        let mut b = Board::empty();
+        b.side_to_move = Player::Red;
+        b.set_piece(at("g7"), Some(Piece::new(Player::Red, PieceType::King)));
+        b.set_piece(at("g8"), Some(Piece::new(Player::Red, PieceType::Pawn))); // own frozen wall
+        b.set_piece(at("h8"), Some(Piece::new(Player::Blue, PieceType::Pawn))); // live enemy
+        b.recompute_zobrist();
+        b.enter_dkw(Player::Red);
+
+        let moves = generate_legal(&mut b);
+        assert!(
+            moves.iter().all(|m| m.from == at("g7")),
+            "only the king moves — non-king pieces are frozen"
+        );
+        assert!(
+            !moves.iter().any(|m| m.to == at("g8")),
+            "the DKW king cannot capture its OWN frozen pawn (fully frozen)"
+        );
+        assert!(
+            moves.iter().any(|m| m.to == at("h8") && m.flags.capture),
+            "but it can capture a LIVE enemy pawn"
+        );
+        assert_eq!(
+            moves.len(),
+            7,
+            "7 of g7's 8 neighbours (own frozen pawn blocks one)"
+        );
+    }
+
+    #[test]
+    fn frozen_dkw_pieces_are_un_capturable_and_block() {
+        use crate::board::types::{Piece, PieceType};
+        let at = |s: &str| Square::from_algebraic(s).unwrap();
+        let mut b = Board::empty();
+        b.side_to_move = Player::Blue; // a LIVE mover
+        b.set_piece(at("g7"), Some(Piece::new(Player::Blue, PieceType::Rook)));
+        b.set_piece(at("g9"), Some(Piece::new(Player::Red, PieceType::Pawn))); // Red is DKW → wall
+        b.set_piece(at("g10"), Some(Piece::new(Player::Yellow, PieceType::Pawn))); // live, behind wall
+        b.recompute_zobrist();
+        b.enter_dkw(Player::Red);
+
+        let moves = generate_legal(&mut b);
+        assert!(
+            !moves.iter().any(|m| m.to == at("g9")),
+            "a frozen DKW pawn is un-capturable by a live player"
+        );
+        assert!(
+            !moves.iter().any(|m| m.to == at("g10")),
+            "the frozen wall blocks the ray past it"
+        );
+        assert!(
+            moves.iter().any(|m| m.to == at("g8")),
+            "the rook still slides up to the empty square before the wall"
+        );
+    }
+
+    #[test]
+    fn dkw_king_capture_awards_no_points() {
+        use crate::board::types::{Piece, PieceType};
+        let at = |s: &str| Square::from_algebraic(s).unwrap();
+        let mut b = Board::empty();
+        b.side_to_move = Player::Red;
+        b.set_piece(at("g7"), Some(Piece::new(Player::Red, PieceType::King)));
+        b.set_piece(at("h8"), Some(Piece::new(Player::Blue, PieceType::Queen)));
+        b.recompute_zobrist();
+        b.enter_dkw(Player::Red);
+
+        let cap = generate_legal(&mut b)
+            .into_iter()
+            .find(|m| m.to == at("h8"))
+            .expect("DKW king can capture the adjacent queen");
+        b.make_move(cap);
+        assert_eq!(
+            b.points[Player::Red.index()],
+            0,
+            "§1.7: a DKW king earns no points for captures"
+        );
+        assert_eq!(
+            b.piece_at(at("h8")),
+            Some(Piece::new(Player::Red, PieceType::King))
         );
     }
 }

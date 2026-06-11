@@ -23,8 +23,14 @@ pub struct Board {
     pub squares: [Option<Piece>; TOTAL_SQUARES],
     /// Whose turn it is (FEN4 field 1).
     pub side_to_move: Player,
-    /// Eliminated/dead flag per player, RBYG order (FEN4 field 2).
+    /// Eliminated/dead flag per player, RBYG order (FEN4 field 2). `dead[p]` = fully out: the king
+    /// was captured and removed; skipped in the turn rotation. Serialized in FEN4.
     pub dead: [bool; 4],
+    /// Dead-King-Walking flag per player (§1.7). `dkw[p]` = the player was checkmated/stalemated, so
+    /// their non-king pieces are frozen walls and their king walks randomly (ignoring check) until it
+    /// is captured (→ `dead`) or the game ends. A DKW player still takes a turn (the king's walk).
+    /// Runtime state — **not** serialized in FEN4 (mid-game only; round-trips as all-false).
+    pub dkw: [bool; 4],
     /// Kingside castling right per player (FEN4 field 3).
     pub castle_kingside: [bool; 4],
     /// Queenside castling right per player (FEN4 field 4).
@@ -50,6 +56,7 @@ impl PartialEq for Board {
         self.squares == o.squares
             && self.side_to_move == o.side_to_move
             && self.dead == o.dead
+            && self.dkw == o.dkw
             && self.castle_kingside == o.castle_kingside
             && self.castle_queenside == o.castle_queenside
             && self.points == o.points
@@ -67,6 +74,7 @@ impl Board {
             squares: [None; TOTAL_SQUARES],
             side_to_move: Player::Red,
             dead: [false; 4],
+            dkw: [false; 4],
             castle_kingside: [false; 4],
             castle_queenside: [false; 4],
             points: [0; 4],
@@ -120,6 +128,47 @@ impl Board {
                 }
                 _ => None,
             })
+    }
+
+    /// Mark a player as Dead-King-Walking (§1.7): on checkmate/stalemate their non-king pieces freeze
+    /// and their king begins walking randomly. The king stays on the board (unlike [`Board::dead`]).
+    /// Idempotent; a no-op if the player is already DKW or fully dead.
+    pub fn enter_dkw(&mut self, player: Player) {
+        let i = player.index();
+        if !self.dkw[i] && !self.dead[i] {
+            self.dkw[i] = true;
+            self.zobrist ^= zobrist::key_dkw(player);
+        }
+    }
+
+    /// Whether a player is Dead-King-Walking (king walks randomly, non-king pieces frozen).
+    #[inline]
+    pub fn is_dkw(&self, player: Player) -> bool {
+        self.dkw[player.index()]
+    }
+
+    /// Fully eliminate a player: remove **all** its pieces from the board (§1.7 — a fully eliminated
+    /// player's pieces are removed), set `dead`, and clear `dkw`. Keeps the Zobrist hash in sync.
+    /// Irreversible (game-flow, not search): used for DKW-king stalemate (§1.8); king-capture
+    /// elimination is handled reversibly inside `make_move`.
+    pub fn eliminate_player(&mut self, player: Player) {
+        let i = player.index();
+        for sq in 0..TOTAL_SQUARES as u8 {
+            let s = Square::new(sq);
+            if let Some(p) = self.piece_at(s)
+                && p.player == player
+            {
+                self.set_piece(s, None); // set_piece XORs the piece out of the hash
+            }
+        }
+        if self.dkw[i] {
+            self.dkw[i] = false;
+            self.zobrist ^= zobrist::key_dkw(player);
+        }
+        if !self.dead[i] {
+            self.dead[i] = true;
+            self.zobrist ^= zobrist::key_dead(player);
+        }
     }
 }
 
@@ -233,7 +282,17 @@ pub struct UndoState {
     prev_ep_pusher: Option<Player>,
     prev_side_to_move: Player,
     prev_dead: [bool; 4],
+    prev_dkw: [bool; 4],
     prev_points: [u16; 4],
+    prev_zobrist: u64,
+}
+
+/// State needed to reverse a [`Board::make_null`] (a "pass": advance the turn without moving).
+#[derive(Clone, Debug)]
+pub struct NullUndo {
+    prev_side_to_move: Player,
+    prev_en_passant: Option<Square>,
+    prev_ep_pusher: Option<Player>,
     prev_zobrist: u64,
 }
 
@@ -256,6 +315,7 @@ impl Board {
             prev_ep_pusher: self.en_passant_pushing_player,
             prev_side_to_move: mover,
             prev_dead: self.dead,
+            prev_dkw: self.dkw,
             prev_points: self.points,
             prev_zobrist: self.zobrist,
         };
@@ -276,11 +336,24 @@ impl Board {
             && let Some(cp) = self.piece_at(csq)
         {
             undo.captured = Some((csq, cp));
-            self.points[mover.index()] += cp.piece_type.ffa_points() as u16;
+            // §1.7: a Dead-King-Walking king can capture but earns NO points.
+            if !self.dkw[mover.index()] {
+                self.points[mover.index()] += cp.piece_type.ffa_points() as u16;
+            }
             self.set_piece(csq, None);
             if cp.piece_type == PieceType::King {
+                // King captured → that player is fully eliminated: mark `dead` and clear any DKW flag
+                // (its walking king is now gone). **Removing the player's remaining pieces from the
+                // board (§1.7) is done at game-flow** (`Game::step` → `eliminate_player`), NOT here —
+                // sweeping inside `make_move` would make Max^n wildly over-value king-captures (the
+                // victim's entire material vanishes from the eval → pathological king-hunting), so the
+                // search leaves them on the board.
                 self.dead[cp.player.index()] = true;
                 self.zobrist ^= zobrist::key_dead(cp.player);
+                if self.dkw[cp.player.index()] {
+                    self.dkw[cp.player.index()] = false;
+                    self.zobrist ^= zobrist::key_dkw(cp.player);
+                }
             }
             self.clear_castle_right_if_rook_home(csq, cp);
         }
@@ -362,6 +435,7 @@ impl Board {
         self.en_passant_pushing_player = undo.prev_ep_pusher;
         self.points = undo.prev_points;
         self.dead = undo.prev_dead;
+        self.dkw = undo.prev_dkw;
         self.side_to_move = undo.prev_side_to_move;
         self.zobrist = undo.prev_zobrist;
     }
@@ -376,6 +450,37 @@ impl Board {
             p = p.next();
         }
         from
+    }
+
+    /// Advance the turn without moving (a "pass") — used by quiescence to reach a rotation boundary
+    /// and by null-move pruning. Clears the en-passant target (the pass forgoes that capture) and
+    /// rotates `side_to_move` past eliminated players. Pieces, points, castling, and the dead set are
+    /// unchanged. Not a legal 4PC move — a search device only.
+    pub fn make_null(&mut self) -> NullUndo {
+        let undo = NullUndo {
+            prev_side_to_move: self.side_to_move,
+            prev_en_passant: self.en_passant,
+            prev_ep_pusher: self.en_passant_pushing_player,
+            prev_zobrist: self.zobrist,
+        };
+        if let Some(old_ep) = self.en_passant {
+            self.zobrist ^= zobrist::key_en_passant(old_ep);
+        }
+        self.en_passant = None;
+        self.en_passant_pushing_player = None;
+        let mover = self.side_to_move;
+        let new_side = self.next_live_player(mover);
+        self.zobrist ^= zobrist::key_side(mover) ^ zobrist::key_side(new_side);
+        self.side_to_move = new_side;
+        undo
+    }
+
+    /// Reverse a [`Board::make_null`].
+    pub fn unmake_null(&mut self, undo: NullUndo) {
+        self.side_to_move = undo.prev_side_to_move;
+        self.en_passant = undo.prev_en_passant;
+        self.en_passant_pushing_player = undo.prev_ep_pusher;
+        self.zobrist = undo.prev_zobrist;
     }
 
     fn clear_castle_right_if_rook_home(&mut self, sq: Square, piece: Piece) {
