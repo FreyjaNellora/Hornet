@@ -44,10 +44,27 @@ it generalizes to any Texel-fitted candidate. **Recipe going forward:** Texel no
 play scales come from a separate sweep (e.g. ISO ∈ {400, 800, 1600}, DGR ∈ {1, 2}) gated on
 winners-only agreement first, the paired gate second.
 
-## Horizon check (the d8 winners-gap question)
+## Horizon check (the d8 winners-gap question) — answered: it's priorities, not horizon
 
-Does deeper search close the winners gap specifically? Flashlight cap 1200 (the depth-pays
-shape, EXP-017), d4 vs d8, same sampled positions (S=4): RESULTS PENDING (running).
+Flashlight cap 1200 (the depth-pays shape, EXP-017), same sampled positions (S=4, 1,270
+positions / 668 winner-moves):
+
+| Depth | all | winners-only |
+|-------|-----|--------------|
+| 4 | 14.4% | 13.0% |
+| 8 | 14.3% | 12.3% |
+
+**Doubling the horizon moved nothing** (all-moves flat; winners-only if anything down — noise).
+Two conclusions:
+1. **The winners gap is a priorities (eval-features) problem, not a horizon problem.** Winners'
+   moves aren't deep moves the engine could find with more lookahead — they're moves the current
+   eval doesn't value at any reachable depth. Feature work leads; depth executes. (Strength is a
+   different axis: EXP-017's depth-pays results were *placement* with the objective layer on —
+   depth can still win games without increasing human-agreement.)
+2. **The d4 instrument depth is vindicated on the modern engine** (closing the 2026-06-11 open
+   dispatch item): move choice is eval-dominated, so d4 comparisons transfer. Side finding:
+   *breadth* alone helps even at d4 — flashlight cap 1200 reads 14.4/13.0 vs the maxn-beam-10
+   instrument's 13.6/12.4, consistent with EXP-016's beam-drops-good-moves diagnosis.
 
 ## Conditions (after)
 
