@@ -264,6 +264,65 @@ fn extract_squares(s: &str) -> Vec<Square> {
     out
 }
 
+/// Parse the `[Result "name: pts - ..."]` header → final points in **seat order** [R,B,Y,G].
+/// chess.com lists the Result in *score* order, so each name is joined to the
+/// `[Red]/[Blue]/[Yellow]/[Green]` headers; falls back to positional order when seat headers are
+/// absent (self-play games are written R,B,Y,G). Shared by texel_tune / move_match /
+/// behavior-mining (was duplicated per instrument).
+pub fn result_points(text: &str) -> Option<[f64; 4]> {
+    let header = |tag: &str| -> Option<String> {
+        text.lines()
+            .find(|l| l.starts_with(&format!("[{tag} ")))
+            .and_then(|l| l.split('"').nth(1))
+            .map(|s| s.to_string())
+    };
+    let seats = [
+        header("Red"),
+        header("Blue"),
+        header("Yellow"),
+        header("Green"),
+    ];
+    let line = text.lines().find(|l| l.starts_with("[Result"))?;
+    let mut pairs: Vec<(String, f64)> = Vec::new();
+    for part in line.split(" - ") {
+        let Some(c) = part.rfind(": ") else { continue };
+        let name = part[..c]
+            .trim_start_matches("[Result")
+            .trim()
+            .trim_start_matches('"')
+            .trim()
+            .to_string();
+        let num: String = part[c + 2..]
+            .chars()
+            .take_while(|ch| ch.is_ascii_digit() || *ch == '-')
+            .collect();
+        if let Ok(n) = num.trim().parse::<f64>() {
+            pairs.push((name, n));
+        }
+    }
+    if pairs.len() != 4 {
+        return None;
+    }
+    if seats.iter().all(|s| s.is_some()) {
+        let seat_names: Vec<&str> = seats.iter().map(|s| s.as_deref().unwrap()).collect();
+        let mut pts = [f64::NAN; 4];
+        for (nm, n) in &pairs {
+            if let Some(i) = seat_names.iter().position(|s| s == nm) {
+                pts[i] = *n;
+            }
+        }
+        if pts.iter().all(|p| !p.is_nan()) {
+            return Some(pts);
+        }
+    }
+    Some([pairs[0].1, pairs[1].1, pairs[2].1, pairs[3].1])
+}
+
+/// Which seats finished 1st or 2nd by final points (ties counted generously).
+pub fn winner_seats(pts: [f64; 4]) -> [bool; 4] {
+    std::array::from_fn(|i| (0..4).filter(|&j| pts[j] > pts[i]).count() < 2)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
