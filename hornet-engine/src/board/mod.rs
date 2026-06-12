@@ -12,6 +12,33 @@ pub mod zobrist;
 // Re-export the core board types from `crate::board` (convenience for downstream phases).
 pub use self::types::{Piece, PieceType, Player, Square, TOTAL_SQUARES};
 
+/// DKW / dead-army rule variant (EXP-026 corpus arbitration; `HORNET_DKW_RULE` = `0`/`1`/`2`,
+/// read once per process):
+///
+/// - **0 — pre-EXP-026:** a DKW player's non-king pieces are un-capturable walls; on full
+///   elimination the army is swept from the board at game flow.
+/// - **1 — capturable-then-locked (user hypothesis):** DKW pieces are capturable (for **no
+///   points** — chess.com Help Center: "Capturing dead pieces does not earn points"); once the
+///   king falls, the remaining army stays on the board, locked (un-capturable terrain).
+/// - **2 — capturable-always:** like 1, but the dead army stays capturable (no points) after the
+///   king falls too. Nothing is ever swept.
+///
+/// **Default = 2**, the EXP-026 verdict: rule 1 (locked) lost 1,297 plies / 11 full games of
+/// corpus replay (real games capture dead pieces after the king falls — locked refuted); rules
+/// 0 and 2 tie in replay, and the chess.com Help Center decides between them ("dead pieces
+/// remain on the board and can be captured… capturing dead pieces does not earn points" — rule
+/// 0's game-flow sweep and DKW freeze contradict both clauses). 0/1 remain as diagnostics.
+pub fn dkw_rule() -> u8 {
+    static RULE: std::sync::LazyLock<u8> = std::sync::LazyLock::new(|| {
+        std::env::var("HORNET_DKW_RULE")
+            .ok()
+            .and_then(|v| v.parse::<u8>().ok())
+            .filter(|&r| r <= 2)
+            .unwrap_or(2)
+    });
+    *RULE
+}
+
 /// The game board: piece placement plus the state encoded by a FEN4 string.
 ///
 /// This is the I/O-focused core. Derived structures used by later phases (piece
@@ -151,6 +178,25 @@ impl Board {
     /// player's pieces are removed), set `dead`, and clear `dkw`. Keeps the Zobrist hash in sync.
     /// Irreversible (game-flow, not search): used for DKW-king stalemate (§1.8); king-capture
     /// elimination is handled reversibly inside `make_move`.
+    /// Retire a player's king without sweeping their army (EXP-026 rules 1/2: the dead army
+    /// stays on the board): remove the king piece if present, set `dead`, clear `dkw`. Keeps
+    /// the Zobrist hash in sync. Irreversible (game-flow, not search) — used for DKW-king
+    /// stalemate when the persisting-army variants are active.
+    pub fn retire_king(&mut self, player: Player) {
+        if let Some(ksq) = self.king_square(player) {
+            self.set_piece(ksq, None);
+        }
+        let i = player.index();
+        if self.dkw[i] {
+            self.dkw[i] = false;
+            self.zobrist ^= zobrist::key_dkw(player);
+        }
+        if !self.dead[i] {
+            self.dead[i] = true;
+            self.zobrist ^= zobrist::key_dead(player);
+        }
+    }
+
     pub fn eliminate_player(&mut self, player: Player) {
         let i = player.index();
         for sq in 0..TOTAL_SQUARES as u8 {
@@ -336,8 +382,12 @@ impl Board {
             && let Some(cp) = self.piece_at(csq)
         {
             undo.captured = Some((csq, cp));
-            // §1.7: a Dead-King-Walking king can capture but earns NO points.
-            if !self.dkw[mover.index()] {
+            // §1.7: a Dead-King-Walking king can capture but earns NO points. Under rules 1/2
+            // (EXP-026), capturing a DKW/dead player's piece also earns no points — chess.com
+            // Help Center: "Capturing dead pieces does not earn points".
+            let victim_inert = self.dkw[cp.player.index()] || self.dead[cp.player.index()];
+            let no_points = self.dkw[mover.index()] || (dkw_rule() >= 1 && victim_inert);
+            if !no_points {
                 self.points[mover.index()] += cp.piece_type.ffa_points() as u16;
             }
             self.set_piece(csq, None);

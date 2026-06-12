@@ -54,6 +54,13 @@ What the result means; falsified or confirmed; next step.
 *(Index gap: EXP-012…019 exist as files but were never indexed — see the experiment files
 directly; backfilling the hooks is an open hygiene item.)*
 
+- [EXP-026 — DKW/dead-army rule arbitration](EXP-026-dkw-rule-arbitration.md) — user challenged
+  the frozen-walls rule; Help Center settled capturability (**capturable, zero points** — also
+  fixing a latent in-search scoring bug) and the corpus arbitrated the post-death question:
+  **locked-after-death refuted** (−1,297 plies / −11 games), **capturable-always landed**
+  (rule 2, never swept; DKW king may take its own pieces). Search/game-flow sweep inconsistency
+  dissolves. Spec §1.7 + VERIFICATION #5 corrected (CO-007). Eval terrain-valuation of dead
+  armies recorded as a future measured arm.
 - [EXP-025 — pawn structure unbundled (C3)](EXP-025-pawn-structure-unbundled.md) — Kimi's
   isolated/doubled/connected count queries fitted on the clean corpus. **First pawn signal above
   the noise floor: ISO drop 0.00054 (~11× floor)** (CONN borderline, DBL null; joint fit

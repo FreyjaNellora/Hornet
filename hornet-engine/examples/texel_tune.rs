@@ -196,11 +196,14 @@ fn mse(data: &[Pos], w: &[f64; NW], k: f64) -> f64 {
 }
 
 fn main() {
-    // HORNET_HUMAN_ONLY=1 → the single curated human corpus (human_games/: baselines + verified rated
-    // collected games, deduped, malformed excluded). HORNET_HUMAN_ONLY off also adds self-play.
+    // DEFAULT: the curated **human** corpus only (human_games/: baselines + verified rated
+    // collected games, deduped, malformed excluded). Human and self-play data are kept separate
+    // on principle — self-play reflects the engine's own biases, and the 2026-06-12 human-only
+    // fits showed the mixed default diluting human behavioral signal ~8× (EXP-025 addendum 2).
+    // HORNET_INCLUDE_SELFPLAY=1 adds selfplay_games/ explicitly (label any such fit "combined").
     let base = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..");
     let mut dirs = vec![base.join("human_games")];
-    if std::env::var("HORNET_HUMAN_ONLY").is_err() {
+    if std::env::var("HORNET_INCLUDE_SELFPLAY").is_ok_and(|v| v == "1") {
         dirs.push(base.join("selfplay_games"));
     }
     let mut data: Vec<Pos> = Vec::new();

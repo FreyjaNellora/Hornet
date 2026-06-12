@@ -1,6 +1,15 @@
 # Hornet — Production Board (STATUS.md)
 
-**Updated:** 2026-06-12 (**C2/C3 continuation landed (Kimi → Fable, EXP-024/025).** Kimi's C2
+**Updated:** 2026-06-12 (**DKW rules corrected (EXP-026/CO-007):** dead/DKW armies are
+**capturable for zero points and never swept** (rule 2, corpus-arbitrated — the user's
+locked-after-death hypothesis lost 1,297 plies of replay; the old frozen/swept rule contradicted
+the chess.com Help Center); DKW king may capture its own pieces; latent in-search scoring bug
+fixed; search/game-flow sweep inconsistency dissolved; spec §1.7 + VERIFICATION #5 corrected;
+`HORNET_DKW_RULE` keeps 0/1 as diagnostics; eval terrain-valuation of dead armies = future
+measured arm. **Texel data discipline:** default fit is now **human-only**
+(`HORNET_INCLUDE_SELFPLAY=1` to opt in) — human-only fits showed the mixed default diluting
+human signal ~8× (ISO 0.00326, CONN 0.00130, DGR 0.00094 human-only; DBL sign-flips positive =
+capture-activity symptom). Earlier same cycle: **C2/C3 continuation (Kimi → Fable, EXP-024/025).** Kimi's C2
 fold-ins were inert as built (terms folded into zero-weighted components) → reverted, eval hot
 path = EXP-022 exactly; her C3.1 pawn queries kept. `texel_tune` extended: 9 weights, dual-base
 single-term marginals. **Findings on 290 games / 17,003 positions** (user added 49 standard-rules

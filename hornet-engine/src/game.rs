@@ -82,7 +82,11 @@ impl Game {
                         self.board.points[j] += 10;
                     }
                 }
-                self.board.eliminate_player(p); // remove all its pieces (§1.7)
+                if crate::board::dkw_rule() == 0 {
+                    self.board.eliminate_player(p); // rule 0: remove all its pieces
+                } else {
+                    self.board.retire_king(p); // rules 1/2 (EXP-026): the army stays on the board
+                }
                 self.board.make_null(); // pass; rotation now skips the removed player
                 return TurnOutcome::Removed(p);
             }
@@ -116,16 +120,20 @@ impl Game {
         }
     }
 
-    /// Make a move, then enforce §1.7 at the game level: any player this move fully eliminated (king
-    /// captured) has its remaining pieces swept off the board. (The search's `make_move` deliberately
-    /// leaves them on, to avoid over-valuing king-captures; the *game* board removes them.)
+    /// Make a move, then apply the game-level death rule. **Rule 0** (pre-EXP-026): any player
+    /// this move fully eliminated (king captured) has its remaining pieces swept off the board.
+    /// **Rules 1/2** (EXP-026): the dead army stays on the board — `make_move` already set the
+    /// `dead` flag, so nothing further is needed, and search and game flow finally agree (the
+    /// EXP-011 search/game inconsistency disappears: no sweep exists anywhere).
     fn apply(&mut self, mv: Move) {
         let dead_before = self.board.dead;
         self.board.make_move(mv);
-        for q in Player::ALL {
-            let j = q.index();
-            if self.board.dead[j] && !dead_before[j] {
-                self.board.eliminate_player(q);
+        if crate::board::dkw_rule() == 0 {
+            for q in Player::ALL {
+                let j = q.index();
+                if self.board.dead[j] && !dead_before[j] {
+                    self.board.eliminate_player(q);
+                }
             }
         }
     }

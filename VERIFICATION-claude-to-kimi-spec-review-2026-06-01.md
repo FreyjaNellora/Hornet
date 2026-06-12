@@ -111,8 +111,12 @@ itself, just verification.
   becomes "dead"** but their **king remains "live"** and continues to move.
 - **DKW king movement:** randomly each turn (one of its legal moves picked
   uniformly at random).
-- **Other pieces (dead army):** immovable walls. Can be captured for points
-  (same point values as before death).
+- **Other pieces (dead army):** immovable walls. Can be captured ~~for points
+  (same point values as before death)~~.
+  > **CORRECTION (2026-06-12, EXP-026/CO-007):** the "for points" claim above was forum-sourced
+  > and is contradicted by the chess.com Help Center: **"Capturing dead pieces does not earn
+  > points."** Dead pieces are capturable but worthless; they also persist after the dead king
+  > itself is captured (corpus-arbitrated — the locked-after-death variant lost replay coverage).
 - **DKW capture rules:** the DKW king CAN capture pieces during its random
   movement but does NOT receive points for captures or for checkmating
   other players.

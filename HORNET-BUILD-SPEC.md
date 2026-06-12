@@ -160,15 +160,27 @@ the queenside rook. Red: Q at g1 → d1 rook is queenside. Blue: Q at a8 → a11
 
 - `eval_value()` — centipawns; used for the material query Mᵢ, SEE, and move ordering.
 - `ffa_points()` — chess.com free-for-all points; used only for result lines / PGN4 output.
-- Capturing a piece in FFA awards its `ffa_points()`. The evaluator never sees FFA points.
+- Capturing a **live** player's piece awards its `ffa_points()`. Capturing a **DKW or dead**
+  player's piece awards **nothing** (chess.com Help Center: "Capturing dead pieces does not earn
+  points"). The evaluator never sees FFA points.
 
-**Elimination & Dead-King-Walking (DKW):**
-- A player is eliminated when their king is captured.
-- The eliminated player's non-king pieces become **immovable walls**.
-- The **DKW king moves randomly** each turn until captured or the game ends. It **can capture but
-  receives no points** for captures.
-- DKW king stalemate: **10 points to each remaining live player**, and the DKW king is removed.
+**Elimination & Dead-King-Walking (DKW) — as corrected by EXP-026 (CO-007):**
+- On checkmate/stalemate/resign/timeout a player's army goes **dead**: its non-king pieces are
+  **immovable** but **capturable by anyone, for no points**. They block movement and give no
+  check threats. **Nothing is ever swept from the board** — dead armies persist as capturable
+  terrain for the rest of the game (corpus-arbitrated: the "locked after the king falls" variant
+  lost 1,297 plies / 11 games of replay coverage; the old swept/frozen rule contradicts the Help
+  Center text).
+- The **DKW king moves randomly** each turn until captured or stalemated. It **can capture any
+  adjacent piece — including its own** (corpus-observed) — and **receives no points** for
+  anything.
+- DKW king stalemate: **10 points to each remaining live player**, and the DKW king is removed
+  (its army stays).
+- A player is **fully eliminated** when their king is captured (or DKW-stalemated). Their
+  remaining pieces stay on the board, still immovable and capturable for no points.
 - Last player standing wins; if multiple players remain at game end, points determine placement.
+- History: v0.2 specified fully-frozen un-capturable walls with the dead army swept — refuted by
+  corpus replay + the chess.com Help Center (EXP-026); do not reintroduce.
 
 ### 1.8 Game End Conditions
 

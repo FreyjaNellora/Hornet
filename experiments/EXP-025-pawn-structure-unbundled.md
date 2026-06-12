@@ -49,7 +49,27 @@ fragile; include it in the P′ arm only as a secondary. DBL null everywhere. Th
 in the Conclusion is unchanged, with ISO as its core and the symptom-vs-cause caveat still the
 reason it must pass self-play before shipping.
 
-## Conditions (after)
+## Addendum 2: human-only fit — the signal is a human-game behavior
+
+`HORNET_HUMAN_ONLY=1` (140 games / 8,205 positions; floor ≈ 0.0002 from WIN's null level):
+
+| Term | deployed (6,0,0,1) | texel-shape (4,0,0,1) |
+|------|--------------------|------------------------|
+| **ISO** | **0.00326 (w 3305)** | **0.00379 (w 3355)** |
+| **CONN** | **0.00130 (w 860)** | **0.00244 (w 1110)** |
+| DGR | 0.00094 (w 5) | 0.00177 (w 6) |
+| DBL | 0.00046 (w **−2500**) | 0.00044 (w −2335) |
+| WIN | 0.00001 | 0.00022 |
+
+The structural/safety signals are **concentrated in human games** (~8× ISO, CONN resurrected,
+DGR passing even at M=6) — the self-play half of the mixed corpus dilutes them, as expected: a
+structure-blind engine produces games where structure varies ~randomly and cannot correlate with
+outcomes. This is the cleanest evidence yet that these are real behaviors-over-many-games, while
+also sharpening the deployment caveat: part of the human signal is "good players build good
+structure," which playing-as-if can't fully capture — the P′ self-play arm remains the gate.
+**DBL sign-flip:** on human data doubled pawns predict *winning* — in 4PC doubling arises from
+capturing toward one's promotion lane, so it's a capture-activity symptom, opposite of 2-player
+folklore. Do not penalize doubling.
 
 - The three pawn queries live in `queries.rs`, exercised by `texel_tune`, **not wired into the
   eval**. Deliberate deviation from the original step plan ("wire passing terms at default-0"):
