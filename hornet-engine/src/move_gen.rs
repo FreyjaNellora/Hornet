@@ -408,11 +408,22 @@ fn gen_castles(board: &Board, mover: Player, king_from: Square, out: &mut Vec<Mo
         if empties.iter().any(|s| board.piece_at(sq(s)).is_some()) {
             continue; // squares between king and rook not all empty
         }
+        // Mirror `in_check` (EXP-026/028): a dead opponent threatens nothing; a DKW opponent
+        // threatens only with its walking king (its immovable army gives no check — the raw
+        // attack scan would phantom-block castles chess.com allows); a live opponent threatens
+        // with everything.
         let attacked = king_path.iter().any(|s| {
-            mover
-                .opponents()
-                .iter()
-                .any(|&o| !board.dead[o.index()] && is_attacked_by(board, sq(s), o))
+            let path_sq = sq(s);
+            mover.opponents().iter().any(|&o| {
+                let i = o.index();
+                if board.dead[i] {
+                    false
+                } else if board.dkw[i] {
+                    king_adjacent(board, path_sq, o)
+                } else {
+                    is_attacked_by(board, path_sq, o)
+                }
+            })
         });
         if attacked {
             continue; // king is in / passes through / lands in check

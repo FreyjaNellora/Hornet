@@ -285,9 +285,12 @@ impl Searcher {
         self
     }
 
-    /// Inject a leaf evaluator (used to test the Max^n backup with a controllable eval).
-    #[cfg(test)]
-    fn with_eval(mut self, eval: fn(&Board, &mut LineMap) -> [i16; 4]) -> Self {
+    /// Inject a leaf evaluator. **Experiment/test machinery only** — used by unit tests (a
+    /// controllable synthetic eval for the Max^n backup) and by eval-arm A/B harnesses
+    /// (EXP-029: candidate evals like [`crate::eval::eval_4vec_pprime`] fighting the deployed
+    /// [`crate::eval::eval_4vec`] inside one process on the paired gate). The deployed default
+    /// never changes here; a candidate becoming the default is a Tier-2 ship.
+    pub fn with_eval(mut self, eval: fn(&Board, &mut LineMap) -> [i16; 4]) -> Self {
         self.eval = eval;
         self
     }

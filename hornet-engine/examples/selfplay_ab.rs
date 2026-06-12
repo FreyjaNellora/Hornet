@@ -16,6 +16,7 @@
 //!   e.g. `selfplay_ab 8 8 1 1000 50 50 100 0` = d8 vs d8, cap 1000, both win-on(50),
 //!        A king-danger(100) vs B danger-off — gates the points-aware safety rebuild.
 
+use hornet_engine::eval::{eval_4vec_pprime, eval_4vec_sprime};
 use hornet_engine::game::Game;
 use hornet_engine::move_gen::generate_legal;
 use hornet_engine::search::Searcher;
@@ -30,14 +31,20 @@ struct Cfg {
     wproxy: bool, // win signal: true = Kimi's elimination-proximity, false = banked points
     danger: i16,  // king-danger weight (0 = off; the points-aware safety rebuild)
     dtable: bool, // king-danger shape: true = Kimi's non-linear table, false = linear scalar
+    eval_id: usize, // leaf eval: 0 = deployed eval_4vec, 1 = P′ (iso), 2 = S′ (danger) — EXP-029
 }
 impl Cfg {
     fn searcher(&self) -> Searcher {
-        Searcher::new(32)
+        let s = Searcher::new(32)
             .with_win_term(self.win)
             .with_win_proxy(self.wproxy)
             .with_king_danger(self.danger)
-            .with_danger_table(self.dtable)
+            .with_danger_table(self.dtable);
+        match self.eval_id {
+            1 => s.with_eval(eval_4vec_pprime),
+            2 => s.with_eval(eval_4vec_sprime),
+            _ => s,
+        }
     }
 }
 
@@ -107,13 +114,22 @@ fn main() {
     let (adg, bdg) = (arg(7).unwrap_or(0) as i16, arg(8).unwrap_or(0) as i16);
     let (adt, bdt) = (arg(9).unwrap_or(0) != 0, arg(10).unwrap_or(0) != 0);
     let (awp, bwp) = (arg(11).unwrap_or(0) != 0, arg(12).unwrap_or(0) != 0);
+    let (aev, bev) = (arg(13).unwrap_or(0), arg(14).unwrap_or(0));
     let (ad, bd) = (arg(1).unwrap_or(8) as u32, arg(2).unwrap_or(8) as u32);
     let tag = |t: bool, c: &'static str| -> &'static str { if t { c } else { "" } };
+    let ev = |e: usize| -> &'static str {
+        match e {
+            1 => " P'",
+            2 => " S'",
+            _ => "",
+        }
+    };
     let a = Cfg {
         label: format!(
-            "A(d{ad} c{cap} w{aw}{} k{adg}{})",
+            "A(d{ad} c{cap} w{aw}{} k{adg}{}{})",
             tag(awp, "P"),
-            tag(adt, "T")
+            tag(adt, "T"),
+            ev(aev)
         ),
         depth: ad,
         cap,
@@ -121,12 +137,14 @@ fn main() {
         wproxy: awp,
         danger: adg,
         dtable: adt,
+        eval_id: aev,
     };
     let b = Cfg {
         label: format!(
-            "B(d{bd} c{cap} w{bw}{} k{bdg}{})",
+            "B(d{bd} c{cap} w{bw}{} k{bdg}{}{})",
             tag(bwp, "P"),
-            tag(bdt, "T")
+            tag(bdt, "T"),
+            ev(bev)
         ),
         depth: bd,
         cap,
@@ -134,6 +152,7 @@ fn main() {
         wproxy: bwp,
         danger: bdg,
         dtable: bdt,
+        eval_id: bev,
     };
     let per_split = arg(3).unwrap_or(1);
     let (opening, cap) = (12usize, 140usize);

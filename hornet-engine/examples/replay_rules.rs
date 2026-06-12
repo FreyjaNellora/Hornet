@@ -17,8 +17,9 @@ use hornet_engine::move_gen::{castle_king_destination, generate_pseudo_legal};
 use std::fs;
 use std::path::PathBuf;
 
-/// Decode + self-sync the mover + apply one ply (mirrors tests/pgn4_replay.rs).
-fn apply_ply(token: &str, board: &mut Board) -> bool {
+/// Decode + self-sync the mover + apply one ply (mirrors tests/pgn4_replay.rs, plus two
+/// fidelity fixes). `last_mover` is the previous ply's mover, used to resolve castle tokens.
+fn apply_ply(token: &str, board: &mut Board, last_mover: &mut Option<Player>) -> bool {
     let Some(decoded) = pgn4::decode_ply(token) else {
         return false;
     };
@@ -48,11 +49,20 @@ fn apply_ply(token: &str, board: &mut Board) -> bool {
                     .into_iter()
                     .find(|m| m.from == from && m.to == to && m.promotion == promotion);
             }
+            if found.is_some() {
+                *last_mover = Some(p.player);
+            }
             found
         }
         DecodedMove::Castle { kingside } => {
+            // A castle token names no player. Trying players in fixed RBYG order misattributes
+            // the castle whenever two players can castle the same side (EXP-028 forensics: the
+            // dominant silent-divergence cause). Resolve in ROTATION order from the expected
+            // next mover instead.
+            let start = last_mover.map_or(Player::Red, |p| p.next());
             let mut found = None;
-            for pl in Player::ALL {
+            let mut pl = start;
+            for _ in 0..4 {
                 board.side_to_move = pl;
                 let dest = castle_king_destination(pl, kingside);
                 if let Some(m) = generate_pseudo_legal(board)
@@ -60,8 +70,10 @@ fn apply_ply(token: &str, board: &mut Board) -> bool {
                     .find(|m| m.flags.castle && m.to == dest)
                 {
                     found = Some(m);
+                    *last_mover = Some(pl);
                     break;
                 }
+                pl = pl.next();
             }
             found
         }
@@ -121,6 +133,8 @@ fn main() {
             games += 1;
             let mut done = 0usize;
             let mut failed = false;
+            let mut last_mover: Option<Player> = None;
+            let mut recent: std::collections::VecDeque<String> = std::collections::VecDeque::new();
             for round in &game.rounds {
                 for tok in &round.plies {
                     if pgn4::decode_ply(tok).is_none() {
@@ -130,8 +144,12 @@ fn main() {
                     if failed {
                         continue;
                     }
-                    if apply_ply(tok, &mut board) {
+                    if apply_ply(tok, &mut board, &mut last_mover) {
                         done += 1;
+                        recent.push_back(tok.clone());
+                        if recent.len() > 4 {
+                            recent.pop_front();
+                        }
                     } else {
                         failed = true;
                         // HORNET_REPLAY_VERBOSE=1: classify the gap (which token kinds diverge).
@@ -178,11 +196,12 @@ fn main() {
                                 None => "undecodable",
                             };
                             println!(
-                                "FAIL {} ply {} token {} kind {}",
+                                "FAIL {} ply {} token {} kind {} after [{}]",
                                 path.file_name().unwrap().to_string_lossy(),
                                 done,
                                 tok,
-                                kind
+                                kind,
+                                recent.iter().cloned().collect::<Vec<_>>().join(" ")
                             );
                         }
                     }

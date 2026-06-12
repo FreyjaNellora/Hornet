@@ -103,6 +103,50 @@ fn compute_utility(qv: &QueryVector) -> [i16; 4] {
 }
 
 // ---------------------------------------------------------------------------
+// EXP-029: candidate evals (experiment-only — the deployed eval is `eval_4vec`)
+// ---------------------------------------------------------------------------
+// Each candidate = the deployed eval + exactly ONE term at its human-only fitted scale
+// (EXP-024/025 addenda, fitted on the deployed (6,0,0,1) base over 140 human games), so the
+// paired-gate verdict attributes cleanly. Injected via `Searcher::with_eval`; never the default
+// (a candidate becoming the default is a Tier-2 ship gated on EXP-027 paired self-play).
+// Both terms are mean-relative (Σ ≈ 0 preserved); values clamped inside mate bounds (±29_000).
+
+/// Isolated-pawn scale (util units; human-only fit: w=3305, MSE drop 0.00326 — EXP-025).
+/// Caveat recorded there: predictive weight, possibly symptom-not-cause; this arm tests exactly
+/// that by *playing as if* isolation matters.
+const PPRIME_ISO_SCALE: i32 = 3305;
+
+/// King-danger-table scale (human-only fit: w=5, MSE drop 0.00094 — EXP-024).
+const SPRIME_DGR_SCALE: i32 = 5;
+
+/// P′ candidate: deployed eval − ISO_SCALE·Δ(isolated-pawn count).
+pub fn eval_4vec_pprime(board: &Board, line_buffer: &mut LineMap) -> [i16; 4] {
+    let mut v = eval_4vec(board, line_buffer);
+    let iso = crate::queries::query_pawn_isolated(board);
+    let sum: i32 = iso.iter().map(|&x| x as i32).sum();
+    for i in 0..4 {
+        // Mean-relative in quarter units to avoid truncating small counts: Δ = (4·x − Σ)/4.
+        let adj = PPRIME_ISO_SCALE * (4 * iso[i] as i32 - sum) / 4;
+        v[i] = (v[i] as i32 - adj).clamp(-29_000, 29_000) as i16;
+    }
+    v
+}
+
+/// S′ candidate: deployed eval − DGR_SCALE·Δ(king-danger table scalar).
+pub fn eval_4vec_sprime(board: &Board, line_buffer: &mut LineMap) -> [i16; 4] {
+    let mut v = eval_4vec(board, line_buffer); // fills `line_buffer` for the safety scan below
+    let ks = crate::queries::query_king_safety(line_buffer, board);
+    let dgr: [i32; 4] =
+        std::array::from_fn(|i| crate::queries::king_danger_table_scalar(&ks[i]) as i32);
+    let sum: i32 = dgr.iter().sum();
+    for i in 0..4 {
+        let adj = SPRIME_DGR_SCALE * (4 * dgr[i] - sum) / 4;
+        v[i] = (v[i] as i32 - adj).clamp(-29_000, 29_000) as i16;
+    }
+    v
+}
+
+// ---------------------------------------------------------------------------
 // Tests (§7.5)
 // ---------------------------------------------------------------------------
 

@@ -5,9 +5,10 @@
 //! decisions in quiet positions (which MSE and the tactical fixtures both miss). Use it to gate eval
 //! changes: a real eval improvement should lift the match rate.
 //!
-//! Run: cargo run --release --example move_match [-- beam depth sample bounty freecap]
-//!   Defaults `10 4 2 0 0` (the historical instrument config, ordering levers off).
+//! Run: cargo run --release --example move_match [-- beam depth sample bounty freecap eval]
+//!   Defaults `10 4 2 0 0 0` (the historical instrument config, ordering levers off).
 //!   bounty/freecap = the EXP-020 ordering levers (1 = on); fwd-pruning/adaptive stay fixed on.
+//!   eval = leaf eval (EXP-029): 0 deployed, 1 P′ (iso), 2 S′ (danger-table).
 
 use hornet_engine::board::pgn4::{self, DecodedMove};
 use hornet_engine::board::types::Player;
@@ -63,6 +64,7 @@ fn main() {
     let sample = arg(3).unwrap_or(2).max(1); // every Nth ply
     let bounty = arg(4).unwrap_or(0) != 0;
     let freecap = arg(5).unwrap_or(0) != 0;
+    let eval_id = arg(6).unwrap_or(0);
     let (mut total, mut matched, mut games) = (0usize, 0usize, 0usize);
 
     for entry in fs::read_dir(&dir).unwrap() {
@@ -91,6 +93,11 @@ fn main() {
                         .with_adaptive_beam(true)
                         .with_ffa_bounty_order(bounty)
                         .with_free_capture_order(freecap);
+                    s = match eval_id {
+                        1 => s.with_eval(hornet_engine::eval::eval_4vec_pprime),
+                        2 => s.with_eval(hornet_engine::eval::eval_4vec_sprime),
+                        _ => s,
+                    };
                     if let Some((eng, _)) = s.search(&mut board, depth) {
                         total += 1;
                         if eng.from == human.from && eng.to == human.to {
@@ -109,7 +116,7 @@ fn main() {
         0.0
     };
     eprintln!(
-        "move-match: {matched}/{total} = {rate:.1}%  over {games} games (beam {beam}, depth {depth}, every {sample} plies, bounty={} freecap={})",
+        "move-match: {matched}/{total} = {rate:.1}%  over {games} games (beam {beam}, depth {depth}, every {sample} plies, bounty={} freecap={} eval={eval_id})",
         bounty as u8, freecap as u8
     );
 }
