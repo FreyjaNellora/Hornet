@@ -54,6 +54,13 @@ What the result means; falsified or confirmed; next step.
 *(Index gap: EXP-012…019 exist as files but were never indexed — see the experiment files
 directly; backfilling the hooks is an open hygiene item.)*
 
+- [EXP-029 — P′/S′ candidate-eval arms](EXP-029-eval-candidate-arms.md) — first eval arms on the
+  paired gate: **both rejected at their human-fitted scales** (P′ 1–5 pairs, 315–492; S′ 1–5,
+  394–522; agreement 12.7%/10.5% vs 13.6%). Lesson measured twice: prediction weights ≠ play
+  weights — Texel nominates terms, play scales need their own sweep. **New standing metric:
+  winners-only agreement = 12.4% < all-moves 13.6% — the engine agrees more with losers than
+  winners.** Rotation-equivariance test added (passed). Horizon check (flashlight d4-vs-d8
+  winners gap) appended.
 - [EXP-028 — replay-gap forensics](EXP-028-replay-gap-forensics.md) — failure classification +
   **DKW own-capture inference** (a live king can never take its own piece → the mover must be
   DKW): replay coverage **72 → 104/140 games fully** (+2,210 plies). Remaining: 25 empty-from

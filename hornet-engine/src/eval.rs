@@ -228,6 +228,64 @@ mod tests {
         );
     }
 
+    /// Rotation equivariance: the 4PC board has an exact 4-fold symmetry — rotate the board 90°
+    /// and relabel players (R→B→Y→G) **and the side to move**, and the position is equivalent,
+    /// so the eval vector must permute exactly. The eval is symmetric *by construction* (every
+    /// query works in each player's own frame — e.g. the PST transform in queries.rs); this test
+    /// pins that assumption and catches orientation bugs (a mis-transformed PST quadrant, a
+    /// wrong pawn-lane axis) that nothing else would surface.
+    #[test]
+    fn eval_is_rotation_equivariant() {
+        use crate::board::Square;
+        use crate::board::types::{Piece, PieceType};
+        let at = |s: &str| Square::from_algebraic(s).unwrap();
+        // 90° rotation mapping Red's frame onto Blue's, matching queries.rs::pst_value
+        // (a Blue square (R,F) corresponds to the Red-frame square (13−F, R), so the forward
+        // map is (rank, file) → (rank: file, file: 13 − rank)).
+        let rot_sq = |sq: Square| Square::from_rank_file(sq.file(), 13 - sq.rank());
+        let rot_pl = |p: Player| match p {
+            Player::Red => Player::Blue,
+            Player::Blue => Player::Yellow,
+            Player::Yellow => Player::Green,
+            Player::Green => Player::Red,
+        };
+        // Deliberately asymmetric: every piece kind whose geometry is orientation-sensitive.
+        let pieces = [
+            ("h1", Player::Red, PieceType::King),
+            ("a7", Player::Blue, PieceType::King),
+            ("g14", Player::Yellow, PieceType::King),
+            ("n8", Player::Green, PieceType::King),
+            ("g5", Player::Red, PieceType::Pawn),
+            ("d10", Player::Blue, PieceType::Pawn),
+            ("c8", Player::Blue, PieceType::Knight),
+            ("i12", Player::Yellow, PieceType::Rook),
+            ("l6", Player::Green, PieceType::Bishop),
+            ("j3", Player::Red, PieceType::Queen),
+        ];
+        let mut b = Board::empty();
+        let mut rb = Board::empty();
+        for (s, p, t) in pieces {
+            b.set_piece(at(s), Some(Piece::new(p, t)));
+            rb.set_piece(rot_sq(at(s)), Some(Piece::new(rot_pl(p), t)));
+        }
+        b.side_to_move = Player::Red;
+        rb.side_to_move = rot_pl(Player::Red);
+        b.recompute_zobrist();
+        rb.recompute_zobrist();
+
+        let mut lm = Box::new(LineMap::new());
+        let v = eval_4vec(&b, &mut lm);
+        let vr = eval_4vec(&rb, &mut lm);
+        for p in Player::ALL {
+            assert_eq!(
+                v[p.index()],
+                vr[rot_pl(p).index()],
+                "rotation equivariance broken: {p:?} (orig {v:?}) vs {:?} (rotated {vr:?})",
+                rot_pl(p)
+            );
+        }
+    }
+
     /// C1 / EXP-022 equality gate: the gated query path (skipping zero-weight components) must
     /// produce the identical eval vector to the full path, across a seeded random-walk position
     /// sweep — not just the start position. If a weight is ever un-zeroed, the gating flags in
