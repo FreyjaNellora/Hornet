@@ -1,6 +1,6 @@
 # EXP-032 — first mining-nominated relational candidates: pawn advancement breaks through
 
-- **Date:** 2026-06-12 · **Status:** paired gate running on the winner
+- **Date:** 2026-06-12 · **Status:** CLOSED — gate null, candidate stays cold
 - **Hypothesis:** relational/behavioral features — one classical (rook on open lanes), one
   nominated by behavioral mining pass 2 (winners push pawns toward the central promotion
   crossing, +2.1pp Center / −2.6pp home in red-frame destinations) — can move the winners gap
@@ -38,16 +38,29 @@ a silent default where a hard error belonged. Fixed: ids 3/4 wired (rook-open/pa
 ids now panic. Silver lining: the void run is an inadvertent second null-validation of the
 paired design at d8 cap 1200 — 12/12 exact ties, seat variance cancels to the point.
 
+## Gate run 2 (valid): NULL
+
+12 pairs, d8 cap 1200, HORNET_PAWN_ADV_SCALE=8, B arm verified distinct (`Padv` label, every
+pair contested): **pair record 6–6–0, points A(deployed) 809 vs B(pawn-adv) 800** — pair
+differentials sum to +9 for deployed, mean +0.8 ± ~30 sd. Dead even.
+
 ## Conditions (after)
 
-- Deployed eval unchanged; gate verdict pending (12 pairs vs deployed, d8 cap 1200,
-  HORNET_PAWN_ADV_SCALE=8, relaunched after the harness fix).
-- If the gate confirms: pawn-adv is the first eval feature to earn a default-on discussion since
-  the recalibration — wiring would go through P (a real positional term at last) with the
-  measured scale, Tier-2 ship.
+- **No wiring.** Pawn-adv stays a cold candidate fn (`eval_4vec_pawn_adv`, env-scaled).
+  Deployed eval unchanged; nothing ships on a null (default-off discipline).
+- Revisit trigger: the incoming human-game influx. At a larger corpus, re-run the winners-only
+  instrument and the texel single-term fit; if the nomination repeats with a sharper scale,
+  the gate gets another 12 pairs. Not before — 12 pairs resolve only LARGE effects, and the
+  honest read is that any true effect here is small.
 
 ## Conclusion
 
-PENDING the gate — but the process result already stands: **mine behavior → represent → gate**
-produced in one pass what three experiments of statistical candidates couldn't. The discovery
-loop the user mandated works.
+**The instruments disagree, and the gate outranks the predictor.** Pawn-adv clearly beat the
+winners-only agreement baseline (+1.5pp — humans who win DO advance pawns more, mining pass 3
+confirmed winners promote 2.6×) but converted to ZERO self-play strength at these settings.
+Fourth instance of the standing lesson: **prediction agreement ≠ play strength** (after P′, S′,
+and the EXP-030 linear terms). Plausible mechanism: in engine-vs-engine play both sides push
+pawns equally well already, or the term's gains are offset by what it displaces in the
+mean-relative budget. The mining loop still did its job — it found a real human behavior and
+the gate told us cheaply that this representation of it doesn't buy strength. The behavior
+stays in the repertoire; the representation question stays open.
