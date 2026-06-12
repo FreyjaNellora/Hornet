@@ -25,12 +25,17 @@
 //!    unlike DKW entry which the replayer infers lazily): the victim's points rank and material
 //!    rank among the 4 at that moment, and the rotation offset killer→victim. "Systematic
 //!    elimination based on what?"
+//! 9. **Capture profitability** — SEE of the captured square (`queries::see_capture`, attacker
+//!    best-case) at the moment of each human capture, plus an overpay marker (mover worth more
+//!    than victim). "Do winners take better-valued trades, or just more of them?"
 //!
 //! Run: cargo run --release --example behavior_mine [-- dir]   (default ../human_games)
 
 use hornet_engine::board::{Board, Square};
 use hornet_engine::board::pgn4::{self, result_points, winner_seats};
 use hornet_engine::board::types::{PieceType, Player};
+use hornet_engine::lines::{LineMap, compute_lines};
+use hornet_engine::queries::see_capture;
 use hornet_engine::replay::{ReplayState, resolve_ply};
 use hornet_engine::zones::ZONES;
 use std::fs;
@@ -162,6 +167,9 @@ fn main() {
     let mut elim_pts_rank = [0u32; 4];
     let mut elim_mat_rank = [0u32; 4];
     let mut elim_offset = [0u32; 4];
+    // [winner-class][phase]: (captures, SEE>0, SEE cp sum, overpay (mover>victim), victim cp sum).
+    let mut profit = [[(0u32, 0u32, 0i64, 0u32, 0i64); NPHASE]; 2];
+    let mut lm = LineMap::new();
     let mut games = 0usize;
 
     for entry in fs::read_dir(&dir).expect("games dir") {
@@ -249,6 +257,23 @@ fn main() {
                         .filter(|o| board.points[o.index()] > vp)
                         .count();
                     target[wclass][phase][above.min(2)] += 1;
+
+                    // Profitability: SEE of the captured square as the position stands.
+                    compute_lines(&board, &mut lm);
+                    let vval = victim.piece_type.eval_value();
+                    let see = see_capture(&lm, mv.to, vval, victim.player, mover);
+                    let e = &mut profit[wclass][phase];
+                    e.0 += 1;
+                    if see > 0 {
+                        e.1 += 1;
+                    }
+                    e.2 += i64::from(see);
+                    if let Some(p) = board.piece_at(mv.from)
+                        && p.piece_type.eval_value() > vval
+                    {
+                        e.3 += 1;
+                    }
+                    e.4 += i64::from(vval);
 
                     kcap[wclass].1 += 1;
                     match victim.piece_type {
@@ -463,6 +488,25 @@ fn main() {
             progsum as f64 / f64::from(n),
             100.0 * f64::from(adv) / f64::from(n)
         );
+    }
+
+    println!("\n== capture profitability (SEE of the captured square; overpay = mover worth > victim) ==");
+    for (w, name) in [(0usize, "winners"), (1, "losers ")] {
+        let line: Vec<String> = (0..NPHASE)
+            .filter(|&ph| profit[w][ph].0 > 0)
+            .map(|ph| {
+                let (n, pos, ssum, over, vsum) = profit[w][ph];
+                format!(
+                    "{}: SEE>0 {:.1}% | mean SEE {:+.0}cp | overpay {:.1}% | mean victim {:.0}cp ({n})",
+                    phn[ph],
+                    100.0 * f64::from(pos) / f64::from(n),
+                    ssum as f64 / f64::from(n),
+                    100.0 * f64::from(over) / f64::from(n),
+                    vsum as f64 / f64::from(n)
+                )
+            })
+            .collect();
+        println!("{name}: {}", line.join("\n         "));
     }
 
     println!("\n== elimination forensics (at king capture; {elim_n} kills, {elim_by_winner} by winners) ==");

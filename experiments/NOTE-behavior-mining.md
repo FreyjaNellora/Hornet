@@ -75,6 +75,26 @@ center-guarding as promotion denial; "systematic elimination based on something"
   → **Nomination: objective-layer target selection should rank opponents by MATERIAL weakness
   (better elimination predictor than points standing), pending the win-term gate verdicts.**
 
+## Pass 3b (2026-06-12, 140 games — capture profitability via `queries::see_capture`)
+
+Closes the "better trades or just more?" question from pass 1. **Winners' captures are NOT
+better by static exchange value — slightly worse:** midgame SEE>0 60.2% (w) vs 64.0% (l), mean
+SEE +140cp vs +168cp; winners also *overpay* (mover worth more than victim) MORE often (late
+54.6% vs 48.7%). Yet pass 2 showed winners' captures get answered LESS (25–30% vs 32–34%).
+**Read: the winner edge in trading is not static exchange quality — it's that their captures go
+unpunished.** They take trades that look worse on paper into squares where the recapture never
+comes — reading the 4-player tempo (who is distracted, who can't afford the recapture). The
+points dynamic compounds this: in FFA every capture banks the victim's value immediately, and
+the recapture pays a *different* player, so a SEE-negative capture can still be
+placement-positive against the other two seats.
+
+**Representation implication:** no static "trade quality" feature to add — SEE/crossfire already
+embodies that and humans don't beat it there. The differential lives in recapture *likelihood*
+(turn-proximity, opponent's competing priorities), i.e. the already-built proximity-weighted
+threat direction, and in the objective layer (whom to pressure), consistent with the
+material-weakness elimination finding. Nothing nominated for eval; reinforces the
+objective-layer queue.
+
 ## Queued passes
 
 - **Player-relative frames** for destination maps (the pass-1 lesson).
