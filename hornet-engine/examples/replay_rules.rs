@@ -32,9 +32,23 @@ fn apply_ply(token: &str, board: &mut Board) -> bool {
                 return false;
             };
             board.side_to_move = p.player;
-            generate_pseudo_legal(board)
+            let mut found = generate_pseudo_legal(board)
                 .into_iter()
-                .find(|m| m.from == from && m.to == to && m.promotion == promotion)
+                .find(|m| m.from == from && m.to == to && m.promotion == promotion);
+            // DKW inference: a live king can NEVER capture its own piece, so a corpus king
+            // landing on its own piece proves the mover is Dead-King-Walking (the replayer has
+            // no game-flow to set the flag). Infer it and retry — the DKW move set generates
+            // own-captures (EXP-026 rule 2).
+            if found.is_none()
+                && p.piece_type == hornet_engine::board::PieceType::King
+                && board.piece_at(to).is_some_and(|t| t.player == p.player)
+            {
+                board.enter_dkw(p.player);
+                found = generate_pseudo_legal(board)
+                    .into_iter()
+                    .find(|m| m.from == from && m.to == to && m.promotion == promotion);
+            }
+            found
         }
         DecodedMove::Castle { kingside } => {
             let mut found = None;
@@ -120,6 +134,57 @@ fn main() {
                         done += 1;
                     } else {
                         failed = true;
+                        // HORNET_REPLAY_VERBOSE=1: classify the gap (which token kinds diverge).
+                        if std::env::var("HORNET_REPLAY_VERBOSE").is_ok_and(|v| v == "1") {
+                            let kind = match pgn4::decode_ply(tok) {
+                                Some(DecodedMove::Castle { .. }) => "castle",
+                                Some(DecodedMove::Normal {
+                                    from,
+                                    to,
+                                    promotion,
+                                }) => {
+                                    if promotion.is_some() {
+                                        "promotion"
+                                    } else {
+                                        match board.piece_at(from) {
+                                            None => "empty-from",
+                                            Some(p) => {
+                                                // A king "capturing" its own piece = a DKW king
+                                                // walk the live-mover move-gen refuses.
+                                                let own_target = board
+                                                    .piece_at(to)
+                                                    .is_some_and(|t| t.player == p.player);
+                                                match p.piece_type {
+                                                    hornet_engine::board::PieceType::King
+                                                        if own_target =>
+                                                    {
+                                                        "king-own-capture"
+                                                    }
+                                                    hornet_engine::board::PieceType::King => "king",
+                                                    hornet_engine::board::PieceType::Pawn => "pawn",
+                                                    hornet_engine::board::PieceType::Knight => {
+                                                        "knight"
+                                                    }
+                                                    hornet_engine::board::PieceType::Bishop => {
+                                                        "bishop"
+                                                    }
+                                                    hornet_engine::board::PieceType::Rook => "rook",
+                                                    _ => "queen",
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                None => "undecodable",
+                            };
+                            println!(
+                                "FAIL {} ply {} token {} kind {}",
+                                path.file_name().unwrap().to_string_lossy(),
+                                done,
+                                tok,
+                                kind
+                            );
+                        }
                     }
                 }
             }

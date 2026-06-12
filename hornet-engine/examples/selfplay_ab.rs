@@ -1,10 +1,12 @@
 //! Self-play A/B strength gate — the human-free way to ask "does config A beat config B?".
 //!
 //! In each game, config A holds 2 seats and config B the other 2, balanced over all six 2-vs-2 seat
-//! splits so neither config gets a seat advantage. Games start from random openings; the score is each
-//! config's summed FFA points (placement points, RBYG). Reports A-vs-B points, A's win-rate (A's two
-//! seats out-scoring B's), and **decisiveness** (how many games actually reach an elimination) — which
-//! is the whole point of a "play for the win" eval change.
+//! splits. **Paired seat-swap design (EXP-027):** every (split, seed) is played TWICE with A/B
+//! exchanged — under identical configs the two games are move-for-move identical, so the pair
+//! difference is exactly 0 and seat/game variance cancels instead of hoping it averages out.
+//! (EXP-024's null control measured the unpaired 6-game design at an 83% false win-rate.) Games
+//! start from random openings; the score is each config's summed FFA points. Reports A-vs-B
+//! points, the per-PAIR record (A/B/tie), and **decisiveness** (games reaching an elimination).
 //!
 //! Configs are Searcher settings (depth, flashlight cap, and the search-side win-term weight), so A and
 //! B differ within the same game. Used to gate the win term (win-on vs win-off) and to ask whether depth
@@ -148,39 +150,58 @@ fn main() {
 
     let start = Instant::now();
     let (mut a_pts, mut b_pts) = (0u64, 0u64);
-    let (mut a_wins, mut games, mut decisive) = (0usize, 0usize, 0usize);
+    let (mut a_pairs, mut b_pairs, mut tie_pairs, mut pairs) = (0usize, 0usize, 0usize, 0usize);
+    let (mut games, mut decisive) = (0usize, 0usize);
     for (si, a_seats) in splits.iter().enumerate() {
         for g in 0..per_split {
             let seed = ((si * per_split + g) as u64 + 1).wrapping_mul(0x9E37_79B9_7F4A_7C15);
-            let (pts, elim) = play_game(&a, &b, *a_seats, seed, opening, cap);
-            let ap: u64 = (0..4).filter(|&i| a_seats[i]).map(|i| pts[i] as u64).sum();
-            let bp: u64 = (0..4).filter(|&i| !a_seats[i]).map(|i| pts[i] as u64).sum();
-            a_pts += ap;
-            b_pts += bp;
-            games += 1;
-            if ap > bp {
-                a_wins += 1;
+            // EXP-027 paired seat-swap: the same seed/split played twice with A/B exchanged.
+            // Identical configs → identical games → pair difference exactly 0 (the unpaired
+            // design's seat/game variance cancels instead of averaging out).
+            let (mut pair_a, mut pair_b) = (0u64, 0u64);
+            for swap in [false, true] {
+                let seats: [bool; 4] = if swap {
+                    [!a_seats[0], !a_seats[1], !a_seats[2], !a_seats[3]]
+                } else {
+                    *a_seats
+                };
+                let (pts, elim) = play_game(&a, &b, seats, seed, opening, cap);
+                let ap: u64 = (0..4).filter(|&i| seats[i]).map(|i| pts[i] as u64).sum();
+                let bp: u64 = (0..4).filter(|&i| !seats[i]).map(|i| pts[i] as u64).sum();
+                pair_a += ap;
+                pair_b += bp;
+                games += 1;
+                if elim > 0 {
+                    decisive += 1;
+                }
+                eprintln!(
+                    "game {games:2}{}: A {ap:3} - B {bp:3}  ({elim} eliminated)  pts {pts:?}  [{:.0}s]",
+                    if swap { " (swap)" } else { "       " },
+                    start.elapsed().as_secs_f64()
+                );
             }
-            if elim > 0 {
-                decisive += 1;
+            a_pts += pair_a;
+            b_pts += pair_b;
+            pairs += 1;
+            match pair_a.cmp(&pair_b) {
+                std::cmp::Ordering::Greater => a_pairs += 1,
+                std::cmp::Ordering::Less => b_pairs += 1,
+                std::cmp::Ordering::Equal => tie_pairs += 1,
             }
-            eprintln!(
-                "game {games:2}: A {ap:3} - B {bp:3}  ({elim} eliminated)  pts {pts:?}  [{:.0}s]",
-                start.elapsed().as_secs_f64()
-            );
+            eprintln!("  pair {pairs}: A {pair_a} - B {pair_b}");
         }
     }
     let n = games as f64;
-    eprintln!("\n=== {} vs {} over {games} games ===", a.label, b.label);
     eprintln!(
-        "points: A {a_pts} vs B {b_pts}   (per seat: A {:.1}, B {:.1})",
+        "\n=== {} vs {} over {pairs} pairs ({games} games) ===",
+        a.label, b.label
+    );
+    eprintln!(
+        "points: A {a_pts} vs B {b_pts}   (per seat-game: A {:.1}, B {:.1})",
         a_pts as f64 / (n * 2.0),
         b_pts as f64 / (n * 2.0)
     );
-    eprintln!(
-        "A win-rate (A-seats out-score B-seats): {a_wins}/{games} = {:.0}%",
-        100.0 * a_wins as f64 / n
-    );
+    eprintln!("pair record (A-B-tie): {a_pairs}-{b_pairs}-{tie_pairs}");
     eprintln!(
         "decisive games (≥1 elimination): {decisive}/{games} = {:.0}%",
         100.0 * decisive as f64 / n

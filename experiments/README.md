@@ -54,6 +54,14 @@ What the result means; falsified or confirmed; next step.
 *(Index gap: EXP-012…019 exist as files but were never indexed — see the experiment files
 directly; backfilling the hooks is an open hygiene item.)*
 
+- [EXP-028 — replay-gap forensics](EXP-028-replay-gap-forensics.md) — failure classification +
+  **DKW own-capture inference** (a live king can never take its own piece → the mover must be
+  DKW): replay coverage **72 → 104/140 games fully** (+2,210 plies). Remaining: 25 empty-from
+  (silent state divergence — EP/castle side-effect suspects), 5 castle, 6 tail.
+- [EXP-027 — paired seat-swap gate](EXP-027-paired-seat-swap-gate.md) — `selfplay_ab` now plays
+  each (seed, split) twice with A/B exchanged; under null the pairs tie **exactly** (validated).
+  EXP-024's 83% false-signal artifact eliminated by construction — the standing powered-gate
+  instrument.
 - [EXP-026 — DKW/dead-army rule arbitration](EXP-026-dkw-rule-arbitration.md) — user challenged
   the frozen-walls rule; Help Center settled capturability (**capturable, zero points** — also
   fixing a latent in-search scoring bug) and the corpus arbitrated the post-death question:
