@@ -16,7 +16,7 @@
 //!   e.g. `selfplay_ab 8 8 1 1000 50 50 100 0` = d8 vs d8, cap 1000, both win-on(50),
 //!        A king-danger(100) vs B danger-off — gates the points-aware safety rebuild.
 
-use hornet_engine::eval::{eval_4vec_pprime, eval_4vec_sprime};
+use hornet_engine::eval::{eval_4vec_pawn_adv, eval_4vec_pprime, eval_4vec_rook_open, eval_4vec_sprime};
 use hornet_engine::game::Game;
 use hornet_engine::move_gen::generate_legal;
 use hornet_engine::search::Searcher;
@@ -41,9 +41,14 @@ impl Cfg {
             .with_king_danger(self.danger)
             .with_danger_table(self.dtable);
         match self.eval_id {
+            0 => s,
             1 => s.with_eval(eval_4vec_pprime),
             2 => s.with_eval(eval_4vec_sprime),
-            _ => s,
+            3 => s.with_eval(eval_4vec_rook_open),
+            4 => s.with_eval(eval_4vec_pawn_adv),
+            // Hard error, not fallthrough: a silent default here ran a 12-pair null (both arms
+            // deployed) instead of the intended gate.
+            n => panic!("unknown eval_id {n} (known: 0..=4)"),
         }
     }
 }
@@ -121,6 +126,8 @@ fn main() {
         match e {
             1 => " P'",
             2 => " S'",
+            3 => " Ropen",
+            4 => " Padv",
             _ => "",
         }
     };

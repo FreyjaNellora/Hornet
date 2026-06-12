@@ -28,10 +28,20 @@
 - **Rook-open: flat** (≤+0.1pp at low scales, negative at 400) — not advanced. The classical
   guess lost to the mined behavior, which is the mining mandate's thesis in one line.
 
+## Gate run 1: VOID (harness bug, fixed)
+
+The first 12-pair gate run came back 0-0-12 — every pair an EXACT tie with identical point
+vectors. That is the null signature (EXP-027): both arms played the same eval. Cause:
+`selfplay_ab`'s `Cfg::searcher()` only mapped eval ids 1/2 (P′/S′); id 4 (pawn-adv, move_match's
+numbering) fell through silently to deployed. Same defect class as the zero-weight fold-in —
+a silent default where a hard error belonged. Fixed: ids 3/4 wired (rook-open/pawn-adv), unknown
+ids now panic. Silver lining: the void run is an inadvertent second null-validation of the
+paired design at d8 cap 1200 — 12/12 exact ties, seat variance cancels to the point.
+
 ## Conditions (after)
 
-- Deployed eval unchanged; gate verdict pending (12 pairs vs deployed, d8 cap 1200, running
-  alongside the EXP-031 extension).
+- Deployed eval unchanged; gate verdict pending (12 pairs vs deployed, d8 cap 1200,
+  HORNET_PAWN_ADV_SCALE=8, relaunched after the harness fix).
 - If the gate confirms: pawn-adv is the first eval feature to earn a default-on discussion since
   the recalibration — wiring would go through P (a real positional term at last) with the
   measured scale, Tier-2 ship.
