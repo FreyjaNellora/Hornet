@@ -45,6 +45,36 @@ PST transform) before aggregating, which should sharpen placement preferences su
   transpose-symmetric; the equivariance test can't distinguish) but a latent bug if the PST ever
   becomes file-asymmetric. Flagged for the next PST revision.
 
+## Pass 3 (2026-06-12, 140 games — development order, promotions, king-raid, denial, eliminations)
+
+Prompted by the user's game-model hypothesis (pawn race → early queens → promote → swarm kings;
+center-guarding as promotion denial; "systematic elimination based on something").
+
+- **Development order (mean own-move index of first move):** pawn 1.0 → knight ~4.8 →
+  **queen ~6.5** → bishop ~9.5 → rook ~16 → king ~18.5. The queen comes out early by classical
+  standards but the KNIGHT leads. Order is nearly identical for winners and losers — but the
+  **profile** differs: winners spend 18.8% of their first 8 moves on the queen vs losers 15.4%,
+  and losers touch their king ~3× more early (2.3% vs 0.8% — an early-trouble marker).
+- **Promotions = the biggest differential found yet: winners 1.76/seat-game vs losers 0.67
+  (2.6×)**; mean ply 172 vs 152. (Survivorship caveat: winners live longer, so more late plies
+  to promote in — part of the gap is consequence, not just cause.) Promoted queens capture
+  slightly LESS per move than originals (22.9% vs 26.4%) — the promoted queen is presence and
+  material, not a distinctly more murderous piece.
+- **King-raid proxy (destinations within Cheb ≤2 of an enemy king):** winners higher in EVERY
+  phase — early 4.7% vs 2.3% (2×), mid 10.6 vs 9.0, late 15.0 vs 10.9 (+4.1pp). Winners deliver
+  25/33 king kills. The swarm is real and winner-differential.
+- **Promotion denial is NOT differential:** pawn-victim progress 6.51 vs 6.57, advanced-victim
+  share 55.8% vs 55.4% — killing runners is universal behavior, both classes do it equally.
+  The winner edge is getting YOUR pawns through, not stopping theirs → supports weighting own
+  advancement (the gated pawn-adv term) over a denial term. No denial feature nominated.
+- **Elimination forensics (33 king kills):** victims at the kill are the WEAK — **67% rank last
+  in material (82% bottom-half); 48% last in points (66% bottom-half); only 3% of kills hit the
+  material leader.** Elimination is opportunistic predation on the materially weakest, not
+  regicide on the leader. Rotation offset: 26/33 kills are by a rotation NEIGHBOR (+1: 13,
+  across: 7, +3: 13) — your killers are adjacent in turn order. Small n; re-run at 500+ games.
+  → **Nomination: objective-layer target selection should rank opponents by MATERIAL weakness
+  (better elimination predictor than points standing), pending the win-term gate verdicts.**
+
 ## Queued passes
 
 - **Player-relative frames** for destination maps (the pass-1 lesson).
