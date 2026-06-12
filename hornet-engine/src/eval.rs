@@ -5,7 +5,7 @@
 //! strength gate is passed (Hard Rule #7).
 
 use crate::board::Board;
-use crate::board::types::Player;
+use crate::board::types::{PieceType, Player};
 use crate::lines::{LineMap, compute_lines};
 use crate::queries::{QueryVector, run_queries_gated};
 
@@ -159,6 +159,107 @@ pub fn eval_4vec_sprime(board: &Board, line_buffer: &mut LineMap) -> [i16; 4] {
     for i in 0..4 {
         let adj = sprime_dgr_scale() * (4 * dgr[i] - sum) / 4;
         v[i] = (v[i] as i32 - adj).clamp(-29_000, 29_000) as i16;
+    }
+    v
+}
+
+// ---------------------------------------------------------------------------
+// EXP-032: relational candidate evals (mining-nominated; cold, experiment-only)
+// ---------------------------------------------------------------------------
+
+/// Rook-on-open-lane scale (util units per rook; `HORNET_ROOK_OPEN_SCALE`, default 200 ≈ 33 cp
+/// at M=6). Open = the rook's lane (its file for R/Y, rank for B/G) holds no pawns at all;
+/// semi-open (no *own* pawns) scores half. Classical relational feature; PST-v3 mining showed
+/// rooks live on the periphery — open lanes are how they act from there.
+fn rook_open_scale() -> i32 {
+    static S: std::sync::LazyLock<i32> = std::sync::LazyLock::new(|| {
+        std::env::var("HORNET_ROOK_OPEN_SCALE")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(200)
+    });
+    *S
+}
+
+/// Pawn-advancement scale (util units per rank of progress; `HORNET_PAWN_ADV_SCALE`, default 8).
+/// Mining pass 2: winners push pawns to the Center (+2.1pp) and away from home (−2.6pp GateS) —
+/// progress toward the central promotion crossing is winner behavior.
+fn pawn_adv_scale() -> i32 {
+    static S: std::sync::LazyLock<i32> = std::sync::LazyLock::new(|| {
+        std::env::var("HORNET_PAWN_ADV_SCALE")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(8)
+    });
+    *S
+}
+
+/// Per-player own-frame forward progress of a square (0 at the home rank, rising toward the
+/// promotion crossing): rank for Red, file for Blue, 13−rank for Yellow, 13−file for Green.
+fn forward_progress(sq: crate::board::Square, p: Player) -> i32 {
+    match p {
+        Player::Red => sq.rank() as i32,
+        Player::Blue => sq.file() as i32,
+        Player::Yellow => 13 - sq.rank() as i32,
+        Player::Green => 13 - sq.file() as i32,
+    }
+}
+
+/// EXP-032 candidate: deployed eval + rook-open-lane bonus (mean-relative).
+pub fn eval_4vec_rook_open(board: &Board, line_buffer: &mut LineMap) -> [i16; 4] {
+    let mut v = eval_4vec(board, line_buffer);
+    let lanes = crate::queries::pawn_lanes(board);
+    // Per player: sum of any-pawn counts per lane across ALL players (full-open test needs the
+    // whole lane's pawn occupancy in the ROOK OWNER's lane orientation).
+    let mut score = [0i32; 4];
+    for i in 0..crate::board::types::TOTAL_SQUARES {
+        let sq = crate::board::Square::new(i as u8);
+        let Some(p) = board.piece_at(sq) else {
+            continue;
+        };
+        if p.piece_type != PieceType::Rook {
+            continue;
+        }
+        let owner = p.player;
+        let lane = match owner {
+            Player::Red | Player::Yellow => sq.file() as usize,
+            Player::Blue | Player::Green => sq.rank() as usize,
+        };
+        // Own pawns on the lane (owner's orientation) and ANY pawns on it.
+        let own = lanes[owner.index()][lane];
+        let any: u8 = (0..4).map(|pl| lanes[pl][lane]).sum();
+        if any == 0 {
+            score[owner.index()] += rook_open_scale(); // fully open
+        } else if own == 0 {
+            score[owner.index()] += rook_open_scale() / 2; // semi-open
+        }
+    }
+    let sum: i32 = score.iter().sum();
+    for i in 0..4 {
+        let adj = (4 * score[i] - sum) / 4;
+        v[i] = (v[i] as i32 + adj).clamp(-29_000, 29_000) as i16;
+    }
+    v
+}
+
+/// EXP-032 candidate: deployed eval + pawn forward-progress (mean-relative).
+pub fn eval_4vec_pawn_adv(board: &Board, line_buffer: &mut LineMap) -> [i16; 4] {
+    let mut v = eval_4vec(board, line_buffer);
+    let mut prog = [0i32; 4];
+    for i in 0..crate::board::types::TOTAL_SQUARES {
+        let sq = crate::board::Square::new(i as u8);
+        if let Some(p) = board.piece_at(sq)
+            && p.piece_type == PieceType::Pawn
+        {
+            // Progress above the starting area (home rank ≈ 1 in own frame).
+            prog[p.player.index()] += (forward_progress(sq, p.player) - 1).max(0);
+        }
+    }
+    let scaled: [i32; 4] = std::array::from_fn(|i| prog[i] * pawn_adv_scale());
+    let sum: i32 = scaled.iter().sum();
+    for i in 0..4 {
+        let adj = (4 * scaled[i] - sum) / 4;
+        v[i] = (v[i] as i32 + adj).clamp(-29_000, 29_000) as i16;
     }
     v
 }

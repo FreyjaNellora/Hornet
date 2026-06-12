@@ -132,6 +132,8 @@ fn main() {
                     s = match eval_id {
                         1 => s.with_eval(hornet_engine::eval::eval_4vec_pprime),
                         2 => s.with_eval(hornet_engine::eval::eval_4vec_sprime),
+                        3 => s.with_eval(hornet_engine::eval::eval_4vec_rook_open),
+                        4 => s.with_eval(hornet_engine::eval::eval_4vec_pawn_adv),
                         _ => s,
                     };
                     let result = if fcap > 0 {

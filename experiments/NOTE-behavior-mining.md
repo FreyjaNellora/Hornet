@@ -27,6 +27,24 @@ quadrants/gates. **Instrument refinement needed:** zones are absolute while the 
 the board from four directions — pass 2 must rotate each player's moves into a common frame (the
 PST transform) before aggregating, which should sharpen placement preferences substantially.
 
+## Pass 2 (2026-06-12, 140 games — player-relative frames, answer rate, phase split)
+
+- **Leader-chasing is a midgame behavior:** losers' captures hit the current leader 53.2% in
+  midgame vs winners' 47.3%; the gap vanishes late (46.1 vs 45.3). (Early-phase rows are a
+  tie-handling artifact — points are all zero, so every victim reads "leader". Ignore early.)
+- **Winners' captures stick:** answered-on-square within ≤4 plies — winners 30.2%/25.4%
+  (mid/late) vs losers 34.3%/31.7%. Winners trade 4–6pp more safely; the engine's SEE already
+  embodies this, so no new representation needed (validates the existing crossfire design).
+- **Red-frame destinations (now sharp):** winners push pawns to **Center** (+2.1pp — the
+  promotion crossing) and away from home (GateS −2.6pp); queens follow (+0.9 Center); winners'
+  **rooks to the home gate** (+1.5pp GateS — the lift/back-rank-center entry). Losers shuffle
+  near home. → **Nominated: pawn forward-progress** (built as `eval_4vec_pawn_adv`, EXP-032)
+  alongside the classical rook-open-lane candidate.
+- Instrument note: true C4 rotations used; found en route that `queries::pst_value`'s **Green
+  branch is a transpose, not a rotation** — currently harmless (the zone PST is
+  transpose-symmetric; the equivariance test can't distinguish) but a latent bug if the PST ever
+  becomes file-asymmetric. Flagged for the next PST revision.
+
 ## Queued passes
 
 - **Player-relative frames** for destination maps (the pass-1 lesson).

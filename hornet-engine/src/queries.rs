@@ -879,8 +879,9 @@ pub fn query_pawn_structure(board: &Board) -> [i16; 4] {
 
 /// Per-player pawn counts by **lane** — the file for Red/Yellow (who advance along ranks) and
 /// the rank for Blue/Green (who advance along files), so "adjacent lane" means the same thing
-/// for every player's structure. Shared prologue of the three pawn queries.
-fn pawn_lanes(board: &Board) -> [[u8; 14]; 4] {
+/// for every player's structure. Shared prologue of the three pawn queries; also used by the
+/// EXP-032 rook-open candidate eval.
+pub(crate) fn pawn_lanes(board: &Board) -> [[u8; 14]; 4] {
     let mut lanes: [[u8; 14]; 4] = [[0; 14]; 4];
     for i in 0..crate::board::types::TOTAL_SQUARES {
         let sq = Square::new(i as u8);
