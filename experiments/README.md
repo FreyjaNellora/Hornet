@@ -54,11 +54,26 @@ What the result means; falsified or confirmed; next step.
 *(Index gap: EXP-012…019 exist as files but were never indexed — see the experiment files
 directly; backfilling the hooks is an open hygiene item.)*
 
-- [EXP-023 — bootstrap corpus regeneration (B5)](EXP-023-corpus-regeneration.md) — *(running)*
-  replaces the tainted 133-game corpus (maxn beam-4 with the inverted heuristic, EXP-020 11.6%;
-  drawish labels). New config: **flashlight d8 cap 1200 + objective layer (win 50, danger 100),
-  200-ply cap, 150 games** — bases: SYNTHESIS (shape), EXP-017 (decisiveness), EXP-013
-  (cap recommendation). Old corpus preserved in git history.
+- [EXP-025 — pawn structure unbundled (C3)](EXP-025-pawn-structure-unbundled.md) — Kimi's
+  isolated/doubled/connected count queries fitted on the clean corpus. **First pawn signal above
+  the noise floor: ISO drop 0.00054 (~11× floor)** (CONN borderline, DBL null; joint fit
+  collinear — single-term marginals are the read). Fitted ISO scale ≈ −290 cp/pawn is
+  symptom-vs-cause suspect — deployment = the recorded P′-rebuild arm, nothing wired (wiring
+  into zero-weighted P would be dead code).
+- [EXP-024 — objective terms in the eval frame (C2 continuation)](EXP-024-objective-terms-in-eval-frame.md) —
+  Kimi's C2 fold-ins were **inert as built** (terms folded into components multiplied by weight
+  0) → reverted; tuner extended to 9 weights + dual-base marginals instead (self-check
+  reproduces EXP-023 exactly). **Danger-table: real but material-entangled signal** (0.00051 at
+  M=4, 0.00015 at deployed M=6) → S′ rebuild with tempered expectations; **win-proximity: null**
+  statically. **Methodological headline: the null-control self-play arm (A≡B) read 83% win-rate
+  / +65% points from pure variance** → 6-game arms resolve nothing, EXP-017's win-rate reads
+  re-graded, powered gate = paired seat-swap + many games.
+- [EXP-023 — bootstrap corpus regeneration (B5)](EXP-023-corpus-regeneration.md) — **complete:**
+  150 clean games replacing the tainted corpus (EXP-020 11.6%): flashlight d8 cap 1200 +
+  objective layer (win 50, danger 100), 200-ply cap, 5 parallel range instances.
+  **Decisiveness 37%** (old ~0), wide point spreads; first clean-data Texel fit confirms the
+  deployed weight shape (MSE 0.1295, 241 games / 13,924 positions). Tune-freeze lifted. Old
+  corpus in git history (≤ 6a2b6a9).
 - [EXP-022 — zero-weight query gating (C1)](EXP-022-zero-weight-query-gating.md) — skip the
   queries `W_POSITIONAL = W_SAFETY = 0` zero out (positional control, SEE threats, PST, the
   king-safety scan) at every leaf. **+41% search throughput (median 64,337 → 90,777 nodes/sec),

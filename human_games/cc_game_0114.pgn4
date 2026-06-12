@@ -1,0 +1,65 @@
+[GameNr "101347961"]
+[TimeControl "1+10"]
+[Variant "FFA"]
+[RuleVariants "Anonymous DeadKingWalking EnPassant PromoteTo=D"]
+[StartFen4 "4PC"]
+[Red "neoserbian"]
+[RedElo "3095"]
+[Blue "ges1980"]
+[BlueElo "2501"]
+[Yellow "Articpolarbear"]
+[YellowElo "3073"]
+[Green "Butters18"]
+[GreenElo "2550"]
+[Result "neoserbian: 65 - ges1980: 3 - Articpolarbear: 26 - Butters18: 57"]
+[Termination "(Green +20)"]
+[Site "www.chess.com/variants/4-player-chess/game/101347961"]
+[Date "Sun Apr 26 2026 22:45:35 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "144"]
+
+1. h2-h3 .. b4-d4 .. h13-h11 .. m6-l6
+2. k2-k4 .. Na5-c6 .. i13-i12 .. m11-k11
+3. Ne1-d3 .. b5-c5 .. Qh14-i13 .. m5-k5
+4. Nd3xc5 .. Ra4-b4 .. d13-d11 .. m8-l8
+5. Nc5xBa6 .. Ka7xNa6 .. Qi13-f10 .. Qn7-l9
+6. f2-f3 .. Ka6-a7 .. Ne14-f12 .. m10-l10
+7. e2-e4 .. b11-c11 .. e13-e12 .. Nn10-m8
+8. Qg1-f2 .. Na10-c9 .. Qf10-h10 .. Nm8-k7
+9. Qf2-e2 .. b8-c8 .. Qh10xRb4 .. Nn5-l4
+10. Qe2-a6+# .. Qb4-f8 .. Nl4-m6
+11. Nj1-i3 .. Bf14-e13 .. Bn6-m5
+12. Qa6-b5 .. O-O .. O-O-O
+13. Qb5-e5 .. Rf14-g14 .. Kn6-n5
+14. j2-j3 .. Qf8-d8 .. Bm5xBi1
+15. Rk1xBi1 .. Qd8xNi3 .. Ql9-j7
+16. Bf1-e2 .. k13-k12 .. Bn9-l7
+17. Qe5-g3 .. Qi3-d8 .. Rn11-n9
+18. Qg3-f2 .. g13-g11 .. Qj7-j4
+19. Qf2-g3 .. g11-g10 .. m9-k9
+20. d2-d3 .. g10-g9 .. k9-j9
+21. Qg3-h2 .. g9-g8 .. Qj4-j8
+22. O-O-O .. Qd8-d10 .. Nk7-i8
+23. Qh2-g3 .. j13-j11 .. k11xj12
+24. Qg3-f2 .. g8-g7=D .. Ni8xQg7
+25. Ri1-j1 .. Qd10xNg7 .. j9-i9
+26. i2-i4 .. Qg7-g11 .. Qj8-k9
+27. h3-h4 .. Bi14-f11 .. i9-h9
+28. h4-h5 .. Qg11-g7 .. Bl7-m8
+29. j3-j4 .. Qg7-g13 .. Bm8xi4
+30. j4xk5 .. Qg13xQk9 .. Rn9xQk9
+31. k5xl6 .. Nj14-h13 .. m7xl6
+32. Qf2-i5+ .. Rg14xg2 .. Nm6-k5
+33. Rg1xRg2 .. Rk14-g14 .. Bi4xRg2+
+34. Kf1-e1 .. Rg14xBg2 .. h9-g9=D
+35. Qi5xl8 .. Rg2-i2 .. Rk9-k6
+36. Ql8-m8 .. Ri2-i10 .. Rk6-k7
+37. Qm8-f1 .. Ke14-d13 .. l10-k10
+38. Ke1-d1 .. Ri10-c10 .. Qg9-n9
+39. Qf1-e1 .. Nh13-j14 .. Qn9-g9
+40. Rj1-h1 .. Nj14-h13 .. Qg9-n9
+41. Rh1-j1 .. Nh13-j14 .. Qn9-g9
+42. Rj1-h1 .. Bf11-g12 .. Kn5-n4
+43. Rh1-j1 .. Rc10-e10 .. Qg9-g11
+44. Rj1xj12 .. Nf12-h13 .. Qg11xBe13+
+45. Qe1xRk7# .. Qe13xQk7
+46. R

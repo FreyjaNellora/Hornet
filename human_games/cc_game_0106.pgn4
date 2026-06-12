@@ -1,0 +1,47 @@
+[GameNr "104029207"]
+[TimeControl "1+10"]
+[Variant "FFA"]
+[RuleVariants "Anonymous DeadKingWalking EnPassant PromoteTo=D"]
+[StartFen4 "4PC"]
+[Red "GellartGrindelwald"]
+[RedElo "2836"]
+[Blue "NightLoveRaver"]
+[BlueElo "2694"]
+[Yellow "LILY-295"]
+[YellowElo "2730"]
+[Green "neoserbian"]
+[GreenElo "3119"]
+[Result "GellartGrindelwald: 14 - NightLoveRaver: 37 - LILY-295: 40 - neoserbian: 49"]
+[Termination "(Yellow +20)"]
+[Site "www.chess.com/variants/4-player-chess/game/104029207"]
+[Date "Sat Jun 06 2026 22:25:04 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "97"]
+
+1. h2-h3 .. b7-c7 .. i13-i12 .. m11-k11
+2. f2-f3 .. Qa8-b7 .. Nj14-k12 .. m6-l6
+3. Bi1-f4 .. b9-d9 .. Nk12-l10 .. Qn7-m6
+4. Bf4-e3 .. b5-c5 .. h13-h11 .. Rn11-l11
+5. Qg1-f2 .. Qb7-a8 .. d13-d11 .. Rl11xNl10
+6. Be3xRl10 .. Qa8-b9 .. Bi14-g12 .. m9xBl10
+7. k2-k4 .. Qb9-d7 .. Qh14-h13 .. m7-k7
+8. Nj1-i3 .. Na5-c6 .. k13-k12 .. Nn10-l9
+9. Rk1-j1 .. Nc6-e7 .. h11-h10 .. Qm6-m7
+10. Qf2-e3 .. Ne7-f5 .. Bg12xNn5 .. Qm7-k9
+11. Qe3xQk9 .. Nf5-g3+ .. Bn5-h11 .. Bn6xQk9
+12. Kh1-h2 .. Qd7-d6 .. Bh11xRa4 .. m8-l8
+13. Kh2-g1 .. Ng3xi2+ .. Ba4-f9 .. Bn9xh3
+14. Kg1-f2 .. Qd6-g3+# .. h10-h9 .. Bh3-m8
+15. Qg3-g9 .. Bf9-g8 .. Kn8-m9
+16. Na10-c11 .. Rd14-d12 .. m5-k5
+17. Ni2-h4 .. Rd12-g12 .. k5-j5
+18. Qg9-h8 .. Ne14-f12 .. j5-i5
+19. Nh4-g6 .. Nf12-g10 .. Rn4-n5
+20. Qh8-d4 .. e13-e12 .. i5-h5
+21. Ng6-e7 .. h9-h8 .. h5-g5=D
+22. Ne7xBg8 .. h8-h7=D .. Qg5-l5
+23. Ng8-f10 .. Bf14xNc11 .. l6-k6
+24. Nf10xRg12 .. Qh7xc7+ .. Ql5xc5
+25. b8xQc7 .. Qh13xNg12 .. Qc5xQd4
+26. b10xBc11 .. Qg12-f12+ .. Rn5-b5
+27. Ba9-b8 .. Qf12xBb8+ .. Qd4xb6+#
+28. Qb8-i8 .. R

@@ -1,0 +1,46 @@
+[GameNr "100735525"]
+[TimeControl "4+0"]
+[Variant "FFA"]
+[RuleVariants "Anonymous DeadKingWalking EnPassant PromoteTo=D"]
+[StartFen4 "4PC"]
+[Red "neoserbian"]
+[RedElo "2311"]
+[Blue "greenkittyplayz"]
+[BlueElo "1500"]
+[Yellow "Winsby"]
+[YellowElo "2470"]
+[Green "Vahan"]
+[GreenElo "2801"]
+[Result "neoserbian: 22 - greenkittyplayz: 6 - Winsby: 49 - Vahan: 35"]
+[Termination "(Yellow +20)"]
+[Site "www.chess.com/variants/4-player-chess-championship-qualifier-arena/game/100735525"]
+[Date "Thu Apr 16 2026 22:57:28 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "64"]
+
+1. h2-h3 .. b7-c7 .. i13-i12 .. m11-k11
+2. f2-f3 .. Ba6xh13+ .. Qh14xBh13 .. m8-l8
+3. Bi1xc7 .. b8xBc7 .. Qh13-a6+ .. m5-k5
+4. Qg1xb6+# .. Qa6xQb6 .. Bn6xj2
+5. Nj1-h2 .. Qb6-f2 .. Bj2xRk1
+6. Ne1-d3 .. Qf2-g3 .. m6-l6
+7. Nh2-i4 .. Qg3-i1+ .. Bk1-j2#
+8. Qi1xBj2 .. k5-j5
+9. d13-d11 .. j5xNi4
+10. Bi14-c8 .. i4xh3
+11. Bc8xh3 .. Bn9xBh3
+12. d11-d10 .. Qn7-m6
+13. d10-d9 .. Bh3xb9
+14. g13-g12 .. k11-j11
+15. Qj2-g5 .. j11xi12
+16. Nj14xi12 .. Nn5-l4
+17. d9-d8 .. Rn4-n5
+18. Qg5-g9 .. Bb9-d7
+19. d8xc7=D .. Bd7xNi12+
+20. j13xBi12 .. Qm6-i10
+21. Qc7-h12 .. Nn10-l9
+22. Qg9xNl4 .. O-O
+23. k13-k11 .. Rn5-j5
+24. Ql4-f10 .. Qi10-k8
+25. Rd14-d10 .. Nl9-n8
+26. Ne14-f12 .. Rj5-j13
+27. Nf12-h11 .. R

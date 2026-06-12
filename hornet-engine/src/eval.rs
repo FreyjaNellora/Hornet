@@ -27,6 +27,15 @@ const W_POSITIONAL: i16 = 0;
 const W_SAFETY: i16 = 0;
 const W_CROSSFIRE: i16 = 1;
 
+// C2 / EXP-024 note: an eval-side mirror of the search-side objective layer (win-proximity into
+// P, king-danger-table into S, gated on their own consts) was drafted here and REMOVED — as
+// built it was inert: the terms folded into component *values* that the utility step multiplies
+// by W_POSITIONAL = W_SAFETY = 0, so no weight setting could make them reach the output. Tuning
+// for these terms lives in `texel_tune` (which computes them independently per position);
+// deployment lives in the search-side runtime knobs (`with_win_term` / `with_king_danger`,
+// EXP-017/018 — the flashlight play path). Do not re-fold objective terms into zero-weighted
+// components.
+
 // ---------------------------------------------------------------------------
 // Evaluator
 // ---------------------------------------------------------------------------

@@ -1,0 +1,69 @@
+[GameNr "101345509"]
+[TimeControl "1+10"]
+[Variant "FFA"]
+[RuleVariants "Anonymous DeadKingWalking EnPassant PromoteTo=D"]
+[StartFen4 "4PC"]
+[Red "NightLoveRaver"]
+[RedElo "2499"]
+[Blue "Joobla"]
+[BlueElo "2657"]
+[Yellow "neoserbian"]
+[YellowElo "3076"]
+[Green "Ourebi"]
+[GreenElo "2599"]
+[Result "NightLoveRaver: 51 - Joobla: 15 - neoserbian: 75 - Ourebi: 5"]
+[Termination "(Yellow +20)"]
+[Site "www.chess.com/variants/4-player-chess/game/101345509"]
+[Date "Sun Apr 26 2026 21:30:30 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "138"]
+
+1. h2-h3 .. b7-c7 .. g13-g12 .. m11-k11
+2. f2-f3 .. b4-d4 .. d13-d11 .. m4-k4
+3. Bi1-e5 .. Na5-c6 .. Bf14-g13 .. k4-j4
+4. Be5xk11 .. b9-c9 .. Nj14-i12 .. Rn11xBk11
+5. Qg1-f2 .. Na10-c11 .. Ni12xRk11 .. m10-l10
+6. Qf2xm9+ .. Nc11-e12 .. Bg13-l8#
+7. Qm9xBl8 .. Ne12xRd14 .. Qh14-g13
+8. Ql8xQg13+ .. Nd14-e12 .. Ne14xQg13
+9. k2-k4 .. Ne12xNg13 .. Kg14xNg13
+10. k4-k5 .. Qa8xd11 .. Nk11-i12
+11. k5-k6 .. Qd11-d8 .. h13-h12
+12. Nj1-i3 .. c9-d9 .. k13-k11
+13. k6-k7 .. d9-e9 .. j13-j12
+14. k7-k8=D .. Qd8-c9+ .. Kg13-h13
+15. Qk8-k7 .. e9-f9 .. f13-f12
+16. Qk7-h7 .. f9-g9 .. Bi14-j13
+17. Rk1-k9 .. b8-d8 .. Rk14-g14
+18. Qh7-g8 .. Nc6-e7 .. Kh13-i14
+19. Qg8-e6 .. Ba6-c8 .. Ki14-j14
+20. Qe6-k6 .. Ba9-b8 .. e13-e11
+21. e2-e4 .. b5-c5 .. f12-f11
+22. Bf1-b5 .. Ra4-a5 .. e11-e10
+23. Bb5xNi12 .. Ra11-a9 .. Bj13xBi12
+24. g2-g4 .. b11-d11 .. Rg14-e14
+25. Ne1-g2 .. Bc8-e6 .. Bi12-j13
+26. d2-d3 .. g9-h9=D .. f11-f10
+27. Rk9xQh9 .. Be6xRh9 .. e10-e9
+28. Qk6xBh9 .. d8xe9 .. f10xe9
+29. Qh9-c4 .. Ne7-c6 .. Bj13xNc6
+30. f3-f4 .. Qc9-g13 .. Bc6-h11
+31. Qc4-b4 .. Ra5-a6 .. e9-e8
+32. Kh1-h2 .. b10-d10 .. e8-e7=D
+33. Qb4-c4 .. d11-e11 .. Qe7-e10
+34. Qc4-k12 .. Ra9-i9 .. Qe10xRa6+
+35. Qk12-c4# .. Qa6-f11
+36. e4-e5 .. k11-k10
+37. Qc4-k12 .. Bh11-j9
+38. f4-f5 .. g12-g11
+39. Ni3-h5 .. g11-g10
+40. Rd1-k1 .. Qf11-e10
+41. e5-e6 .. g10-g9
+42. Rk1-k9 .. g9-g8
+43. Qk12-j11 .. Re14xe11
+44. Qj11-g14+ .. Kj14-j13
+45. Qg14xQg13 .. Re11-h11
+46. Nh5-i7 .. Rh11-g11
+47. Qg13xRg11 .. h12xQg11
+48. Ni7xg8 .. Qe10xNg8
+49. Ng2-f4 .. Qg8-j8
+50. R

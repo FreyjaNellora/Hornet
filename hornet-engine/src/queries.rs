@@ -872,6 +872,84 @@ pub fn query_pawn_structure(board: &Board) -> [i16; 4] {
 }
 
 // ---------------------------------------------------------------------------
+// C3 / EXP-025: Unbundled pawn-structure queries (isolated / doubled / connected)
+// ---------------------------------------------------------------------------
+// Each returns a raw COUNT per player (not pre-scaled cp). The tuner assigns
+// independent weights. Hard Rule #4: all fold into P (positional).
+
+/// Per-player pawn counts by **lane** — the file for Red/Yellow (who advance along ranks) and
+/// the rank for Blue/Green (who advance along files), so "adjacent lane" means the same thing
+/// for every player's structure. Shared prologue of the three pawn queries.
+fn pawn_lanes(board: &Board) -> [[u8; 14]; 4] {
+    let mut lanes: [[u8; 14]; 4] = [[0; 14]; 4];
+    for i in 0..crate::board::types::TOTAL_SQUARES {
+        let sq = Square::new(i as u8);
+        if let Some(p) = board.piece_at(sq)
+            && p.piece_type == PieceType::Pawn
+        {
+            let lane = if p.player == Player::Red || p.player == Player::Yellow {
+                sq.file() as usize
+            } else {
+                sq.rank() as usize
+            };
+            lanes[p.player.index()][lane] += 1;
+        }
+    }
+    lanes
+}
+
+/// True if `lanes` has any pawn on a lane adjacent to `lane`.
+fn lane_has_neighbor(lanes: &[u8; 14], lane: usize) -> bool {
+    (lane > 0 && lanes[lane - 1] > 0) || (lane < 13 && lanes[lane + 1] > 0)
+}
+
+/// Count isolated pawns per player: a pawn with no friendly pawn on an adjacent lane.
+/// Returns unit counts (0..N); the consumer scales them (EXP-025: fitted in texel_tune).
+pub fn query_pawn_isolated(board: &Board) -> [i16; 4] {
+    let lanes = pawn_lanes(board);
+    let mut iso = [0i16; 4];
+    for pi in 0..4 {
+        for lane in 0..14 {
+            if lanes[pi][lane] > 0 && !lane_has_neighbor(&lanes[pi], lane) {
+                iso[pi] += 1;
+            }
+        }
+    }
+    iso
+}
+
+/// Count doubled pawns per player: extra pawns beyond the first per lane.
+/// Returns unit counts (0..N); the consumer scales them (EXP-025: fitted in texel_tune).
+pub fn query_pawn_doubled(board: &Board) -> [i16; 4] {
+    let lanes = pawn_lanes(board);
+    let mut dbl = [0i16; 4];
+    for pi in 0..4 {
+        for lane in 0..14 {
+            if lanes[pi][lane] >= 2 {
+                dbl[pi] += (lanes[pi][lane] - 1) as i16;
+            }
+        }
+    }
+    dbl
+}
+
+/// Count connected pawns per player: pawns with a friendly pawn on an adjacent lane.
+/// Returns unit counts (0..N); the consumer scales them (EXP-025: fitted in texel_tune).
+pub fn query_pawn_connected(board: &Board) -> [i16; 4] {
+    let lanes = pawn_lanes(board);
+    let mut conn = [0i16; 4];
+    for pi in 0..4 {
+        for lane in 0..14 {
+            if lanes[pi][lane] > 0 && lane_has_neighbor(&lanes[pi], lane) {
+                // Each pawn on this lane is connected (has support on an adjacent lane).
+                conn[pi] += lanes[pi][lane] as i16;
+            }
+        }
+    }
+    conn
+}
+
+// ---------------------------------------------------------------------------
 // L3 Selective Intent Query (§4.8 selective — offense only, feeds into Pᵢ)
 // ---------------------------------------------------------------------------
 
@@ -976,6 +1054,7 @@ pub fn run_all_queries(lines: &LineMap, board: &Board) -> QueryVector {
 /// output — it only skips the work (positional control + threats + PST, and the king-safety
 /// scan, at every leaf). The search-side king-danger term is unaffected: it calls
 /// [`query_king_safety`] directly, never through this function.
+///
 pub fn run_queries_gated(
     lines: &LineMap,
     board: &Board,

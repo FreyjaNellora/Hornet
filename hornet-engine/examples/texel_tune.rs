@@ -13,7 +13,10 @@ use hornet_engine::board::pgn4::{self, DecodedMove};
 use hornet_engine::board::types::Player;
 use hornet_engine::lines::{LineMap, compute_lines};
 use hornet_engine::move_gen::{castle_king_destination, generate_pseudo_legal};
-use hornet_engine::queries::run_all_queries;
+use hornet_engine::queries::{
+    elimination_proximity, king_danger_table_scalar, query_king_safety, query_pawn_connected,
+    query_pawn_doubled, query_pawn_isolated, run_all_queries,
+};
 use std::fs;
 use std::hash::{Hash, Hasher};
 use std::path::PathBuf;
@@ -134,25 +137,52 @@ fn sigmoid(x: f64) -> f64 {
 }
 
 /// One labelled position: raw query components per player + the game outcome per player.
+///
+/// EXP-024/025 extension: alongside the four deployed components, five **candidate terms** are
+/// cached so independent weights can be fitted without touching the eval — win-proximity (the
+/// search-side win signal in eval frame), king-danger table (Kimi's non-linear shape), and the
+/// three unbundled pawn-structure counts (C3.1).
 struct Pos {
     m: [f64; 4],
     p: [f64; 4],
     s: [f64; 4],
     o: [f64; 4],
+    /// win_i = Σ_{j≠i} prox_j − 3·prox_i (mean-zero by construction; + is good for i).
+    win: [f64; 4],
+    /// Non-linear attack-units king danger (table scalar; high = bad for i).
+    dgr: [f64; 4],
+    /// Isolated-pawn count (bad), doubled-pawn count (bad), connected-pawn count (good).
+    iso: [f64; 4],
+    dbl: [f64; 4],
+    conn: [f64; 4],
     target: [f64; 4],
 }
 
-/// Mean-relative eval component for player `i` under candidate weights (matches `compute_utility`).
-fn util(pos: &Pos, i: usize, w: [f64; 4]) -> f64 {
+/// Number of fitted weights: [M, P, S, O, WIN, DGR, ISO, DBL, CONN].
+const NW: usize = 9;
+/// Signs match the deployed convention (O subtracts) and classical expectations for the
+/// candidates (danger/iso/dbl penalize, win/conn reward). A fitted weight may go NEGATIVE for
+/// the candidate terms (indices 4..9) — that reads as "signal in the opposite direction".
+const SIGN: [f64; NW] = [1.0, 1.0, 1.0, -1.0, 1.0, -1.0, -1.0, -1.0, 1.0];
+
+/// Mean-relative eval component for player `i` under candidate weights (matches `compute_utility`
+/// for the first four; candidates extend the same mean-relative frame).
+fn util(pos: &Pos, i: usize, w: &[f64; NW]) -> f64 {
     let mean = |a: &[f64; 4]| (a[0] + a[1] + a[2] + a[3]) / 4.0;
-    w[0] * (pos.m[i] - mean(&pos.m))
-        + w[1] * (pos.p[i] - mean(&pos.p))
-        + w[2] * (pos.s[i] - mean(&pos.s))
-        - w[3] * (pos.o[i] - mean(&pos.o))
+    let comps: [&[f64; 4]; NW] = [
+        &pos.m, &pos.p, &pos.s, &pos.o, &pos.win, &pos.dgr, &pos.iso, &pos.dbl, &pos.conn,
+    ];
+    let mut u = 0.0;
+    for c in 0..NW {
+        if w[c] != 0.0 {
+            u += SIGN[c] * w[c] * (comps[c][i] - mean(comps[c]));
+        }
+    }
+    u
 }
 
 /// Mean squared error over all positions × 4 players.
-fn mse(data: &[Pos], w: [f64; 4], k: f64) -> f64 {
+fn mse(data: &[Pos], w: &[f64; NW], k: f64) -> f64 {
     let mut e = 0.0;
     let mut n = 0.0;
     for pos in data {
@@ -234,11 +264,26 @@ fn main() {
                         compute_lines(&board, &mut lines);
                         let qv = run_all_queries(&lines, &board);
                         let f = |a: [i16; 4]| [a[0] as f64, a[1] as f64, a[2] as f64, a[3] as f64];
+                        // Candidate terms (EXP-024/025): computed independently per position.
+                        let ks = query_king_safety(&lines, &board);
+                        let prox = elimination_proximity(&qv.material, &ks);
+                        let total: i32 = prox.iter().map(|&x| x as i32).sum();
+                        let mut win = [0.0f64; 4];
+                        let mut dgr = [0.0f64; 4];
+                        for i in 0..4 {
+                            win[i] = (total - 4 * prox[i] as i32) as f64;
+                            dgr[i] = king_danger_table_scalar(&ks[i]) as f64;
+                        }
                         data.push(Pos {
                             m: f(qv.material),
                             p: f(qv.positional),
                             s: f(qv.safety),
                             o: f(qv.crossfire),
+                            win,
+                            dgr,
+                            iso: f(query_pawn_isolated(&board)),
+                            dbl: f(query_pawn_doubled(&board)),
+                            conn: f(query_pawn_connected(&board)),
                             target,
                         });
                     }
@@ -282,12 +327,13 @@ fn main() {
         eprintln!("dumped {} rows to {}", data.len() * 4, path.display());
     }
 
-    // Fit K (sigmoid scale) once, with the current weights.
-    let baseline = [4.0, 1.0, 1.0, 1.0];
+    // Fit K (sigmoid scale) once, with the current deployed weights (candidates at 0 — this
+    // reproduces the 4-weight baseline exactly; the EXP-023 self-check).
+    let baseline: [f64; NW] = [4.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0];
     let (mut best_k, mut best_k_mse) = (0.0001, f64::MAX);
     let mut k = 0.00002;
     while k <= 0.01 {
-        let e = mse(&data, baseline, k);
+        let e = mse(&data, &baseline, k);
         if e < best_k_mse {
             best_k_mse = e;
             best_k = k;
@@ -296,18 +342,25 @@ fn main() {
     }
     eprintln!("fitted K={best_k:.4} | baseline weights {baseline:?} MSE={best_k_mse:.5}");
 
-    // Local search the integer weights (deployable as i16), K fixed.
+    // Local search the integer weights, K fixed. Per-index step sizes match each component's
+    // natural scale (pawn counts are 0..~8 units vs material in the thousands of cp, so their
+    // weights move in steps of 5 cp/unit). Deployed weights (0..4) stay non-negative; candidate
+    // weights (4..9) may go negative — a negative fit = signal opposite to the classical sign.
+    const STEP: [f64; NW] = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 5.0, 5.0, 5.0];
     let k = best_k;
     let mut w = baseline;
-    let mut cur = mse(&data, w, k);
+    let mut cur = mse(&data, &w, k);
     let mut improved = true;
     while improved {
         improved = false;
-        for idx in 0..4 {
-            for delta in [-1.0, 1.0] {
+        for idx in 0..NW {
+            for dir in [-1.0, 1.0] {
                 let mut cand = w;
-                cand[idx] = (cand[idx] + delta).max(0.0);
-                let e = mse(&data, cand, k);
+                cand[idx] += dir * STEP[idx];
+                if idx < 4 {
+                    cand[idx] = cand[idx].max(0.0);
+                }
+                let e = mse(&data, &cand, k);
                 if e < cur - 1e-9 {
                     w = cand;
                     cur = e;
@@ -317,15 +370,67 @@ fn main() {
         }
     }
     eprintln!(
-        "tuned weights M={} P={} S={} O={} | MSE={cur:.5} (baseline {best_k_mse:.5}, -{:.5})",
+        "tuned weights M={} P={} S={} O={} | WIN={} DGR={} ISO={} DBL={} CONN={} | MSE={cur:.5} (baseline {best_k_mse:.5}, -{:.5})",
         w[0],
         w[1],
         w[2],
         w[3],
+        w[4],
+        w[5],
+        w[6],
+        w[7],
+        w[8],
         best_k_mse - cur
     );
     eprintln!(
-        "=> eval.rs: W_MATERIAL={} W_POSITIONAL={} W_SAFETY={} W_CROSSFIRE={}",
+        "=> deployed components: W_MATERIAL={} W_POSITIONAL={} W_SAFETY={} W_CROSSFIRE={}",
         w[0] as i16, w[1] as i16, w[2] as i16, w[3] as i16
     );
+    eprintln!(
+        "=> candidate terms (EXP-024/025; sign convention: WIN+ DGR- ISO- DBL- CONN+): a 0 = no outcome signal at this corpus size; non-zero = candidate for a measured wiring arm"
+    );
+
+    // Single-term marginal fits: the pawn counts are strongly anti-correlated (a pawn is either
+    // isolated or connected), so the joint fit can ride a collinear direction with huge opposing
+    // weights. Fit each candidate ALONE on top of a FIXED base — the per-term marginal MSE drop
+    // is the interpretable signal, and the spread across known-null terms estimates the noise
+    // floor. Marginals are **base-sensitive** (candidate signal partially overlaps material's:
+    // a collapsing player is also down material, so heavier M absorbs danger/structure signal) —
+    // so report both canonical bases: the deployed eval (6,0,0,1) and the Texel-preferred shape
+    // (4,0,0,1). A term that passes on BOTH is robust.
+    let names = ["WIN", "DGR", "ISO", "DBL", "CONN"];
+    for (base_name, base4) in [
+        ("deployed (6,0,0,1)", [6.0, 0.0, 0.0, 1.0]),
+        ("texel-shape (4,0,0,1)", [4.0, 0.0, 0.0, 1.0]),
+    ] {
+        let base: [f64; NW] = [
+            base4[0], base4[1], base4[2], base4[3], 0.0, 0.0, 0.0, 0.0, 0.0,
+        ];
+        let base_mse = mse(&data, &base, k);
+        eprintln!("single-term marginal fits (base = {base_name}, MSE {base_mse:.5}):");
+        for (t, name) in names.iter().enumerate() {
+            let idx = 4 + t;
+            let mut wt = base;
+            let mut best = base_mse;
+            let mut improved = true;
+            while improved {
+                improved = false;
+                for dir in [-1.0, 1.0] {
+                    let mut cand = wt;
+                    cand[idx] += dir * STEP[idx];
+                    let e = mse(&data, &cand, k);
+                    if e < best - 1e-9 {
+                        wt = cand;
+                        best = e;
+                        improved = true;
+                    }
+                }
+            }
+            eprintln!(
+                "  {name}: weight {} | MSE {best:.5} (drop {:.5})",
+                wt[idx],
+                base_mse - best
+            );
+        }
+    }
 }

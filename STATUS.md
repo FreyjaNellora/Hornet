@@ -1,6 +1,18 @@
 # Hornet — Production Board (STATUS.md)
 
-**Updated:** 2026-06-10 (**B-lane landed (Fable): EXP-020/021 + protocol alignment.** B1: the two
+**Updated:** 2026-06-12 (**C2/C3 continuation landed (Kimi → Fable, EXP-024/025).** Kimi's C2
+fold-ins were inert as built (terms folded into zero-weighted components) → reverted, eval hot
+path = EXP-022 exactly; her C3.1 pawn queries kept. `texel_tune` extended: 9 weights, dual-base
+single-term marginals. **Findings on 290 games / 17,003 positions** (user added 49 standard-rules
+games; RuleVariants audited uniform across all 319 headers): **ISO (isolated pawns) = the one
+robust term** (0.00040–0.00081 on every base, ~6–13× floor; magnitude symptom-suspect → P′
+rebuild arm recorded); DGR real but material-entangled (S′ rebuild, tempered); WIN/DBL null,
+CONN fragile. **Self-play null control (A≡B) read 83% win-rate / +65% points from pure
+variance → 6-game arms resolve nothing; EXP-017 win-rate reads re-graded; powered gate = paired
+seat-swap design.** Nothing wired (default-off discipline; no dead code). **NEXT SHIFT QUEUED:
+DKW rules fix** — chess.com Help Center: dead pieces capturable, **no points** (contradicts both
+the frozen rule and VERIFICATION item #5); post-king-capture behavior unspecified → 3-variant
+corpus-replay arbitration. Prior session same cycle: B-lane EXP-020/021 + protocol alignment. B1: the two
 move-ordering flags (`FFA bounty`, `free-capture`) moved const-true → `OrderState` fields
 **default-off** (Hard Rule #6 restored); refactor proven behavior-preserving by exact golden-ref
 equivalence; `order()` now `sort_by_cached_key`. Measured (EXP-020): **the inverted free-capture

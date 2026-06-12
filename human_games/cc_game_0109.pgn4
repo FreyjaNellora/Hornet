@@ -1,0 +1,63 @@
+[GameNr "101828189"]
+[TimeControl "1+10"]
+[Variant "FFA"]
+[RuleVariants "Anonymous DeadKingWalking EnPassant PromoteTo=D"]
+[StartFen4 "4PC"]
+[Red "KrokogatorAlligadil"]
+[RedElo "2615"]
+[Blue "Elementalors"]
+[BlueElo "2465"]
+[Yellow "RAJU74"]
+[YellowElo "2605"]
+[Green "neoserbian"]
+[GreenElo "3112"]
+[Result "KrokogatorAlligadil: 19 - Elementalors: 41 - RAJU74: 0 - neoserbian: 56"]
+[Termination "(Green +20)"]
+[Site "www.chess.com/variants/4-player-chess/game/101828189"]
+[Date "Mon May 04 2026 13:41:21 GMT+0000 (Coordinated Universal Time)"]
+[CurrentMove "136"]
+
+1. k2-k4 .. b4-d4 .. e13-e12 .. m8-l8
+2. f2-f4 .. Na5-c6 .. g13-g12 .. m11-k11
+3. Ne1-f3 .. Na10-c9 .. Ne14-f12 .. Nn10-l9
+4. Nj1-i3 .. Nc9-d7 .. Bf14-e13 .. m6-k6
+5. j2-j3 .. b9-c9 .. O-O .. m10-l10
+6. h2-h3 .. b7-c7 .. Ke14-d14T .. Bn9-m10
+7. g2-g4 .. b11-d11 .. Kd14xd13 .. O-O
+8. Bf1-g2 .. d11xe12 .. Kd13-d12 .. m7-k7
+9. e2-e4 .. e12xf13 .. Kd12-d13 .. Qn7-l7
+10. d2-d3 .. f13xg12 .. Kd13-d12 .. k7-j7
+11. Qg1-f2 .. g12xh13=D .. Kd12-d13 .. Ql7-l6
+12. Bi1-g3 .. b10-d10 .. Kd13-e14 .. Ql6xNi3
+13. Rk1-j1 .. Qh13xBe13+# .. Qi3-i7
+14. O-O-O .. Qe13-e7 .. Qi7-k9
+15. Kf1-e1 .. Ba6-b7 .. m5-k5
+16. Ke1-d2 .. b5-c5 .. m4-l4
+17. g4-g5 .. Nc6-b4 .. Bn6-m5
+18. Nf3-e1 .. c5-d5 .. Nn5-m7
+19. Qf2xd4 .. d5xe4 .. Qk9-f9
+20. Bg2xe4 .. Qe7-c5 .. Qf9-k9
+21. Qd4xNd7 .. Ra4-a5 .. j7-i7
+22. Be4xBb7 .. Qa8xBb7 .. k6-j6
+23. Rg1-g2 .. Qc5-c6 .. Qk9-g9
+24. Qd7-d4 .. Nb4xd3 .. i7-h7
+25. Qd4xNd3 .. d10-e10 .. h7-g7=D
+26. Rg2-e2 .. e10-f10 .. Qg9xf10
+27. Rj1-f1 .. Ba9-c11 .. Qg7xBc11
+28. i2-i4 .. Ra11-a8 .. Qc11-c10
+29. h3-h4 .. Ra5-b5 .. Nm7-k8
+30. f4-f5 .. Ka7-a6 .. Nk8-i7
+31. Rf1-f4 .. Ka6-a5 .. j6-i6
+32. f5-f6 .. Ra8-a7 .. Qf10-h8
+33. f6-f7 .. c7-d7 .. Ni7-h9
+34. Qd3-d4 .. Rb5-d5 .. Qh8-j8
+35. Re2-e5 .. Ka5-a6 .. Qj8xj3
+36. Re5xRd5 .. Qc6xRd5 .. Qj3xBg3
+37. Qd4xQd5 .. Qb7xQd5+ .. Qg3-f2+#
+38. d7-e7 .. Qc10-e10+
+39. Ka6-a5 .. Qe10-e9
+40. Ra7-c7 .. i6-h6
+41. Qd5xf7 .. h6xg5=D+
+42. Ka5-b4 .. Qf2-d4+
+43. Rc7-c4 .. Qe9xb6+
+44. R
