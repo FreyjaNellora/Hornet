@@ -15,6 +15,7 @@ pub mod move_order;
 pub mod nnue;
 pub mod protocol;
 pub mod queries;
+pub mod replay;
 pub mod search;
 pub mod tt;
 pub mod zones;

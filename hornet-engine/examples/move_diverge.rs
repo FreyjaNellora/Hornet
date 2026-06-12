@@ -9,43 +9,11 @@
 //! Run: cargo run --release --example move_diverge [-- beam depth sample a_bounty a_freecap b_bounty b_freecap]
 //!   Defaults `4 4 2 1 1 1 0` (arm (i) vs arm (ii) at beam 4 — the EXP-020 contamination pairing).
 
-use hornet_engine::board::pgn4::{self, DecodedMove};
-use hornet_engine::board::types::Player;
-use hornet_engine::board::{Board, Move};
-use hornet_engine::move_gen::{castle_king_destination, generate_pseudo_legal};
+use hornet_engine::board::pgn4;
+use hornet_engine::replay::{ReplayState, resolve_ply};
 use hornet_engine::search::Searcher;
 use std::fs;
 use std::path::PathBuf;
-
-/// Resolve a PGN4 ply token to a concrete move (self-syncing `side_to_move`) — same as move_match.
-fn resolve(token: &str, board: &mut Board) -> Option<Move> {
-    match pgn4::decode_ply(token)? {
-        DecodedMove::Normal {
-            from,
-            to,
-            promotion,
-        } => {
-            let p = board.piece_at(from)?;
-            board.side_to_move = p.player;
-            generate_pseudo_legal(board)
-                .into_iter()
-                .find(|m| m.from == from && m.to == to && m.promotion == promotion)
-        }
-        DecodedMove::Castle { kingside } => {
-            for pl in Player::ALL {
-                board.side_to_move = pl;
-                let dest = castle_king_destination(pl, kingside);
-                if let Some(m) = generate_pseudo_legal(board)
-                    .into_iter()
-                    .find(|m| m.flags.castle && m.to == dest)
-                {
-                    return Some(m);
-                }
-            }
-            None
-        }
-    }
-}
 
 fn main() {
     let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
@@ -85,9 +53,10 @@ fn main() {
         };
         games += 1;
         let mut ply = 0usize;
+        let mut st = ReplayState::default();
         'game: for round in &game.rounds {
             for tok in &round.plies {
-                let Some(human) = resolve(tok, &mut board) else {
+                let Some(human) = resolve_ply(&mut board, tok, &mut st) else {
                     break 'game;
                 };
                 if ply % sample == 0 {

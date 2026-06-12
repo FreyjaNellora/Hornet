@@ -1,77 +1,29 @@
-//! Replays the move stream of every PGN4 corpus game against the move generator.
-//!
-//! Self-syncing: each ply's mover is read from the piece on its `from` square (rather than
-//! trusting turn rotation), so replay survives eliminations/DKW and validates that the move
-//! **generator produces every move that occurs in real games**. Matching is against
-//! *pseudo-legal* moves (a real move is always pseudo-legal; this isolates move geometry from
-//! the legality filter, and tolerates DKW kings moving into check).
+//! Replays the move stream of every PGN4 corpus game against the move generator, via the shared
+//! `hornet_engine::replay` logic (self-syncing, pseudo-legal matching, EXP-028 fidelity
+//! inferences — see that module's docs). Validates that the move **generator produces every
+//! move that occurs in real games**.
 
-use hornet_engine::board::Board;
 use hornet_engine::board::pgn4::{self, DecodedMove};
 use hornet_engine::board::types::Player;
-use hornet_engine::eval::eval_4vec;
-use hornet_engine::lines::{LineMap, compute_lines};
-use hornet_engine::move_gen::{castle_king_destination, generate_pseudo_legal};
-use hornet_engine::zones::{ZONES, aggregate_zone_control};
+use hornet_engine::replay::{ReplayState, apply_ply};
+use hornet_engine::zones::ZONES;
 use std::fs;
 use std::path::PathBuf;
 
 /// Size of the `baselines/` PGN4 corpus. Update when games are added (and recalibrate the floors
 /// below against an actual run — they are regression floors, set just under observed values).
 const CORPUS_GAMES: usize = 32;
-/// Regression floor: total plies replayed across the corpus (observed 5058/7477 on 2026-06-10).
-const MIN_PLIES_REPLAYED: usize = 5000;
-/// Regression floor: games replayed end-to-end with no move-gen miss (observed 15/32, 2026-06-10).
-const MIN_GAMES_FULLY_REPLAYED: usize = 15;
+/// Regression floor: total plies replayed across the corpus (observed 7098/7477 on 2026-06-12,
+/// after the EXP-026 rule landing + EXP-028 replayer fidelity fixes; was 5058 pre-fix).
+const MIN_PLIES_REPLAYED: usize = 7000;
+/// Regression floor: games replayed end-to-end with no move-gen miss (observed 29/32, 2026-06-12;
+/// was 15/32 pre-fix).
+const MIN_GAMES_FULLY_REPLAYED: usize = 28;
 
 fn baselines_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("..")
         .join("baselines")
-}
-
-/// Decode + match + apply one ply token. Returns false if it can't be decoded or matched.
-fn apply_ply(token: &str, board: &mut Board) -> bool {
-    let Some(decoded) = pgn4::decode_ply(token) else {
-        return false;
-    };
-    let mv = match decoded {
-        DecodedMove::Normal {
-            from,
-            to,
-            promotion,
-        } => {
-            let Some(p) = board.piece_at(from) else {
-                return false;
-            };
-            board.side_to_move = p.player; // self-sync to the actual mover
-            generate_pseudo_legal(board)
-                .into_iter()
-                .find(|m| m.from == from && m.to == to && m.promotion == promotion)
-        }
-        DecodedMove::Castle { kingside } => {
-            let mut found = None;
-            for pl in Player::ALL {
-                board.side_to_move = pl;
-                let dest = castle_king_destination(pl, kingside);
-                if let Some(m) = generate_pseudo_legal(board)
-                    .into_iter()
-                    .find(|m| m.flags.castle && m.to == dest)
-                {
-                    found = Some(m);
-                    break;
-                }
-            }
-            found
-        }
-    };
-    match mv {
-        Some(m) => {
-            board.make_move(m);
-            true
-        }
-        None => false,
-    }
 }
 
 /// Replay a game; return (plies applied, total plies, first failing token if any).
@@ -80,7 +32,7 @@ fn replay(game: &pgn4::Pgn4Game) -> (usize, usize, Option<String>) {
     let mut board = game.initial_board().unwrap();
     let total = game.ply_count();
     let mut done = 0;
-    let mut lines = LineMap::new();
+    let mut st = ReplayState::default();
     for round in &game.rounds {
         for tok in &round.plies {
             // Track piece positions by phase and player
@@ -137,7 +89,7 @@ fn replay(game: &pgn4::Pgn4Game) -> (usize, usize, Option<String>) {
             if pgn4::decode_ply(tok).is_none() {
                 continue; // non-move token (e.g. "R"/"S" result/resign marker) — not a move-gen test
             }
-            if !apply_ply(tok, &mut board) {
+            if !apply_ply(&mut board, tok, &mut st) {
                 return (done, total, Some(tok.clone()));
             }
             done += 1;
@@ -224,13 +176,12 @@ fn corpus_games_replay_against_move_gen() {
     println!(
         "replayed {total_applied}/{total_plies} corpus plies; {fully}/{CORPUS_GAMES} games fully"
     );
-    // Regression baseline. This validates move *geometry* against the chess.com corpus, whose DKW is
-    // *takeable*; the replay never sets the DKW flag, so Hornet's **fully-frozen** DKW rule (a DKW
-    // player's pieces are un-capturable — `move_gen::DKW_PIECES_REMOVABLE = false`) intentionally
-    // diverges wherever the corpus captures a DKW piece (incl. a dead king taking its own). Skipping
-    // trailing non-move markers ("R"/"S") helps; the future *removable* variant would restore full
-    // corpus fidelity. DKW rules are validated by the unit tests + `game.rs`; see EXP-011.
-    // Floors recalibrated 2026-06-10 for the 32-game corpus (was 16: >=2500 plies, >=8 fully).
+    // Regression baseline. Validates move *geometry* against the chess.com corpus via the shared
+    // `hornet_engine::replay` logic (EXP-026 capturable-no-points rule + EXP-028 fidelity
+    // inferences: DKW own-capture, rotation-aware castles). Remaining known gaps: players who
+    // went DKW via *checkmate* can't be inferred by the replayer (their phantom castle blocks),
+    // plus a small notation tail — see EXP-028. Floors recalibrated 2026-06-12 (was: >=5000
+    // plies / >=15 fully under the pre-EXP-026 frozen rule).
     assert!(
         total_applied >= MIN_PLIES_REPLAYED,
         "move-gen regression: only {total_applied} plies replayed (floor {MIN_PLIES_REPLAYED})"

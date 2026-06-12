@@ -8,62 +8,16 @@
 //!
 //! Run: cargo run --release --example texel_tune
 
-use hornet_engine::board::Board;
-use hornet_engine::board::pgn4::{self, DecodedMove};
-use hornet_engine::board::types::Player;
+use hornet_engine::board::pgn4;
 use hornet_engine::lines::{LineMap, compute_lines};
-use hornet_engine::move_gen::{castle_king_destination, generate_pseudo_legal};
 use hornet_engine::queries::{
     elimination_proximity, king_danger_table_scalar, query_king_safety, query_pawn_connected,
     query_pawn_doubled, query_pawn_isolated, run_all_queries,
 };
+use hornet_engine::replay::{ReplayState, apply_ply};
 use std::fs;
 use std::hash::{Hash, Hasher};
 use std::path::PathBuf;
-
-/// Decode + self-sync the mover + apply one PGN4 ply (mirrors tests/pgn4_replay.rs).
-fn apply_ply(token: &str, board: &mut Board) -> bool {
-    let Some(decoded) = pgn4::decode_ply(token) else {
-        return false;
-    };
-    let mv = match decoded {
-        DecodedMove::Normal {
-            from,
-            to,
-            promotion,
-        } => {
-            let Some(p) = board.piece_at(from) else {
-                return false;
-            };
-            board.side_to_move = p.player;
-            generate_pseudo_legal(board)
-                .into_iter()
-                .find(|m| m.from == from && m.to == to && m.promotion == promotion)
-        }
-        DecodedMove::Castle { kingside } => {
-            let mut found = None;
-            for pl in Player::ALL {
-                board.side_to_move = pl;
-                let dest = castle_king_destination(pl, kingside);
-                if let Some(m) = generate_pseudo_legal(board)
-                    .into_iter()
-                    .find(|m| m.flags.castle && m.to == dest)
-                {
-                    found = Some(m);
-                    break;
-                }
-            }
-            found
-        }
-    };
-    match mv {
-        Some(m) => {
-            board.make_move(m);
-            true
-        }
-        None => false,
-    }
-}
 
 /// Parse `[Result "name: pts - ..."]` → [R,B,Y,G] points. chess.com lists the Result in **score
 /// order, not seat order**, so we JOIN each name to the `[Red]/[Blue]/[Yellow]/[Green]` headers.
@@ -261,6 +215,7 @@ fn main() {
             }
             games += 1;
             let mut ply = 0usize;
+            let mut st = ReplayState::default();
             'game: for round in &game.rounds {
                 for tok in &round.plies {
                     if ply % SAMPLE == 0 {
@@ -290,7 +245,7 @@ fn main() {
                             target,
                         });
                     }
-                    if !apply_ply(tok, &mut board) {
+                    if !apply_ply(&mut board, tok, &mut st) {
                         break 'game;
                     }
                     ply += 1;

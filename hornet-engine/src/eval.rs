@@ -111,13 +111,30 @@ fn compute_utility(qv: &QueryVector) -> [i16; 4] {
 // (a candidate becoming the default is a Tier-2 ship gated on EXP-027 paired self-play).
 // Both terms are mean-relative (Σ ≈ 0 preserved); values clamped inside mate bounds (±29_000).
 
-/// Isolated-pawn scale (util units; human-only fit: w=3305, MSE drop 0.00326 — EXP-025).
-/// Caveat recorded there: predictive weight, possibly symptom-not-cause; this arm tests exactly
-/// that by *playing as if* isolation matters.
-const PPRIME_ISO_SCALE: i32 = 3305;
+/// Isolated-pawn scale (util units). Default = the human-only fitted 3305 (EXP-025), which the
+/// EXP-029 paired gate **rejected as unplayably loud** — override per sweep arm with
+/// `HORNET_PPRIME_SCALE` (EXP-030 scale sweep; read once per process).
+fn pprime_iso_scale() -> i32 {
+    static S: std::sync::LazyLock<i32> = std::sync::LazyLock::new(|| {
+        std::env::var("HORNET_PPRIME_SCALE")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(3305)
+    });
+    *S
+}
 
-/// King-danger-table scale (human-only fit: w=5, MSE drop 0.00094 — EXP-024).
-const SPRIME_DGR_SCALE: i32 = 5;
+/// King-danger-table scale. Default = the human-only fitted 5 (EXP-024), rejected at that volume
+/// by the EXP-029 paired gate — override per sweep arm with `HORNET_SPRIME_SCALE`.
+fn sprime_dgr_scale() -> i32 {
+    static S: std::sync::LazyLock<i32> = std::sync::LazyLock::new(|| {
+        std::env::var("HORNET_SPRIME_SCALE")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(5)
+    });
+    *S
+}
 
 /// P′ candidate: deployed eval − ISO_SCALE·Δ(isolated-pawn count).
 pub fn eval_4vec_pprime(board: &Board, line_buffer: &mut LineMap) -> [i16; 4] {
@@ -126,7 +143,7 @@ pub fn eval_4vec_pprime(board: &Board, line_buffer: &mut LineMap) -> [i16; 4] {
     let sum: i32 = iso.iter().map(|&x| x as i32).sum();
     for i in 0..4 {
         // Mean-relative in quarter units to avoid truncating small counts: Δ = (4·x − Σ)/4.
-        let adj = PPRIME_ISO_SCALE * (4 * iso[i] as i32 - sum) / 4;
+        let adj = pprime_iso_scale() * (4 * iso[i] as i32 - sum) / 4;
         v[i] = (v[i] as i32 - adj).clamp(-29_000, 29_000) as i16;
     }
     v
@@ -140,7 +157,7 @@ pub fn eval_4vec_sprime(board: &Board, line_buffer: &mut LineMap) -> [i16; 4] {
         std::array::from_fn(|i| crate::queries::king_danger_table_scalar(&ks[i]) as i32);
     let sum: i32 = dgr.iter().sum();
     for i in 0..4 {
-        let adj = SPRIME_DGR_SCALE * (4 * dgr[i] - sum) / 4;
+        let adj = sprime_dgr_scale() * (4 * dgr[i] - sum) / 4;
         v[i] = (v[i] as i32 - adj).clamp(-29_000, 29_000) as i16;
     }
     v

@@ -16,45 +16,11 @@
 //! played by players who finished 1st/2nd — "imitate winners, not losers"; blunder-prone
 //! losing play stops polluting the target).
 
-use hornet_engine::board::pgn4::{self, DecodedMove};
-use hornet_engine::board::types::Player;
-use hornet_engine::board::{Board, Move};
-use hornet_engine::move_gen::{castle_king_destination, generate_pseudo_legal};
+use hornet_engine::board::pgn4;
+use hornet_engine::replay::{ReplayState, resolve_ply};
 use hornet_engine::search::Searcher;
 use std::fs;
 use std::path::PathBuf;
-
-/// Resolve a PGN4 ply token to a concrete move (self-syncing `side_to_move` to the piece's owner, so
-/// after this the board is set up for that player to move) — mirrors the replay harness, but does NOT
-/// apply the move.
-fn resolve(token: &str, board: &mut Board) -> Option<Move> {
-    match pgn4::decode_ply(token)? {
-        DecodedMove::Normal {
-            from,
-            to,
-            promotion,
-        } => {
-            let p = board.piece_at(from)?;
-            board.side_to_move = p.player;
-            generate_pseudo_legal(board)
-                .into_iter()
-                .find(|m| m.from == from && m.to == to && m.promotion == promotion)
-        }
-        DecodedMove::Castle { kingside } => {
-            for pl in Player::ALL {
-                board.side_to_move = pl;
-                let dest = castle_king_destination(pl, kingside);
-                if let Some(m) = generate_pseudo_legal(board)
-                    .into_iter()
-                    .find(|m| m.flags.castle && m.to == dest)
-                {
-                    return Some(m);
-                }
-            }
-            None
-        }
-    }
-}
 
 /// Parse `[Result "name: pts - ..."]` → [R,B,Y,G] points (seat-joined via the player headers;
 /// positional fallback). Mirrors texel_tune's parser.
@@ -150,9 +116,10 @@ fn main() {
         let win_seats = parse_result_points(&text).map(winners);
         games += 1;
         let mut ply = 0usize;
+        let mut st = ReplayState::default();
         'game: for round in &game.rounds {
             for tok in &round.plies {
-                let Some(human) = resolve(tok, &mut board) else {
+                let Some(human) = resolve_ply(&mut board, tok, &mut st) else {
                     break 'game; // replay diverged (elimination) — stop this game
                 };
                 if ply % sample == 0 {

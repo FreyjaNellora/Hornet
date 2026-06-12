@@ -54,6 +54,13 @@ What the result means; falsified or confirmed; next step.
 *(Index gap: EXP-012…019 exist as files but were never indexed — see the experiment files
 directly; backfilling the hooks is an open hygiene item.)*
 
+- [EXP-030 — play-volume scale sweep](EXP-030-play-volume-scale-sweep.md) — ISO{400,800,1600} ×
+  DGR{1,2} on the upgraded instrument (shared replayer; new baselines 14.1%/13.3% over 3,440
+  positions). **DGR rejected at every volume** (danger is a search concern — third strike);
+  **ISO winners-neutral** (+0.2pp peak, sub-resolution, but directionally trades loser- for
+  winner-agreement). Nothing gated. Verdict on "the eval issue": linear scalar counts can't
+  close the winners gap at any volume — the path is relational/tactical features (C3 program),
+  interactions, then NNUE.
 - [EXP-029 — P′/S′ candidate-eval arms](EXP-029-eval-candidate-arms.md) — first eval arms on the
   paired gate: **both rejected at their human-fitted scales** (P′ 1–5 pairs, 315–492; S′ 1–5,
   394–522; agreement 12.7%/10.5% vs 13.6%). Lesson measured twice: prediction weights ≠ play

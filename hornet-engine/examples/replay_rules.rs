@@ -10,82 +10,11 @@
 //! Run: HORNET_DKW_RULE=0|1|2 cargo run --release --example replay_rules [-- dir ...]
 //!   Default dirs: ../baselines and ../human_games.
 
+use hornet_engine::board::dkw_rule;
 use hornet_engine::board::pgn4::{self, DecodedMove};
-use hornet_engine::board::types::Player;
-use hornet_engine::board::{Board, dkw_rule};
-use hornet_engine::move_gen::{castle_king_destination, generate_pseudo_legal};
+use hornet_engine::replay::{ReplayState, apply_ply};
 use std::fs;
 use std::path::PathBuf;
-
-/// Decode + self-sync the mover + apply one ply (mirrors tests/pgn4_replay.rs, plus two
-/// fidelity fixes). `last_mover` is the previous ply's mover, used to resolve castle tokens.
-fn apply_ply(token: &str, board: &mut Board, last_mover: &mut Option<Player>) -> bool {
-    let Some(decoded) = pgn4::decode_ply(token) else {
-        return false;
-    };
-    let mv = match decoded {
-        DecodedMove::Normal {
-            from,
-            to,
-            promotion,
-        } => {
-            let Some(p) = board.piece_at(from) else {
-                return false;
-            };
-            board.side_to_move = p.player;
-            let mut found = generate_pseudo_legal(board)
-                .into_iter()
-                .find(|m| m.from == from && m.to == to && m.promotion == promotion);
-            // DKW inference: a live king can NEVER capture its own piece, so a corpus king
-            // landing on its own piece proves the mover is Dead-King-Walking (the replayer has
-            // no game-flow to set the flag). Infer it and retry — the DKW move set generates
-            // own-captures (EXP-026 rule 2).
-            if found.is_none()
-                && p.piece_type == hornet_engine::board::PieceType::King
-                && board.piece_at(to).is_some_and(|t| t.player == p.player)
-            {
-                board.enter_dkw(p.player);
-                found = generate_pseudo_legal(board)
-                    .into_iter()
-                    .find(|m| m.from == from && m.to == to && m.promotion == promotion);
-            }
-            if found.is_some() {
-                *last_mover = Some(p.player);
-            }
-            found
-        }
-        DecodedMove::Castle { kingside } => {
-            // A castle token names no player. Trying players in fixed RBYG order misattributes
-            // the castle whenever two players can castle the same side (EXP-028 forensics: the
-            // dominant silent-divergence cause). Resolve in ROTATION order from the expected
-            // next mover instead.
-            let start = last_mover.map_or(Player::Red, |p| p.next());
-            let mut found = None;
-            let mut pl = start;
-            for _ in 0..4 {
-                board.side_to_move = pl;
-                let dest = castle_king_destination(pl, kingside);
-                if let Some(m) = generate_pseudo_legal(board)
-                    .into_iter()
-                    .find(|m| m.flags.castle && m.to == dest)
-                {
-                    found = Some(m);
-                    *last_mover = Some(pl);
-                    break;
-                }
-                pl = pl.next();
-            }
-            found
-        }
-    };
-    match mv {
-        Some(m) => {
-            board.make_move(m);
-            true
-        }
-        None => false,
-    }
-}
 
 fn main() {
     let base = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..");
@@ -133,7 +62,7 @@ fn main() {
             games += 1;
             let mut done = 0usize;
             let mut failed = false;
-            let mut last_mover: Option<Player> = None;
+            let mut st = ReplayState::default();
             let mut recent: std::collections::VecDeque<String> = std::collections::VecDeque::new();
             for round in &game.rounds {
                 for tok in &round.plies {
@@ -144,7 +73,7 @@ fn main() {
                     if failed {
                         continue;
                     }
-                    if apply_ply(tok, &mut board, &mut last_mover) {
+                    if apply_ply(&mut board, tok, &mut st) {
                         done += 1;
                         recent.push_back(tok.clone());
                         if recent.len() > 4 {
