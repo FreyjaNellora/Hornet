@@ -1,6 +1,7 @@
 # EXP-031 — objective layer on the powered paired gate: a lean, not a pass
 
-- **Date:** 2026-06-12 · **Status:** CLOSED (verdict below); weight-variant sweep follow-up running
+- **Date:** 2026-06-12 · **Status:** w50 CLOSED (verdict below); **w100 variant = marginal pass,
+  extension to 24 pairs running**
 - **Hypothesis:** the search-side objective layer (win 50 + king-danger 100 — the EXP-017 config
   whose unpaired 6-game reads suggested doubled win-rates) beats the plain eval on the paired
   gate, justifying flipping the play defaults (the first gated strength upgrade toward the
@@ -51,10 +52,27 @@ arg 15 — extensions must pass the pair count already played.
 - The direct human gate is available regardless: the REPL and `examples/play.rs` play
   end-to-end — the user playing the engine is the beats-humans measurement itself.
 
+## Variant sweep: win 100 + danger 100 (12 pairs, common seeds with the w50 arm)
+
+| | points | per seat-game | pair record | decisive | paired t (one-sided) |
+|---|---|---|---|---|---|
+| A = win 100 + danger 100 | 904 | 18.8 | **7–5** | 7/24 = 29% | **t(11)=1.88, p≈0.044** |
+| B = off (deployed) | 746 | 15.5 | | | |
+
+- **+21.2% points (+13.2/pair)** vs the w50 arm's +2.1% on the SAME openings — same 7–5 pair
+  record, ~10× the margin. CRN head-to-head (per-seed differential w100−w50): +11.8/pair,
+  t(11)=1.40, p≈0.10 — directional, not conclusive on its own.
+- A marginal pass with a multiple-comparisons caveat (second config tested). Per the
+  pre-specified rule — more pairs at the best variant only — **extension running: 12 fresh
+  pairs at w100 (seed offset 12, the new harness arg). 24 total pairs decide the flip**: if the
+  true effect is ~+13/pair, t at 24 pairs ≈ 2.6 — clears 0.05 cleanly; a shrink-to-lean kills it.
+
 ## Conclusion
 
-The objective layer at first-guess weights is a real-looking but sub-significant +8.7% points
-lean over 34 honest pairs. Standing lesson reinforced twice in one day: every prior "big"
-self-play effect has shrunk under the paired instrument, and the instrument itself bites
-(silent eval-id fallthrough voided a gate; seed renumbering duplicated pairs) — strength claims
-are earned slowly and honestly or not at all.
+The objective layer at first-guess weights (w50) is a real-looking but sub-significant +8.7%
+points lean over 34 honest pairs. **Doubling the win weight (w100) roughly 10×'d the points
+margin on identical openings (+21.2%, p≈0.044)** — the first config to touch the bar since the
+paired instrument landed; the 24-pair extension decides. Standing lesson reinforced twice in
+one day: every prior "big" self-play effect has shrunk under the paired instrument, and the
+instrument itself bites (silent eval-id fallthrough voided a gate; seed renumbering duplicated
+pairs) — strength claims are earned slowly and honestly or not at all.
