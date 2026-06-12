@@ -23,6 +23,14 @@ use std::fmt;
 /// Canonical 4PC starting position (spec v0.2 §1.3, verified vs chess.com).
 pub const START_FEN4: &str = "R-0,0,0,0-1,1,1,1-1,1,1,1-0,0,0,0-0-3,yR,yN,yB,yK,yQ,yB,yN,yR,3/3,yP,yP,yP,yP,yP,yP,yP,yP,3/14/bR,bP,10,gP,gR/bN,bP,10,gP,gN/bB,bP,10,gP,gB/bQ,bP,10,gP,gK/bK,bP,10,gP,gQ/bB,bP,10,gP,gB/bN,bP,10,gP,gN/bR,bP,10,gP,gR/14/3,rP,rP,rP,rP,rP,rP,rP,rP,3/3,rR,rN,rB,rQ,rK,rB,rN,rR,3";
 
+/// The `StartFen4 "4PCo"` array (2026-06-12 export batch): Blue's and Green's king/queen home
+/// squares are EXCHANGED relative to the canonical array (bQ a7 / bK a8, gQ n8 / gK n7);
+/// Red/Yellow unchanged. Identified empirically, not from documentation: under the canonical
+/// start these games fail replay on queen tokens that find a king on the from-square; under
+/// this array they replay like the rest of the corpus (corpus_check trial ladder — canonical
+/// 1/45 full, BG-swap 13/45 + the standard castle tail, both all-swap and RY-swap 0/45).
+pub const START_FEN4_4PCO: &str = "R-0,0,0,0-1,1,1,1-1,1,1,1-0,0,0,0-0-3,yR,yN,yB,yK,yQ,yB,yN,yR,3/3,yP,yP,yP,yP,yP,yP,yP,yP,3/14/bR,bP,10,gP,gR/bN,bP,10,gP,gN/bB,bP,10,gP,gB/bK,bP,10,gP,gQ/bQ,bP,10,gP,gK/bB,bP,10,gP,gB/bN,bP,10,gP,gN/bR,bP,10,gP,gR/14/3,rP,rP,rP,rP,rP,rP,rP,rP,3/3,rR,rN,rB,rQ,rK,rB,rN,rR,3";
+
 /// Errors a malformed FEN4 string can produce.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Fen4Error {

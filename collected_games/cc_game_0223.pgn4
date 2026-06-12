@@ -1,0 +1,49 @@
+[GameNr "11982250"]
+[TimeControl "1+15D"]
+[Variant "FFA"]
+[RuleVariants "Anonymous DeadKingWalking EnPassant PromoteTo=D"]
+[Red "aaam"]
+[RedElo "2396"]
+[Blue "anreyking1"]
+[BlueElo "2797"]
+[Yellow "Pirannita4Cazador"]
+[YellowElo "2551"]
+[Green "Riba"]
+[GreenElo "2990"]
+[Result "aaam: 0 - anreyking1: 33 - Pirannita4Cazador: 33 - Riba: 44"]
+[Termination "Game over. (Yellow +20)"]
+[Site "www.chess.com/variants/4-player-chess/game/11982250"]
+[Date "Wed Mar 09 2022 23:15:11 GMT+0000 (Coordinated Universal Time)"]
+[StartFen4 "4PCo"]
+[CurrentMove "94"]
+
+1. d2-d4 .. b8-c8 .. d13-d11 .. m7-l7
+2. k2-k3 .. Qa7-d10 .. Ne14-f12 .. Qn8-k5
+3. Nj1-i3 .. Na10-c11 .. Nj14-i12 .. Nn5-l6
+4. j2-j3 .. Qd10-h6 .. h13-h12 .. Qk5xNi3
+5. R .. Qh6xh2+# .. Qh14-h13 .. Qi3-i6
+6. Qh2-c7 .. k13-k11 .. Bn6-m7
+7. Na5-c6 .. j13-j12 .. m11-l11
+8. b5-d5 .. Bi14-j13 .. Nn10-l9
+9. Ra4-a5 .. Ni12-g11 .. m8-k8
+10. d5-e5 .. e13-e12 .. Bn9-m8
+11. e5-f5 .. Bf14xNc11 .. Qi6-h5
+12. b10xBc11 .. i13-i11 .. m4-k4
+13. Nc6xd4 .. Bj13-i12 .. Qh5-h4
+14. Ra5-d5 .. Ng11-e10 .. Qh4xRa11
+15. f5-g5 .. Bi12-j11 .. Qa11xb11
+16. Rd5-d9 .. k11-k10 .. Nl9-k7
+17. Rd9xm9 .. Bj11-i12 .. O-O
+18. Rm9-d9 .. j12-j11 .. Nk7-l5
+19. Ka8-a7 .. k10-k9 .. Qb11-a11
+20. g5-h5=D .. j11-j10 .. Bm8xBi12
+21. Ba6xe2 .. Qh13xBi12 .. Rn11-n8
+22. Be2-b5 .. Qi12-h13 .. Nl5-j6
+23. Qh5-k5 .. Rk14-h14 .. Nj6-l5
+24. Rd9-d5 .. Kg14-f14 .. Nl6-j5
+25. Qk5xNl5 .. Kf14-e14 .. m6xQl5
+26. Qc7xl7+ .. Ne10-c9 .. Kn5-m4
+27. Ql7-c7 .. Nc9-b11 .. Bm7-k5
+28. Ka7-a8 .. Nb11xBa9 .. Bk5-h2
+29. Qc7xNa9 .. Nf12-e10 .. Qa11xQa9+#
+30. Qh13-f11 .. R

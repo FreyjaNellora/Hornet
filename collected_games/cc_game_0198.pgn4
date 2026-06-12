@@ -1,0 +1,80 @@
+[GameNr "12080137"]
+[TimeControl "4+0"]
+[Variant "FFA"]
+[RuleVariants "Anonymous DeadKingWalking EnPassant PromoteTo=D"]
+[Red "SirMullih"]
+[RedElo "2467"]
+[Blue "Riba"]
+[BlueElo "2708"]
+[Yellow "mati4333"]
+[YellowElo "2431"]
+[Green "yasmin-er-vatar"]
+[GreenElo "2285"]
+[Result "SirMullih: 49 - Riba: 112 - mati4333: 26 - yasmin-er-vatar: 29"]
+[Termination "Game over. (Blue +40)"]
+[Site "www.chess.com/variants/4-player-chess/game/12080137"]
+[Date "Sat Mar 19 2022 17:07:38 GMT+0000 (Coordinated Universal Time)"]
+[StartFen4 "4PCo"]
+[CurrentMove "225"]
+
+1. h2-h3 .. b6-c6 .. g13-g12 .. m8-l8
+2. d2-d4 .. b7-c7 .. Qh14-d10 .. Bn9-l7
+3. Qg1-j4 .. Qa7-b7 .. Qd10xm10 .. Nn10-m8
+4. Qj4-g4 .. Qb7-c8 .. Qm10xb10 .. Bl7xh3
+5. Qg4xBh3 .. Ba9xQb10 .. e13-e12 .. m9-k9
+6. Qh3xQc8 .. Ba6xQc8 .. Bf14xBb10 .. Qn8xi13
+7. i2-i3 .. Na10-c9 .. Nj14-i12 .. Qi13-f10
+8. Ne1-f3 .. Ra11-a10 .. Bb10-e13 .. Qf10xf13+
+9. Nj1-h2 .. Ra10-g10 .. Kg14-h14 .. Qf13xBe13
+10. e2-e3 .. b4-c4 .. Ne14-g13 .. Qe13xRd14+
+11. Bf1-e2 .. Rg10xg12 .. Kh14-i13 .. Rn11-n8
+12. O-O-O .. Rg12-g8 .. h13-h12 .. Nn5-l6
+13. Nh2-j3 .. Bc8xBi14 .. Rk14xBi14 .. Qd14xRi14+
+14. Nj3-h4 .. Rg8xNg13+ .. Ki13xQi14 .. m5-l5
+15. k2-k3 .. Rg13xd13 .. k13-k12 .. m4-k4
+16. g2-g4 .. Na5-b7 .. h12-h11 .. Bn6-m5
+17. g4-g5 .. Rd13-e13 .. h11-h10 .. Nl6-j7
+18. g5-g6 .. Nc9-e8 .. h10-h9 .. Bm5-i9
+19. Bi1-e5 .. Re13xe12 .. Ki14-j14 .. Bi9-m5
+20. g6-g7 .. Ne8xg7 .. Kj14-k13 .. k4-j4
+21. Be5xNg7 .. Re12-g12 .. Kk13-j14 .. j4xi3
+22. j2xi3 .. Rg12xBg7 .. Kj14-k13 .. Nm8-l6
+23. Rg1xRg7 .. Nb7-d8 .. Kk13-j14 .. Rn4-i4
+24. Rg7-g3 .. Ka8-b7 .. Kj14-k13 .. Nl6-k4
+25. Nf3-g5 .. b11-d11 .. h9-h8 .. Ri4xNi12
+26. Be2xNj7 .. Ra4-a6 .. j13xRi12 .. Nk4-i5
+27. Bj7-f11+ .. b8-c8 .. i12-i11 .. Bm5-i9
+28. Nh4-g6 .. Ra6-a10 .. Kk13-j12 .. Bi9xh8
+29. Ng6xNi5 .. d11-e11 .. k12-k11 .. Bh8-j6
+30. Ng5-h3 .. Ra10-d10 .. Kj12-j11 .. Kn7-n6
+31. k3-k4 .. Rd10-f10 .. k11-k10 .. Bj6xNi5
+32. Nh3xBi5 .. Rf10xBf11 .. Kj11-j12 .. l5-k5
+33. Rk1-k2 .. Rf11-f12+ .. Kj12-j11 .. m11-l11
+34. Kf1-e2 .. Rf12-f10 .. Kj11-j12 .. l11xk10
+35. Rg3-g11 .. e11-f11 .. Kj12-k11 .. Rn8-n11+
+36. Ni5-j7 .. Nd8-e10 .. Kk11-j12 .. m6-k6
+37. Rg11-g6 .. f11-g11 .. Kj12-i12 .. m7-l7
+38. Nj7xk5 .. Rf10-f8 .. Ki12-h11 .. Kn6-m7
+39. Rg6-g7 .. Rf8-h8+ .. Kh11-i12 .. k10-j10
+40. Rg7xg11 .. Ne10xRg11+ .. Ki12-j12 .. Rn11xi11
+41. i3-i4 .. Rh8-h12+ .. Kj12-j13 .. Ri11xi4
+42. Nk5xRi4 .. Ng11-h13 .. Kj13-i13 .. j10-i10
+43. k4-k5 .. Rh12-h4 .. Ki13-i12 .. i10-h10
+44. Ni4-j6 .. Nh13-f12 .. Ki12-h12 .. h10-g10=D+
+45. Nj6-l5+ .. Rh4xKh12#S .. Km7-m6
+46. Nl5-j6 .. Nf12xQg10 .. Km6-n6T
+47. Nj6xl7+ .. b9-d9 .. Kn6-n7
+48. Nl7-j8 .. d9-e9 .. Kn7-m6
+49. Nj8xk6 .. e9-f9 .. Km6-n5
+50. Nk6-i7 .. Rh12-h7 .. Kn5-m4
+51. Rk2-i2 .. f9-g9 .. Km4-m5
+52. k5-k6 .. Rh7xNi7 .. Km5-n6
+53. Ri2xRi7 .. g9-h9=D .. Kn6-m5
+54. k6-k7 .. Qh9-h5++ .. Km5-m4
+55. Ke2-d2 .. Qh5-k8 .. Km4-n4
+56. Ri7-g7 .. Ng10-h8 .. Kn4-m4
+57. Rg7-g8 .. Qk8xk7 .. Km4-l5
+58. Rg8xNh8 .. Qk7xf2+ .. Kl5-m4
+59. Kd2-d1 .. Qf2xe3 .. Km4-m5
+60. Rh8-h2 .. Qe3-g1+ .. Km5-l6
+61. R

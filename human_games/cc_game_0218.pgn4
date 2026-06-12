@@ -1,0 +1,52 @@
+[GameNr "12002195"]
+[TimeControl "1+15D"]
+[Variant "FFA"]
+[RuleVariants "Anonymous DeadKingWalking EnPassant PromoteTo=D"]
+[Red "Riba"]
+[RedElo "3008"]
+[Blue "vitalik-razumov"]
+[BlueElo "2478"]
+[Yellow "dragonblanco26"]
+[YellowElo "2752"]
+[Green "Vestmar"]
+[GreenElo "2333"]
+[Result "Riba: 68 - vitalik-razumov: 19 - dragonblanco26: 35 - Vestmar: 5"]
+[Termination "Game over. (Checkmate)"]
+[Site "www.chess.com/variants/4-player-chess/game/12002195"]
+[Date "Fri Mar 11 2022 20:42:26 GMT+0000 (Coordinated Universal Time)"]
+[StartFen4 "4PCo"]
+[CurrentMove "100"]
+
+1. h2-h3 .. b7-d7 .. g13-g12 .. m8-k8
+2. Qg1-j4 .. Qa7-b7 .. Nj14-i12 .. m9-l9
+3. Ne1-f3 .. Na10-c9 .. k13-k11 .. m4-l4
+4. d2-d4 .. b11-d11 .. Qh14-e11 .. Nn5-l6
+5. Nj1-i3 .. b4-c4 .. Ne14-d12 .. m7-k7
+6. Qj4-h4 .. Na5-c6 .. Bf14xBn6 .. Kn7xBn6
+7. Qh4xk7 .. b10-c10 .. Qe11-i11+ .. Kn6-n5
+8. Bi1-h2 .. Ba9xNd12 .. e13xBd12 .. Nn10-m8
+9. Qk7-i5 .. Nc9-e10 .. Kg14-h14 .. Nl6-j7
+10. Qi5xm5+ .. Ne10xd12 .. Qi11-h10#
+11. Qm5xQh10 .. Nd12xf13+ .. Kh14-g13
+12. Qh10-h8 .. Nf13xRd14 .. h13-h12
+13. k2-k4 .. Qb7-e10 .. Kg13-h13
+14. Qh8-f8 .. d7-e7 .. Ni12-g13
+15. Qf8-f7 .. Nd14-f13 .. i13-i12
+16. Qf7xNf13 .. Ba6-d9 .. j13-j11
+17. Qf13-f5 .. O-O-O .. Kh13-i13
+18. k4-k5 .. Qe10-e13 .. Ki13-j12
+19. k5-k6 .. Qe13xNg13 .. g12-g11
+20. d4-d5 .. Nc6-d8 .. Bi14xBd9+
+21. k6xNj7 .. c10xBd9 .. Rk14-k13
+22. j7xk8=D .. Qg13-c9 .. i12-i11
+23. d5-d6 .. e7-f7 .. k11-k10
+24. Qk8-h11 .. Nd8-c6 .. Rk13-h13
+25. Rk1-k5 .. b5-c5 .. k10xl9
+26. Qf5-l11 .. f7-g7 .. Kj12-i13
+27. Ql11-j13+# .. g7-h7=D
+28. Qh11xNc6 .. Qc9xQc6
+29. Qj13xQc6 .. Qh7-i7
+30. e2-e3 .. Ra7-g7
+31. Rk5xc5 .. Qi7-k7
+32. Bf1xc4+ .. Ka6-a7
+33. Rc5-a5+#

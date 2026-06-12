@@ -1,0 +1,49 @@
+[GameNr "12052984"]
+[TimeControl "1+15D"]
+[Variant "FFA"]
+[RuleVariants "Anonymous DeadKingWalking EnPassant PromoteTo=D"]
+[Red "Riba"]
+[RedElo "3084"]
+[Blue "smokeandmirrorsrlonggone"]
+[BlueElo "2558"]
+[Yellow "flyinghuman"]
+[YellowElo "2556"]
+[Green "GoldCoinCollector"]
+[GreenElo "2497"]
+[Result "Riba: 51 - smokeandmirrorsrlonggone: 57 - flyinghuman: 1 - GoldCoinCollector: 12"]
+[Termination "Game over. (Red +20)"]
+[Site "www.chess.com/variants/4-player-chess/game/12052984"]
+[Date "Wed Mar 16 2022 20:39:23 GMT+0000 (Coordinated Universal Time)"]
+[StartFen4 "4PCo"]
+[CurrentMove "109"]
+
+1. h2-h3 .. b7-c7 .. g13-g12 .. m8-l8
+2. Qg1-j4 .. b6-c6 .. Qh14-e11 .. m9-l9
+3. d2-d4 .. Na10-c9 .. k13-k11 .. Nn5-l6
+4. k2-k4 .. b11-d11 .. Ne14-f12 .. m4-l4
+5. k4-k5 .. Na5-b7 .. Qe11-h11 .. Nl6-k8
+6. Nj1-i3 .. Nb7-d8 .. j13-j12 .. m11-l11
+7. k5-k6 .. Ba6-c8 .. Nj14-i12 .. Nn10-m8
+8. Ni3-k4 .. Bc8-d7 .. Qh11-h5 .. Rn4-n5
+9. Bi1-h2 .. Qa7-b7 .. Bf14-g13 .. Qn8-m9
+10. Ne1-f3 .. d11-e11 .. Nf12-h11 .. Kn7-n8
+11. Nk4-j6 .. Bd7-e8 .. Qh5-h10 .. Nk8xNj6
+12. Qj4xNj6 .. b10-c10 .. d13-d12 .. Nm8-l6
+13. k6-k7 .. Nc9-d11 .. Rd14-e14 .. l8-k8
+14. Qj6xe11 .. Ba9-b10 .. Bi14-j13 .. Bn9-l7
+15. Qe11xBe8 .. Nd11-c9 .. Ni12-g11 .. Nl6-j5
+16. Qe8-i4 .. Qb7-c8 .. Nh11-j10 .. Kn8-n9
+17. Qi4-i5 .. Nc9-b7 .. Ng11-i10 .. m5-k5
+18. e2-e3 .. b4-c4 .. Ni10-k9 .. Bl7-k6
+19. Qi5-i6 .. Qc8-f5 .. Nj10xl11 .. Bk6-e12
+20. Qi6xm6 .. Qf5xf13+ .. Kg14-h14 .. Nj5-l6
+21. Bf1xc4 .. Qf13xRe14+ .. Bg13-f14 .. m10xNl11
+22. Bc4xb5 .. Qe14xBf14+# .. Qm9xk7
+23. Bh2-g3 .. Ra4-a5 .. Qk7-j7
+24. Bb5-e2 .. Qf14-i11 .. Be12-i8
+25. Rk1-j1 .. c6-d6 .. Rn11-m11
+26. O-O-O .. Qi11xNk9 .. Rm11-m10
+27. j2-j4 .. Qk9xl9+ .. Kn9-n8
+28. j4xk5 .. Ql9xRm10 .. Qj7xRj1
+29. Rg1xQj1 .. Qm10-m9+#
+30. Bg3xQm9 .. R

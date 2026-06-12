@@ -1,0 +1,51 @@
+[GameNr "11981570"]
+[TimeControl "1+15D"]
+[Variant "FFA"]
+[RuleVariants "Anonymous DeadKingWalking EnPassant PromoteTo=D"]
+[Red "ivo324"]
+[RedElo "2613"]
+[Blue "Riba"]
+[BlueElo "2968"]
+[Yellow "kurtssj"]
+[YellowElo "2550"]
+[Green "aaam"]
+[GreenElo "2438"]
+[Result "ivo324: 51 - Riba: 53 - kurtssj: 9 - aaam: 0"]
+[Termination "Game over. (Red +20)"]
+[Site "www.chess.com/variants/4-player-chess/game/11981570"]
+[Date "Wed Mar 09 2022 21:47:42 GMT+0000 (Coordinated Universal Time)"]
+[StartFen4 "4PCo"]
+[CurrentMove "104"]
+
+1. h2-h3 .. b6-d6 .. g13-g12 .. m9-l9
+2. d2-d4 .. Qa7-b6 .. k13-k11 .. Qn8-m9
+3. Bi1-g3 .. Qb6-d8 .. Qh14-e11 .. Qm9-n8
+4. Qg1-j4 .. Na10-c9 .. d13-d11 .. m5-l5
+5. k2-k3 .. b8-c8 .. Bf14-h12 .. Nn5-l6
+6. Nj1-i3 .. Qd8-d7 .. Ne14-f12 .. m4-k4
+7. Ne1-f3 .. Na5-c4 .. Nj14-i12 .. Rn4-n5
+8. e2-e4 .. Qd7-d9 .. Qe11-i7 .. Nn10-l11
+9. Qj4-f8 .. Ba9-b8 .. Qi7-f10 .. Nl6-k8
+10. Qf8-h6 .. Ra11-a10 .. Qf10-i10 .. Nl11-m9
+11. Qh6xm6+ .. Qd9-g6# .. j13-j12
+12. Qm6xQg6 .. b11-c11 .. Bi14-j13
+13. O-O .. Nc4-a5 .. Qi10-g10
+14. Qg6xQg10 .. Nc9xd11 .. Nf12xQg10
+15. Bg3-l8 .. Nd11-c9 .. Kg14-f14R
+16. e4-e5 .. c11-d11 .. Kf14-g13
+17. Bl8-j6 .. b10-d10 .. Kg13xBh12
+18. Ni3-g4 .. d11-e11 .. Kh12-i11
+19. e5xd6 .. e11-f11 .. Ki11-h12
+20. Bj6-g3 .. Ra10-a11 .. Kh12-i11
+21. d4-d5 .. f11-g11 .. Ki11-i10
+22. Nf3-d4 .. Na5-c4 .. Ki10-i9
+23. Bf1xNc4 .. b5xBc4 .. Ki9-h8
+24. Nd4-e6 .. g11-h11=D+ .. Kh8-g9
+25. Ne6-c7+ .. Bb8xNc7 .. Kg9-g8
+26. d6xBc7 .. Ba6-b5 .. Kg8-g9
+27. d5-d6 .. Ra11-g11 .. Kg9-g8
+28. Ng4-f6+ .. Rg11xNg10+ .. Kg8-f7
+29. d6-d7 .. Nc9xd7 .. Kf7-e6
+30. Nf6xNd7 .. Bb5xNd7+ .. Ke6-f6
+31. Ri1-e1 .. Qh11-f11+#
+32. Re1-e4 .. R

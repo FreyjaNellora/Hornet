@@ -28,9 +28,11 @@ else {
 if (-not $sources) { Write-Host "no source dir found"; exit 1 }
 
 $std = '^\[RuleVariants "(Anonymous )?DeadKingWalking EnPassant PromoteTo=D( SemiAnonymous)?"\]$'
+# `\[?` tolerates a corrupt export seen in the wild (missing leading bracket); 25 lines covers
+# the blank-line header format. GameNr is chess.com's unique game id — the dedupe key.
 $getnr = {
     param($f)
-    (Get-Content $f -TotalCount 8 | Where-Object { $_ -match '^\[GameNr' }) -replace '.*"(\d+)".*', '$1'
+    (Get-Content $f -TotalCount 25 | Where-Object { $_ -match '^\[?GameNr' }) -replace '.*"(\d+)".*', '$1'
 }
 
 # Existing GameNrs across all corpus dirs.
@@ -38,10 +40,11 @@ $existing = @{}
 Get-ChildItem (Join-Path $root "collected_games"), (Join-Path $root "human_games"), (Join-Path $root "baselines") -Filter "*.pgn4" |
     ForEach-Object { $nr = & $getnr $_.FullName; if ($nr) { $existing[$nr] = $true } }
 
-# Next free number.
-$maxn = (Get-ChildItem (Join-Path $root "collected_games") -Filter "cc_game_*.pgn4" |
+# Next free number across BOTH corpus dirs. The [int] cast is load-bearing: Measure-Object
+# returns a Double, and "{0:D4}" -f a Double throws (the 2026-06-12 batch landed un-renumbered).
+$maxn = (Get-ChildItem (Join-Path $root "collected_games"), (Join-Path $root "human_games") -Filter "cc_game_*.pgn4" |
     ForEach-Object { [int]($_.BaseName -replace 'cc_game_', '') } | Measure-Object -Maximum).Maximum
-$n = $maxn + 1
+$n = [int]$maxn + 1
 
 $ingested = 0; $dups = 0; $badrules = 0; $nogamenr = 0
 foreach ($src in $sources) {
@@ -56,7 +59,8 @@ foreach ($src in $sources) {
             $badrules++
             continue
         }
-        $name = "cc_game_{0:D4}.pgn4" -f $n
+        $name = "cc_game_{0:D4}.pgn4" -f [int]$n
+        if (-not $name) { Write-Host "ABORT: empty target name at n=$n"; exit 1 }
         Copy-Item $f.FullName (Join-Path $root "collected_games\$name")
         Copy-Item $f.FullName (Join-Path $root "human_games\$name")
         $existing[$nr] = $true
@@ -64,8 +68,16 @@ foreach ($src in $sources) {
     }
 }
 
+# Post-ingest validation: the corpus must be GameNr-unique. A silent dedupe miss once survived
+# a whole batch cycle — never trust, always verify.
+$seen = @{}; $dupfiles = @()
+Get-ChildItem (Join-Path $root "human_games") -Filter "*.pgn4" | ForEach-Object {
+    $nr = & $getnr $_.FullName
+    if ($nr -and $seen[$nr]) { $dupfiles += "$($_.Name) == $($seen[$nr])" } elseif ($nr) { $seen[$nr] = $_.Name }
+}
 $total = (Get-ChildItem (Join-Path $root "human_games") -Filter "*.pgn4").Count
 Write-Host ""
 Write-Host "ingested: $ingested   duplicates skipped: $dups   non-standard skipped: $badrules   no-GameNr skipped: $nogamenr"
-Write-Host "human_games corpus now: $total games"
+Write-Host "human_games corpus now: $total games ($($seen.Count) unique GameNrs)"
+if ($dupfiles) { Write-Host "WARNING - GameNr DUPLICATES IN CORPUS:"; $dupfiles | ForEach-Object { Write-Host "  $_" } }
 Write-Host "next: re-run texel_tune + move_match baselines; commit the new games."

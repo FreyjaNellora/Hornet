@@ -68,11 +68,15 @@ impl Pgn4Game {
         self.tag("StartFen4").unwrap_or("4PC")
     }
 
-    /// Resolve the initial position to a [`Board`] (`"4PC"` → canonical start, else an
-    /// explicit FEN4 string).
+    /// Resolve the initial position to a [`Board`] (`"4PC"` → canonical start, `"4PCo"` → the
+    /// Blue/Green-K-Q-exchanged array — see [`fen4::START_FEN4_4PCO`] — else an explicit FEN4
+    /// string).
     pub fn initial_board(&self) -> Result<Board, Pgn4Error> {
-        let s = self.start_fen4();
-        let fen = if s == "4PC" { START_FEN4 } else { s };
+        let fen = match self.start_fen4() {
+            "4PC" => START_FEN4,
+            "4PCo" => fen4::START_FEN4_4PCO,
+            s => s,
+        };
         fen4::parse(fen).map_err(Pgn4Error::Fen4)
     }
 
@@ -353,6 +357,28 @@ mod tests {
         let b = g.initial_board().unwrap();
         assert_eq!(b.side_to_move, Player::Red);
         assert_eq!(b.piece_count(Player::Red), 16);
+    }
+
+    #[test]
+    fn start_fen4_4pco_swaps_blue_green_royals() {
+        let s = SAMPLE.replace("\"4PC\"", "\"4PCo\"");
+        let g = parse(&s).unwrap();
+        assert_eq!(g.start_fen4(), "4PCo");
+        let b = g.initial_board().unwrap();
+        let at = |sq: &str| {
+            b.piece_at(Square::from_algebraic(sq).unwrap())
+                .map(|p| (p.player, p.piece_type))
+        };
+        use crate::board::types::Player::{Blue, Green, Red, Yellow};
+        // Blue/Green royals exchanged vs canonical; Red/Yellow unchanged.
+        assert_eq!(at("a7"), Some((Blue, PieceType::Queen)));
+        assert_eq!(at("a8"), Some((Blue, PieceType::King)));
+        assert_eq!(at("n8"), Some((Green, PieceType::Queen)));
+        assert_eq!(at("n7"), Some((Green, PieceType::King)));
+        assert_eq!(at("g1"), Some((Red, PieceType::Queen)));
+        assert_eq!(at("h1"), Some((Red, PieceType::King)));
+        assert_eq!(at("g14"), Some((Yellow, PieceType::King)));
+        assert_eq!(at("h14"), Some((Yellow, PieceType::Queen)));
     }
 
     #[test]
