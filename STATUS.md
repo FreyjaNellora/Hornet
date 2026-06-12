@@ -1,49 +1,28 @@
 # Hornet — Production Board (STATUS.md)
 
-**Updated:** 2026-06-12 (**DKW rules corrected (EXP-026/CO-007):** dead/DKW armies are
-**capturable for zero points and never swept** (rule 2, corpus-arbitrated — the user's
-locked-after-death hypothesis lost 1,297 plies of replay; the old frozen/swept rule contradicted
-the chess.com Help Center); DKW king may capture its own pieces; latent in-search scoring bug
-fixed; search/game-flow sweep inconsistency dissolved; spec §1.7 + VERIFICATION #5 corrected;
-`HORNET_DKW_RULE` keeps 0/1 as diagnostics; eval terrain-valuation of dead armies = future
-measured arm. **Texel data discipline:** default fit is now **human-only**
-(`HORNET_INCLUDE_SELFPLAY=1` to opt in) — human-only fits showed the mixed default diluting
-human signal ~8× (ISO 0.00326, CONN 0.00130, DGR 0.00094 human-only; DBL sign-flips positive =
-capture-activity symptom). Earlier same cycle: **C2/C3 continuation (Kimi → Fable, EXP-024/025).** Kimi's C2
-fold-ins were inert as built (terms folded into zero-weighted components) → reverted, eval hot
-path = EXP-022 exactly; her C3.1 pawn queries kept. `texel_tune` extended: 9 weights, dual-base
-single-term marginals. **Findings on 290 games / 17,003 positions** (user added 49 standard-rules
-games; RuleVariants audited uniform across all 319 headers): **ISO (isolated pawns) = the one
-robust term** (0.00040–0.00081 on every base, ~6–13× floor; magnitude symptom-suspect → P′
-rebuild arm recorded); DGR real but material-entangled (S′ rebuild, tempered); WIN/DBL null,
-CONN fragile. **Self-play null control (A≡B) read 83% win-rate / +65% points from pure
-variance → 6-game arms resolve nothing; EXP-017 win-rate reads re-graded; powered gate = paired
-seat-swap design.** Nothing wired (default-off discipline; no dead code). **NEXT SHIFT QUEUED:
-DKW rules fix** — chess.com Help Center: dead pieces capturable, **no points** (contradicts both
-the frozen rule and VERIFICATION item #5); post-king-capture behavior unspecified → 3-variant
-corpus-replay arbitration. Prior session same cycle: B-lane EXP-020/021 + protocol alignment. B1: the two
-move-ordering flags (`FFA bounty`, `free-capture`) moved const-true → `OrderState` fields
-**default-off** (Hard Rule #6 restored); refactor proven behavior-preserving by exact golden-ref
-equivalence; `order()` now `sort_by_cached_key`. Measured (EXP-020): **the inverted free-capture
-heuristic changed the played move on 11.6% of positions at beam 4** (0.9%/0.6% at beams 10/30) —
-the beam-4 bootstrap corpus is tainted ~1-in-9 moves; landing flags-off costs nothing (self-play
-noise, human-agreement flat). **New move_match baseline (arm iii, 32 games, d4, S2): 13.5% / 13.6%
-/ 13.6% at beams 4/10/30.** B2 (EXP-021): `count_defenders` (inverted polarity, adjacency-only) →
-real attack scan via `board::attacks::is_attacked_by`; measured cost ≈ 0 (median nodes/sec 64.3k
-off vs 65.8k on) → fix kept, lever stays default-off. B3: protocol `go` now plays the
-**flashlight at cap 1200** (SYNTHESIS recommendation); deprecated maxn + 2M node-budget config
-removed. B4: **CO-006** drafted (Hard Rule #6 "anything that changes the played move" amendment,
-Tier 2). New instruments: `selfplay_ab_maxn`, `move_diverge`; `move_match`/`bench_beam`
-parameterized. **C1 LANDED (EXP-022, user-authorized cross-lane): zero-weight queries gated —
-+41% search throughput (median 64,337 → 90,777 nodes/sec), node counts bit-identical, equality
-pinned by test; `run_all_queries` stays full for texel_tune.** **B5 RUNNING (EXP-023):**
-`selfplay_games/` regenerating — flashlight d8 cap 1200 + objective layer (win 50, danger 100),
-200-ply cap, 150 games (config bases: SYNTHESIS shape, EXP-017 decisiveness; old tainted corpus
-preserved in git history at 6a2b6a9). **B5 COMPLETE 2026-06-11:** 150/150 games, 37% decisive
-(old ~0), wide point spreads; first clean-data Texel fit confirms the deployed weight shape —
-tune-freeze lifted. All COs resolved + repo reconciled/pushed. Suite **115 lib + 3 integration
-green**. Open: Kimi C2 (re-anchored baselines) and C3 (on the new corpus). Prior: A-bucket suite
-repair; search-shape EXP-012; DKW EXP-011; recalibration EXP-005→009.)
+**Updated:** 2026-06-12 late (**Gates cycle.** **EXP-031 objective layer CLOSED:** 34 unique
+paired pairs (seed-collision dedup — extension per_split 2→4 replayed the original's split-0
+games; harness gained a seed-offset arg), pair record 20–13–1, points +8.7%, paired t=1.34
+(p≈0.09), sign test p≈0.15 → **a consistent lean, NOT a pass; play defaults unchanged.**
+Follow-up running: win-100+danger-100 variant vs deployed, 12 pairs, common-seed vs the w50 arm.
+**EXP-032 behavioral-mining candidates:** mining pass 2 (player-relative frames) nominated
+**pawn advancement** — first candidate to beat the winners-only instrument (+1.0pp all /
+**+1.5pp winners-only**, stable over 2× scale; classical rook-open flat → not advanced); 12-pair
+gate vs deployed RUNNING. Its first run was **VOID — selfplay_ab eval_id fallthrough** (ids 3/4
+unmapped → both arms silently deployed → 12/12 EXACT pair ties; accidental second null
+validation); fixed: ids 3/4 wired, unknown ids panic. **Tester loop landed:**
+`examples/play.rs` = human-vs-engine session (ASCII board, flashlight d8 cap 1200) that writes
+an emailable PGN4 debug report (engine config/seat/termination/avg-ms headers, replays in all
+instruments) → returned reports go to `versus_games/` (NEVER `human_games/` — engine games stay
+out of the human-behavior corpus). `tools/ingest_games.ps1` = one-command batch ingestion
+(rules filter, GameNr dedupe, renumber); user collecting 100–250 games/day ~2 weeks → re-baseline
+instruments per batch. Standing program: `experiments/NOTE-behavior-mining.md` (mine winner
+behaviors → represent → place by fit → gate). Texel default = human-only. Earlier this cycle:
+DKW rules corrected (EXP-026/CO-007: dead/DKW armies capturable for zero points, never swept;
+rule-1 locking variant pinned by test per user); shared replayer `src/replay.rs` (95% of corpus
+games replay fully); C1 query gating +41% nps; B1–B5, CO-002…007 all resolved. Suite **116 lib
++ 1 variant + 3 integration green**. Prior: A-bucket suite repair; EXP-012; EXP-011;
+recalibration EXP-005→009.)
 **State store — replaced, not appended.** History lives in `sessions/` and `dispatch_comms.jsonl`.
 
 Architecture/reference = `HORNET-BUILD-SPEC.md` (§9 file structure defines the module tree).

@@ -120,6 +120,11 @@ fn main() {
     let (adt, bdt) = (arg(9).unwrap_or(0) != 0, arg(10).unwrap_or(0) != 0);
     let (awp, bwp) = (arg(11).unwrap_or(0) != 0, arg(12).unwrap_or(0) != 0);
     let (aev, bev) = (arg(13).unwrap_or(0), arg(14).unwrap_or(0));
+    // Seed offset (arg 15): extensions of a prior run MUST pass the number of pairs already
+    // played at this config. The seed index is si*per_split+g, which renumbers when per_split
+    // changes — the EXP-031 extension (per_split 2→4) silently replayed the original run's
+    // split-0 games as its pairs 1–2 (move-for-move identical; deduped in the verdict).
+    let soff = arg(15).unwrap_or(0) as u64;
     let (ad, bd) = (arg(1).unwrap_or(8) as u32, arg(2).unwrap_or(8) as u32);
     let tag = |t: bool, c: &'static str| -> &'static str { if t { c } else { "" } };
     let ev = |e: usize| -> &'static str {
@@ -180,7 +185,7 @@ fn main() {
     let (mut games, mut decisive) = (0usize, 0usize);
     for (si, a_seats) in splits.iter().enumerate() {
         for g in 0..per_split {
-            let seed = ((si * per_split + g) as u64 + 1).wrapping_mul(0x9E37_79B9_7F4A_7C15);
+            let seed = ((si * per_split + g) as u64 + 1 + soff).wrapping_mul(0x9E37_79B9_7F4A_7C15);
             // EXP-027 paired seat-swap: the same seed/split played twice with A/B exchanged.
             // Identical configs → identical games → pair difference exactly 0 (the unpaired
             // design's seat/game variance cancels instead of averaging out).
@@ -219,8 +224,14 @@ fn main() {
     }
     let n = games as f64;
     eprintln!(
-        "\n=== {} vs {} over {pairs} pairs ({games} games) ===",
-        a.label, b.label
+        "\n=== {} vs {} over {pairs} pairs ({games} games{}) ===",
+        a.label,
+        b.label,
+        if soff > 0 {
+            format!(", seed offset {soff}")
+        } else {
+            String::new()
+        }
     );
     eprintln!(
         "points: A {a_pts} vs B {b_pts}   (per seat-game: A {:.1}, B {:.1})",

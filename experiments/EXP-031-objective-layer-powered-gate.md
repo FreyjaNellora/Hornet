@@ -1,6 +1,6 @@
-# EXP-031 — objective layer on the powered paired gate: a lean, not a pass (yet)
+# EXP-031 — objective layer on the powered paired gate: a lean, not a pass
 
-- **Date:** 2026-06-12 · **Status:** extension running
+- **Date:** 2026-06-12 · **Status:** CLOSED (verdict below); weight-variant sweep follow-up running
 - **Hypothesis:** the search-side objective layer (win 50 + king-danger 100 — the EXP-017 config
   whose unpaired 6-game reads suggested doubled win-rates) beats the plain eval on the paired
   gate, justifying flipping the play defaults (the first gated strength upgrade toward the
@@ -20,15 +20,41 @@ unpaired instrument's noise; the real effect, if present, is modest at these wei
 first guesses, never tuned. Extension to 36 total pairs running; weight variants (win 100,
 danger 50, table shape) are the follow-up sweep if the extension stays ambiguous.
 
+## Results (extension, 24 pairs / 48 games)
+
+| | points | per seat-game | pair record | decisive |
+|---|---|---|---|---|
+| A = win 50 + danger 100 | 1587 | 16.5 | **14–9–1** | 14/48 = 29% |
+| B = off (deployed play config) | 1417 | 14.8 | | |
+
+**Seed-collision dedup:** the extension's pairs 1–2 are move-for-move REPLAYS of the original
+run's pairs 1–2 (identical point vectors verified). The harness seed index `si*per_split+g`
+renumbers when per_split changes (2→4), so split 0 regenerated seeds 1–2. The combined verdict
+uses the 34 UNIQUE pairs (duplicates dropped: one A-win, one B-win). Harness fixed: seed-offset
+arg 15 — extensions must pass the pair count already played.
+
+## Verdict (34 unique pairs / 68 games)
+
+- Pair record **20–13–1**; points **A 2266 vs B 2084** (per seat-game 16.7 vs 15.3, **+8.7%**;
+  mean pair differential +5.4 pts, sd 23.3).
+- **Paired t = 1.34** (df 33, one-sided p ≈ 0.09); **exact sign test p ≈ 0.15**.
+- A consistent positive lean across both runs — but it does not clear 0.05 on any honest test
+  at first-guess weights (win 50 / danger 100, never tuned). **Not a pass. Defaults stay.**
+
 ## Conditions (after)
 
-- Play defaults unchanged (`go` = plain flashlight cap 1200). Nothing ships on 7–5.
-- The direct human gate is available regardless: the REPL plays end-to-end
-  (`cargo run` → `position startpos` / `go depth 8`) — the user playing the engine is the
-  beats-humans measurement itself, and doesn't wait on A/B resolution.
+- Play defaults unchanged (`go` = plain flashlight cap 1200). Nothing ships on p ≈ 0.09.
+- Follow-up per plan (variants before more pairs): **win 100 + danger 100 vs deployed**, 12
+  pairs, seed offset 0 ON PURPOSE — common random numbers with the original w50 run, so the
+  two arms are comparable head-to-head on identical openings. If the variant's lean is no
+  bigger, the next lever is danger 50 / table shape, then more pairs at the best variant only.
+- The direct human gate is available regardless: the REPL and `examples/play.rs` play
+  end-to-end — the user playing the engine is the beats-humans measurement itself.
 
 ## Conclusion
 
-PENDING the 36-pair total. Standing lesson reinforced: every prior "big" self-play effect has
-shrunk under the paired instrument — strength claims in this project are now earned slowly and
-honestly or not at all.
+The objective layer at first-guess weights is a real-looking but sub-significant +8.7% points
+lean over 34 honest pairs. Standing lesson reinforced twice in one day: every prior "big"
+self-play effect has shrunk under the paired instrument, and the instrument itself bites
+(silent eval-id fallthrough voided a gate; seed renumbering duplicated pairs) — strength claims
+are earned slowly and honestly or not at all.
