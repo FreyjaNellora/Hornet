@@ -1,28 +1,32 @@
 # Hornet — Production Board (STATUS.md)
 
-**Updated:** 2026-06-12 late (**Gates cycle.** **EXP-031 objective layer CLOSED:** 34 unique
-paired pairs (seed-collision dedup — extension per_split 2→4 replayed the original's split-0
-games; harness gained a seed-offset arg), pair record 20–13–1, points +8.7%, paired t=1.34
-(p≈0.09), sign test p≈0.15 → **a consistent lean, NOT a pass; play defaults unchanged.**
-Follow-up running: win-100+danger-100 variant vs deployed, 12 pairs, common-seed vs the w50 arm.
-**EXP-032 behavioral-mining candidates:** mining pass 2 (player-relative frames) nominated
-**pawn advancement** — first candidate to beat the winners-only instrument (+1.0pp all /
-**+1.5pp winners-only**, stable over 2× scale; classical rook-open flat → not advanced); 12-pair
-gate vs deployed RUNNING. Its first run was **VOID — selfplay_ab eval_id fallthrough** (ids 3/4
-unmapped → both arms silently deployed → 12/12 EXACT pair ties; accidental second null
-validation); fixed: ids 3/4 wired, unknown ids panic. **Tester loop landed:**
-`examples/play.rs` = human-vs-engine session (ASCII board, flashlight d8 cap 1200) that writes
-an emailable PGN4 debug report (engine config/seat/termination/avg-ms headers, replays in all
-instruments) → returned reports go to `versus_games/` (NEVER `human_games/` — engine games stay
-out of the human-behavior corpus). `tools/ingest_games.ps1` = one-command batch ingestion
-(rules filter, GameNr dedupe, renumber); user collecting 100–250 games/day ~2 weeks → re-baseline
-instruments per batch. Standing program: `experiments/NOTE-behavior-mining.md` (mine winner
-behaviors → represent → place by fit → gate). Texel default = human-only. Earlier this cycle:
-DKW rules corrected (EXP-026/CO-007: dead/DKW armies capturable for zero points, never swept;
-rule-1 locking variant pinned by test per user); shared replayer `src/replay.rs` (95% of corpus
-games replay fully); C1 query gating +41% nps; B1–B5, CO-002…007 all resolved. Suite **116 lib
-+ 1 variant + 3 integration green**. Prior: A-bucket suite repair; EXP-012; EXP-011;
-recalibration EXP-005→009.)
+**Updated:** 2026-06-12 end-of-cycle (**Gates cycle CLOSED — nothing earned a flip; the
+discipline held three times.** **EXP-031 objective layer (win term + king danger) CLOSED at
+both weights:** w50 = 34 unique pairs (after seed-collision dedup; harness gained a seed-offset
+arg) +8.7% pts, p≈0.09; w100 = 24 pairs +9.5% pts, p≈0.11 (its first-12 p≈0.044 was the lucky
+half — the fresh 12 were dead even). A remarkably consistent ~+9% lean across 58 pairs that
+never clears the bar; post-hoc family pooling t(57)=1.86 p≈0.034 recorded as suggestive only.
+**Defaults stay plain flashlight cap 1200.** Next objective-layer move = the mining-nominated
+shape (target selection by MATERIAL weakness — elimination forensics: 67% of kill victims rank
+last in material) + the human tester gate, not more pairs at the generic win term. **EXP-032
+pawn-adv CLOSED: gate NULL** (6-6-0, 809-800) after its run-1 was VOID (selfplay_ab eval_id
+silent fallthrough → both arms deployed, 12/12 exact ties; fixed, unknown ids panic). Fourth
+prediction≠play instance — +1.5pp winners-only agreement bought zero strength. **Corpus:
+`human_games/` = 143 standard-array games (188 unique total after the user's 48-game batch:
+ingest script renumber bug fixed + post-ingest GameNr validation added; one prior-batch dup
+removed; 1 corrupt header repaired). DISCOVERED: 45 of the batch are `StartFen4 "4PCo"` = the
+RETIRED OLD ARRAY (Blue/Green royals exchanged; proven by replay trial ladder; GameNr timeline
+shows it dying ~50M) → dispatch ruled it a VARIANT, quarantined to `human_games_4pco/`, ingest
+auto-routes by StartFen4. Engine canonical start = current chess.com array, confirmed.** Lib
+reads both arrays (`START_FEN4_4PCO`, pinned test). New tool `examples/corpus_check.rs` (per
+batch: gate/replay health + failure classification). Mining program (NOTE-behavior-mining.md)
+passes 1–3b done: winners farm middle/kill weakest-by-material, promotions 2.6× (biggest
+differential), king-raid gap every phase, denial NOT differential, trades not statically better
+— just unpunished (tempo). Tester loop live: `examples/play.rs` → emailable PGN4 reports →
+`versus_games/`. Texel re-baseline 143 games/10.7k positions: ISO only robust term, WIN null.
+Suite **117 lib + 1 variant + 3 integration green**. Queued: 4PCo castle tail; repetition/
+50-move/claim rules (needed before wide tester play); material-weakness targeting term. Prior:
+DKW rules EXP-026/CO-007; shared replayer; C1 +41% nps; B1–B5; recalibration EXP-005→009.)
 **State store — replaced, not appended.** History lives in `sessions/` and `dispatch_comms.jsonl`.
 
 Architecture/reference = `HORNET-BUILD-SPEC.md` (§9 file structure defines the module tree).

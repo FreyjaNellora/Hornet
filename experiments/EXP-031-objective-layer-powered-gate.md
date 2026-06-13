@@ -1,7 +1,7 @@
 # EXP-031 — objective layer on the powered paired gate: a lean, not a pass
 
-- **Date:** 2026-06-12 · **Status:** w50 CLOSED (verdict below); **w100 variant = marginal pass,
-  extension to 24 pairs running**
+- **Date:** 2026-06-12 · **Status:** **CLOSED — both weights. Consistent lean, never
+  significant; defaults stay off; compute redirects to the mining-nominated representation.**
 - **Hypothesis:** the search-side objective layer (win 50 + king-danger 100 — the EXP-017 config
   whose unpaired 6-game reads suggested doubled win-rates) beats the plain eval on the paired
   gate, justifying flipping the play defaults (the first gated strength upgrade toward the
@@ -67,12 +67,27 @@ arg 15 — extensions must pass the pair count already played.
   pairs at w100 (seed offset 12, the new harness arg). 24 total pairs decide the flip**: if the
   true effect is ~+13/pair, t at 24 pairs ≈ 2.6 — clears 0.05 cleanly; a shrink-to-lean kills it.
 
+## w100 extension (12 fresh pairs, seed offset 12) and final verdict
+
+The extension came back **dead even: 7–5 pairs but points A 832 vs B 840 (−8)**. The first 12
+pairs' p≈0.044 was the lucky half. Combined w100 over 24 pairs: **14–10, points 1736 vs 1586
+(+9.5%), t(23)=1.27, one-sided p≈0.11.** Per the pre-registered rule (shrink-to-lean kills it):
+**NOT a pass. The `go` defaults stay plain flashlight.**
+
+Family evidence, recorded honestly: pooling both weights (58 pairs: w50 +5.35/pair over 34,
+w100 +6.25/pair over 24) gives mean +5.7/pair, t(57)=1.86, p≈0.034 — but the pooling decision
+was made AFTER seeing the per-config results, so this is suggestive, not confirmatory. If the
+true effect is ~+6 pts/pair (~0.25 sd), a properly powered single-config gate needs ~100+ pairs
+(30+ hours) — compute that the mining program can spend better.
+
 ## Conclusion
 
-The objective layer at first-guess weights (w50) is a real-looking but sub-significant +8.7%
-points lean over 34 honest pairs. **Doubling the win weight (w100) roughly 10×'d the points
-margin on identical openings (+21.2%, p≈0.044)** — the first config to touch the bar since the
-paired instrument landed; the 24-pair extension decides. Standing lesson reinforced twice in
-one day: every prior "big" self-play effect has shrunk under the paired instrument, and the
-instrument itself bites (silent eval-id fallthrough voided a gate; seed renumbering duplicated
-pairs) — strength claims are earned slowly and honestly or not at all.
+The objective layer in its current shape (banked-points win term + king danger) produces a
+remarkably CONSISTENT ~+9% points lean at both tried weights across 58 honest pairs — and never
+clears the bar. Decision: defaults stay off; no more pairs at these shapes. Two better paths,
+both already queued: (1) **the mining-nominated objective-layer representation** — elimination
+forensics shows kills target the MATERIAL-weakest opponent (67% last-rank), so target selection
+by material weakness is likely the right shape where the generic win term is the wrong one;
+(2) **the human gate** — at this effect size the tester loop (versus_games/) measures what
+actually matters, beats-humans, faster than self-play significance does. Standing lesson, third
+time today: every effect shrinks under the paired instrument; ship nothing on a lucky half.
