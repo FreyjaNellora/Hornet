@@ -6,9 +6,12 @@
 # wrong cwd) and collected_games_new if present. For each *.pgn4 in the source:
 #   1. RULES FILTER: keep only standard gameplay (FFA + DeadKingWalking + EnPassant +
 #      PromoteTo=D; Anonymous/SemiAnonymous privacy flags ignored). Non-standard → skipped+listed.
-#   2. DEDUPE by GameNr against collected_games/, human_games/, baselines/.
+#   2. DEDUPE by GameNr against collected_games/, human_games/, human_games_4pco/, baselines/.
 #   3. RENUMBER continuing from the highest existing cc_game_NNNN.
-#   4. COPY into collected_games\ (raw archive) and human_games\ (the tuning corpus).
+#   4. COPY into collected_games\ (raw archive) and — ROUTED BY STARTING ARRAY — human_games\
+#      (standard array, the tuning/mining corpus) or human_games_4pco\ (the retired old array,
+#      StartFen4 "4PCo": Blue/Green royals exchanged). Different starting geometry = a variant;
+#      the corpora are never mixed (dispatch ruling 2026-06-12).
 # Prints a summary. After ingesting, re-run the instruments to re-baseline (see
 # experiments/NOTE-behavior-mining.md and the texel/move_match docs).
 
@@ -37,7 +40,7 @@ $getnr = {
 
 # Existing GameNrs across all corpus dirs.
 $existing = @{}
-Get-ChildItem (Join-Path $root "collected_games"), (Join-Path $root "human_games"), (Join-Path $root "baselines") -Filter "*.pgn4" |
+Get-ChildItem (Join-Path $root "collected_games"), (Join-Path $root "human_games"), (Join-Path $root "human_games_4pco"), (Join-Path $root "baselines") -Filter "*.pgn4" |
     ForEach-Object { $nr = & $getnr $_.FullName; if ($nr) { $existing[$nr] = $true } }
 
 # Next free number across BOTH corpus dirs. The [int] cast is load-bearing: Measure-Object
@@ -46,7 +49,7 @@ $maxn = (Get-ChildItem (Join-Path $root "collected_games"), (Join-Path $root "hu
     ForEach-Object { [int]($_.BaseName -replace 'cc_game_', '') } | Measure-Object -Maximum).Maximum
 $n = [int]$maxn + 1
 
-$ingested = 0; $dups = 0; $badrules = 0; $nogamenr = 0
+$ingested = 0; $dups = 0; $badrules = 0; $nogamenr = 0; $variant = 0
 foreach ($src in $sources) {
     Write-Host "source: $src"
     foreach ($f in (Get-ChildItem $src -Filter "*.pgn4" | Sort-Object Name)) {
@@ -62,7 +65,15 @@ foreach ($src in $sources) {
         $name = "cc_game_{0:D4}.pgn4" -f [int]$n
         if (-not $name) { Write-Host "ABORT: empty target name at n=$n"; exit 1 }
         Copy-Item $f.FullName (Join-Path $root "collected_games\$name")
-        Copy-Item $f.FullName (Join-Path $root "human_games\$name")
+        # Route by starting array: "4PCo" (old array, B/G royals exchanged) is a variant and
+        # lives in its own corpus — never in human_games.
+        $is4pco = Get-Content $f.FullName -TotalCount 80 | Where-Object { $_ -match '"4PCo"' }
+        if ($is4pco) {
+            Copy-Item $f.FullName (Join-Path $root "human_games_4pco\$name")
+            $variant++
+        } else {
+            Copy-Item $f.FullName (Join-Path $root "human_games\$name")
+        }
         $existing[$nr] = $true
         $n++; $ingested++
     }
@@ -77,7 +88,7 @@ Get-ChildItem (Join-Path $root "human_games") -Filter "*.pgn4" | ForEach-Object 
 }
 $total = (Get-ChildItem (Join-Path $root "human_games") -Filter "*.pgn4").Count
 Write-Host ""
-Write-Host "ingested: $ingested   duplicates skipped: $dups   non-standard skipped: $badrules   no-GameNr skipped: $nogamenr"
+Write-Host "ingested: $ingested ($variant routed to human_games_4pco)   duplicates skipped: $dups   non-standard skipped: $badrules   no-GameNr skipped: $nogamenr"
 Write-Host "human_games corpus now: $total games ($($seen.Count) unique GameNrs)"
 if ($dupfiles) { Write-Host "WARNING - GameNr DUPLICATES IN CORPUS:"; $dupfiles | ForEach-Object { Write-Host "  $_" } }
 Write-Host "next: re-run texel_tune + move_match baselines; commit the new games."
