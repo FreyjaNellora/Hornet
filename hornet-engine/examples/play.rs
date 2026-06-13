@@ -14,7 +14,7 @@
 
 use hornet_engine::board::types::{PieceType, Player};
 use hornet_engine::board::{Board, Move, Square, dkw_rule};
-use hornet_engine::game::{Game, TurnOutcome};
+use hornet_engine::game::{DrawReason, Game, TurnOutcome};
 use hornet_engine::move_gen::generate_legal;
 use hornet_engine::search::Searcher;
 use std::io::{BufRead, Write};
@@ -178,6 +178,17 @@ fn main() {
     draw(&game.board);
     let mut ply = 0usize;
     while game.active_count() > 1 && ply < 400 {
+        // FFA draw rules (EXP-034): a repeated position or a stale 50-move clock ends the game,
+        // +10 to each remaining player. Checked before the turn, on the position just reached.
+        if let Some(reason) = game.draw_status() {
+            game.claim_draw();
+            termination = match reason {
+                DrawReason::Repetition => "threefold repetition (+10 each remaining)".into(),
+                DrawReason::FiftyMove => "50-move rule (+10 each remaining)".into(),
+            };
+            println!("\n== draw: {termination} ==");
+            break;
+        }
         let mover = game.board.side_to_move;
         if mover == human && !game.board.dkw[human.index()] && !game.board.dead[human.index()] {
             // Human turn.
