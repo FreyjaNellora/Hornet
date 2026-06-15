@@ -1,0 +1,12 @@
+[package]
+name = "hornet-view"
+version = "0.1.0"
+edition = "2024"
+
+# The native graphical viewer. egui/eframe live HERE only — the engine crate stays std-only.
+# `hornet-engine` is a path dep used purely for rendering helpers (Square geometry, the FEN4
+# parser to deserialize the position the engine reports, Player/PieceType for glyphs). All game
+# DECISIONS (legality, moves, search) go to the engine PROCESS over the protocol — never here.
+[dependencies]
+eframe = "0.34"
+hornet-engine = { path = "../hornet-engine" }

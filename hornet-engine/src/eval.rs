@@ -1,0 +1,550 @@
+//! Evaluator (spec §4.7, §5). Computes `eval_4vec(&state) -> [i16; 4]` — the per-player
+//! utility vector V that search backs up via Max^n (Hard Rule #3: vector, never scalar).
+//!
+//! v0 is hand-tuned (weights from spec Appendix). The NNUE (§5) replaces this once the
+//! strength gate is passed (Hard Rule #7).
+
+use crate::board::Board;
+use crate::board::types::{PieceType, Player};
+use crate::lines::{LineMap, compute_lines};
+use crate::queries::{QueryVector, run_queries_gated};
+
+// ---------------------------------------------------------------------------
+// v0 weights (from spec Appendix)
+// ---------------------------------------------------------------------------
+
+// Recalibrated weights. Crossfire/safety are now centipawn-bounded (SEE material-at-risk; clamped
+// danger), so the heuristic components sit at 1. Material stays high: under the mean-relative
+// normalization a free piece only nets ~value/4 to the taker, so material must out-weigh the
+// positional swing of repositioning or the engine won't take free material (free-queen test).
+// Weights validated by offline tuning (EXP-015). Positional and safety are net-harmful for move
+// choice as currently built; material+crossfire is the validated stopgap. Re-enable P/S when a
+// fixed positional component is shown to help.
+const W_MATERIAL: i16 = 6;
+const W_POSITIONAL: i16 = 0;
+const W_SAFETY: i16 = 0;
+const W_CROSSFIRE: i16 = 1;
+
+// C2 / EXP-024 note: an eval-side mirror of the search-side objective layer (win-proximity into
+// P, king-danger-table into S, gated on their own consts) was drafted here and REMOVED — as
+// built it was inert: the terms folded into component *values* that the utility step multiplies
+// by W_POSITIONAL = W_SAFETY = 0, so no weight setting could make them reach the output. Tuning
+// for these terms lives in the offline tuning tooling (which computes them independently per position);
+// deployment lives in the search-side runtime knobs (`with_win_term` / `with_king_danger`,
+// EXP-017/018 — the flashlight play path). Do not re-fold objective terms into zero-weighted
+// components.
+
+// ---------------------------------------------------------------------------
+// Evaluator
+// ---------------------------------------------------------------------------
+
+/// Compute the per-player utility vector `V = <U₁, U₂, U₃, U₄>`.
+///
+/// This is the evaluator's primary interface (Hard Rule #3). Search consumes the
+/// full vector; no scalar collapse happens at the eval boundary.
+///
+/// The caller must provide a reusable `LineMap` buffer (boxed, allocated once).
+/// `compute_lines` fills it in place (~110 KB, always-recompute per Hard Rule #5).
+pub fn eval_4vec(board: &Board, line_buffer: &mut LineMap) -> [i16; 4] {
+    compute_lines(board, line_buffer);
+    // C1 / EXP-022: skip the query components the deployed weights zero out (pure perf —
+    // a zero-weight component contributes exactly 0 through mean-relative × weight, so the
+    // output is identical; pinned by `gated_queries_match_full_eval`). The flags are consts,
+    // so the gating itself is compile-time.
+    let qv = run_queries_gated(line_buffer, board, W_POSITIONAL != 0, W_SAFETY != 0);
+    compute_utility(&qv)
+}
+
+/// Scalar convenience: one player's score. Exactly `eval_4vec(state, lines)[player.index()]` —
+/// the full vector is still computed (lines + all queries); this only saves the caller the
+/// indexing, not any work.
+pub fn eval_scalar(board: &Board, line_buffer: &mut LineMap, player: Player) -> i16 {
+    let v = eval_4vec(board, line_buffer);
+    v[player.index()]
+}
+
+/// **Play-only "loaded" eval — the human-gate experiment.** The deployed [`eval_4vec`] is material +
+/// crossfire (positional/safety weighted 0), which plays flat and undevelops in quiet positions
+/// because nothing distinguishes a developed piece from an undeveloped one. This turns the
+/// **positional** (development/activity = central-square control) and **king-safety** components ON
+/// at modest weights, so the engine a HUMAN plays has real positional purpose. Material stays
+/// dominant (6) so captures still beat repositioning (the free-queen test holds). Wired via
+/// `Searcher::with_eval` on the **protocol/play path only** — the deployed eval, the instruments,
+/// self-play, and the tests are all untouched. Weights are first guesses for play-testing by feel:
+/// the self-play gates judged positional/safety net-harmful, but those gates measure engine-vs-engine
+/// proxies, not "beats a human" — which is what playing it actually tests.
+pub fn eval_4vec_loaded(board: &Board, line_buffer: &mut LineMap) -> [i16; 4] {
+    compute_lines(board, line_buffer);
+    let qv = run_queries_gated(line_buffer, board, true, true); // need positional + safety
+    compute_utility_weighted(&qv, 6, 2, 1, 1) // M=6, P=2, S=1, O=1
+    // Development comes from the piece-square tables (queries::query_pst, in the positional
+    // component), which score start squares negative (knight e1/j1, queen g1) and developed/advanced
+    // squares positive — so the engine develops pawns, minors, and the queen from the table, not a
+    // hard-coded rule. Tune the positional weight if development reads too weak or strong.
+}
+
+/// Collapse a `QueryVector` into per-player utilities using the v0 weights.
+///
+/// `Uᵢ = w₁·ΔMᵢ + w₂·ΔPᵢ + w₃·ΔSᵢ − w₄·ΔOᵢ` where `ΔXᵢ = Xᵢ − X̄` (deviation from mean).
+///
+/// **Why relative?** In 4-player FFA, captures remove material from the board — total
+/// material is not conserved. Making each component relative to its per-player mean
+/// ensures `Σᵢ Uᵢ = 0` (zero-sum), which enables Sturtevant–Korf shallow pruning
+/// bounds (`SUM_UB = 0` exactly). This is a post-processing step; the four query
+/// components remain independent and inspectable (Hard Rule #4).
+///
+/// Oᵢ is the crossfire query alone (centipawns). The `ffa_points` bounty term was lifted out of the
+/// eval (Hard Rule #8 / §1.7: the evaluator is points-blind; the FFA-hunt preference lives in move
+/// ordering, not V).
+fn compute_utility(qv: &QueryVector) -> [i16; 4] {
+    compute_utility_weighted(qv, W_MATERIAL, W_POSITIONAL, W_SAFETY, W_CROSSFIRE)
+}
+
+/// Collapse a `QueryVector` with explicit weights (mean-relative, so `Σ Uᵢ ≈ 0` — see above for the
+/// zero-sum rationale). [`compute_utility`] passes the deployed consts; [`eval_4vec_loaded`] passes
+/// positional/safety-on weights for the play path.
+fn compute_utility_weighted(qv: &QueryVector, wm: i16, wp: i16, ws: i16, wo: i16) -> [i16; 4] {
+    // Per-component means (i32 to avoid overflow).
+    let mean_m = qv.material.iter().map(|&x| x as i32).sum::<i32>() / 4;
+    let mean_p = qv.positional.iter().map(|&x| x as i32).sum::<i32>() / 4;
+    let mean_s = qv.safety.iter().map(|&x| x as i32).sum::<i32>() / 4;
+    let mean_o = qv.crossfire.iter().map(|&x| x as i32).sum::<i32>() / 4;
+
+    let mut v = [0i16; 4];
+    for player in Player::ALL {
+        let i = player.index();
+        let dm = qv.material[i] as i32 - mean_m;
+        let dp = qv.positional[i] as i32 - mean_p;
+        let ds = qv.safety[i] as i32 - mean_s;
+        let do_ = qv.crossfire[i] as i32 - mean_o;
+
+        let score = dm * wm as i32 + dp * wp as i32 + ds * ws as i32 - do_ * wo as i32;
+
+        v[i] = score.clamp(i16::MIN as i32, i16::MAX as i32) as i16;
+    }
+    v
+}
+
+// ---------------------------------------------------------------------------
+// EXP-029: candidate evals (experiment-only — the deployed eval is `eval_4vec`)
+// ---------------------------------------------------------------------------
+// Each candidate = the deployed eval + exactly ONE term at its fitted scale (EXP-024/025
+// addenda, fitted on the deployed (6,0,0,1) base), so the paired-gate verdict attributes
+// cleanly. Injected via `Searcher::with_eval`; never the default
+// (a candidate becoming the default is a Tier-2 ship gated on EXP-027 paired self-play).
+// Both terms are mean-relative (Σ ≈ 0 preserved); values clamped inside mate bounds (±29_000).
+
+/// Isolated-pawn scale (util units). Default = the fitted value 3305 (EXP-025), which the
+/// EXP-029 paired gate **rejected as unplayably loud** — override per sweep arm with
+/// `HORNET_PPRIME_SCALE` (EXP-030 scale sweep; read once per process).
+fn pprime_iso_scale() -> i32 {
+    static S: std::sync::LazyLock<i32> = std::sync::LazyLock::new(|| {
+        std::env::var("HORNET_PPRIME_SCALE")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(3305)
+    });
+    *S
+}
+
+/// King-danger-table scale. Default = the fitted value 5 (EXP-024), rejected at that volume
+/// by the EXP-029 paired gate — override per sweep arm with `HORNET_SPRIME_SCALE`.
+fn sprime_dgr_scale() -> i32 {
+    static S: std::sync::LazyLock<i32> = std::sync::LazyLock::new(|| {
+        std::env::var("HORNET_SPRIME_SCALE")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(5)
+    });
+    *S
+}
+
+/// P′ candidate: deployed eval − ISO_SCALE·Δ(isolated-pawn count).
+pub fn eval_4vec_pprime(board: &Board, line_buffer: &mut LineMap) -> [i16; 4] {
+    let mut v = eval_4vec(board, line_buffer);
+    let iso = crate::queries::query_pawn_isolated(board);
+    let sum: i32 = iso.iter().map(|&x| x as i32).sum();
+    for i in 0..4 {
+        // Mean-relative in quarter units to avoid truncating small counts: Δ = (4·x − Σ)/4.
+        let adj = pprime_iso_scale() * (4 * iso[i] as i32 - sum) / 4;
+        v[i] = (v[i] as i32 - adj).clamp(-29_000, 29_000) as i16;
+    }
+    v
+}
+
+/// S′ candidate: deployed eval − DGR_SCALE·Δ(king-danger table scalar).
+pub fn eval_4vec_sprime(board: &Board, line_buffer: &mut LineMap) -> [i16; 4] {
+    let mut v = eval_4vec(board, line_buffer); // fills `line_buffer` for the safety scan below
+    let ks = crate::queries::query_king_safety(line_buffer, board);
+    let dgr: [i32; 4] =
+        std::array::from_fn(|i| crate::queries::king_danger_table_scalar(&ks[i]) as i32);
+    let sum: i32 = dgr.iter().sum();
+    for i in 0..4 {
+        let adj = sprime_dgr_scale() * (4 * dgr[i] - sum) / 4;
+        v[i] = (v[i] as i32 - adj).clamp(-29_000, 29_000) as i16;
+    }
+    v
+}
+
+// ---------------------------------------------------------------------------
+// EXP-032: relational candidate evals (cold, experiment-only)
+// ---------------------------------------------------------------------------
+
+/// Rook-on-open-lane scale (util units per rook; `HORNET_ROOK_OPEN_SCALE`, default 200 ≈ 33 cp
+/// at M=6). Open = the rook's lane (its file for R/Y, rank for B/G) holds no pawns at all;
+/// semi-open (no *own* pawns) scores half. Classical relational feature: rooks belong on open
+/// lanes, acting from the periphery.
+fn rook_open_scale() -> i32 {
+    static S: std::sync::LazyLock<i32> = std::sync::LazyLock::new(|| {
+        std::env::var("HORNET_ROOK_OPEN_SCALE")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(200)
+    });
+    *S
+}
+
+/// Pawn-advancement scale (util units per rank of progress; `HORNET_PAWN_ADV_SCALE`, default 8).
+/// Rewards pushing pawns toward the central promotion crossing (progress off the home edge).
+fn pawn_adv_scale() -> i32 {
+    static S: std::sync::LazyLock<i32> = std::sync::LazyLock::new(|| {
+        std::env::var("HORNET_PAWN_ADV_SCALE")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(8)
+    });
+    *S
+}
+
+/// Per-player own-frame forward progress of a square (0 at the home rank, rising toward the
+/// promotion crossing): rank for Red, file for Blue, 13−rank for Yellow, 13−file for Green.
+fn forward_progress(sq: crate::board::Square, p: Player) -> i32 {
+    match p {
+        Player::Red => sq.rank() as i32,
+        Player::Blue => sq.file() as i32,
+        Player::Yellow => 13 - sq.rank() as i32,
+        Player::Green => 13 - sq.file() as i32,
+    }
+}
+
+/// EXP-032 candidate: deployed eval + rook-open-lane bonus (mean-relative).
+pub fn eval_4vec_rook_open(board: &Board, line_buffer: &mut LineMap) -> [i16; 4] {
+    let mut v = eval_4vec(board, line_buffer);
+    let lanes = crate::queries::pawn_lanes(board);
+    // Per player: sum of any-pawn counts per lane across ALL players (full-open test needs the
+    // whole lane's pawn occupancy in the ROOK OWNER's lane orientation).
+    let mut score = [0i32; 4];
+    for i in 0..crate::board::types::TOTAL_SQUARES {
+        let sq = crate::board::Square::new(i as u8);
+        let Some(p) = board.piece_at(sq) else {
+            continue;
+        };
+        if p.piece_type != PieceType::Rook {
+            continue;
+        }
+        let owner = p.player;
+        let lane = match owner {
+            Player::Red | Player::Yellow => sq.file() as usize,
+            Player::Blue | Player::Green => sq.rank() as usize,
+        };
+        // Own pawns on the lane (owner's orientation) and ANY pawns on it.
+        let own = lanes[owner.index()][lane];
+        let any: u8 = (0..4).map(|pl| lanes[pl][lane]).sum();
+        if any == 0 {
+            score[owner.index()] += rook_open_scale(); // fully open
+        } else if own == 0 {
+            score[owner.index()] += rook_open_scale() / 2; // semi-open
+        }
+    }
+    let sum: i32 = score.iter().sum();
+    for i in 0..4 {
+        let adj = (4 * score[i] - sum) / 4;
+        v[i] = (v[i] as i32 + adj).clamp(-29_000, 29_000) as i16;
+    }
+    v
+}
+
+/// EXP-032 candidate: deployed eval + pawn forward-progress (mean-relative).
+pub fn eval_4vec_pawn_adv(board: &Board, line_buffer: &mut LineMap) -> [i16; 4] {
+    let mut v = eval_4vec(board, line_buffer);
+    let mut prog = [0i32; 4];
+    for i in 0..crate::board::types::TOTAL_SQUARES {
+        let sq = crate::board::Square::new(i as u8);
+        if let Some(p) = board.piece_at(sq)
+            && p.piece_type == PieceType::Pawn
+        {
+            // Progress above the starting area (home rank ≈ 1 in own frame).
+            prog[p.player.index()] += (forward_progress(sq, p.player) - 1).max(0);
+        }
+    }
+    let scaled: [i32; 4] = std::array::from_fn(|i| prog[i] * pawn_adv_scale());
+    let sum: i32 = scaled.iter().sum();
+    for i in 0..4 {
+        let adj = (4 * scaled[i] - sum) / 4;
+        v[i] = (v[i] as i32 + adj).clamp(-29_000, 29_000) as i16;
+    }
+    v
+}
+
+// ---------------------------------------------------------------------------
+// Tests (§7.5)
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::board::fen4;
+
+    fn start() -> Board {
+        fen4::parse(fen4::START_FEN4).unwrap()
+    }
+
+    fn eval_start() -> ([i16; 4], Box<LineMap>) {
+        let b = start();
+        let mut lm = Box::new(LineMap::new());
+        let v = eval_4vec(&b, &mut lm);
+        (v, lm)
+    }
+
+    #[test]
+    fn starting_position_symmetry() {
+        let (v, _) = eval_start();
+        let avg = (v[0] as i32 + v[1] as i32 + v[2] as i32 + v[3] as i32) / 4;
+        for (i, &score) in v.iter().enumerate() {
+            let diff = (score as i32 - avg).abs();
+            assert!(
+                diff <= 500,
+                "player {i} score {score} deviates {diff} from avg {avg} (max ±500)"
+            );
+        }
+    }
+
+    #[test]
+    fn scalar_matches_4vec() {
+        let b = start();
+        let mut lm = Box::new(LineMap::new());
+        let v = eval_4vec(&b, &mut lm);
+        for player in Player::ALL {
+            let scalar = eval_scalar(&b, &mut lm, player);
+            assert_eq!(
+                scalar,
+                v[player.index()],
+                "scalar mismatch for player {:?}",
+                player
+            );
+        }
+    }
+
+    #[test]
+    fn eval_performance_debug_mode() {
+        let b = start();
+        let mut lm = Box::new(LineMap::new());
+
+        // Warm-up
+        for _ in 0..10 {
+            let _ = eval_4vec(&b, &mut lm);
+        }
+
+        let start = std::time::Instant::now();
+        for _ in 0..1000 {
+            let _ = eval_4vec(&b, &mut lm);
+        }
+        let elapsed = start.elapsed();
+        let avg_us = elapsed.as_micros() as f64 / 1000.0;
+        println!("eval_4vec debug-mode average: {avg_us:.1} µs (working budget 600 µs)");
+
+        // The 600 µs working budget (the eval-feature gate) is machine-dependent in
+        // debug mode, so the strict assert is opt-in: HORNET_PERF_ASSERT=1. The always-on bound is
+        // a generous catastrophic-regression backstop only.
+        if std::env::var("HORNET_PERF_ASSERT").is_ok_and(|v| v == "1") {
+            assert!(
+                avg_us < 600.0,
+                "eval_4vec average {avg_us:.1} µs exceeds the 600 µs debug-mode working budget"
+            );
+        }
+        assert!(
+            avg_us < 3000.0,
+            "eval_4vec average {avg_us:.1} µs — catastrophic regression (backstop 3000 µs; working budget 600 µs)"
+        );
+    }
+
+    /// Rotation equivariance: the 4PC board has an exact 4-fold symmetry — rotate the board 90°
+    /// and relabel players (R→B→Y→G) **and the side to move**, and the position is equivalent,
+    /// so the eval vector must permute exactly. The eval is symmetric *by construction* (every
+    /// query works in each player's own frame — e.g. the PST transform in queries.rs); this test
+    /// pins that assumption and catches orientation bugs (a mis-transformed PST quadrant, a
+    /// wrong pawn-lane axis) that nothing else would surface.
+    #[test]
+    fn eval_is_rotation_equivariant() {
+        use crate::board::Square;
+        use crate::board::types::{Piece, PieceType};
+        let at = |s: &str| Square::from_algebraic(s).unwrap();
+        // 90° rotation mapping Red's frame onto Blue's, matching queries.rs::pst_value
+        // (a Blue square (R,F) corresponds to the Red-frame square (13−F, R), so the forward
+        // map is (rank, file) → (rank: file, file: 13 − rank)).
+        let rot_sq = |sq: Square| Square::from_rank_file(sq.file(), 13 - sq.rank());
+        let rot_pl = |p: Player| match p {
+            Player::Red => Player::Blue,
+            Player::Blue => Player::Yellow,
+            Player::Yellow => Player::Green,
+            Player::Green => Player::Red,
+        };
+        // Deliberately asymmetric: every piece kind whose geometry is orientation-sensitive.
+        let pieces = [
+            ("h1", Player::Red, PieceType::King),
+            ("a7", Player::Blue, PieceType::King),
+            ("g14", Player::Yellow, PieceType::King),
+            ("n8", Player::Green, PieceType::King),
+            ("g5", Player::Red, PieceType::Pawn),
+            ("d10", Player::Blue, PieceType::Pawn),
+            ("c8", Player::Blue, PieceType::Knight),
+            ("i12", Player::Yellow, PieceType::Rook),
+            ("l6", Player::Green, PieceType::Bishop),
+            ("j3", Player::Red, PieceType::Queen),
+        ];
+        let mut b = Board::empty();
+        let mut rb = Board::empty();
+        for (s, p, t) in pieces {
+            b.set_piece(at(s), Some(Piece::new(p, t)));
+            rb.set_piece(rot_sq(at(s)), Some(Piece::new(rot_pl(p), t)));
+        }
+        b.side_to_move = Player::Red;
+        rb.side_to_move = rot_pl(Player::Red);
+        b.recompute_zobrist();
+        rb.recompute_zobrist();
+
+        let mut lm = Box::new(LineMap::new());
+        let v = eval_4vec(&b, &mut lm);
+        let vr = eval_4vec(&rb, &mut lm);
+        for p in Player::ALL {
+            assert_eq!(
+                v[p.index()],
+                vr[rot_pl(p).index()],
+                "rotation equivariance broken: {p:?} (orig {v:?}) vs {:?} (rotated {vr:?})",
+                rot_pl(p)
+            );
+        }
+    }
+
+    /// C1 / EXP-022 equality gate: the gated query path (skipping zero-weight components) must
+    /// produce the identical eval vector to the full path, across a seeded random-walk position
+    /// sweep — not just the start position. If a weight is ever un-zeroed, the gating flags in
+    /// `eval_4vec` flip with it (they are `W_* != 0`), so this holds by construction; the test
+    /// pins it against refactor drift.
+    #[test]
+    fn gated_queries_match_full_eval() {
+        use crate::move_gen::generate_legal;
+        use crate::queries::run_all_queries;
+
+        let mut xs = 0x9E37_79B9_7F4A_7C15u64;
+        let mut rng = || {
+            xs ^= xs << 13;
+            xs ^= xs >> 7;
+            xs ^= xs << 17;
+            xs
+        };
+
+        let mut lm = Box::new(LineMap::new());
+        for walk in 0..8 {
+            let mut b = start();
+            // Walk 0 checks the start position itself; others take 4..32 random plies.
+            for _ in 0..(walk * 4) {
+                let legal = generate_legal(&mut b);
+                if legal.is_empty() {
+                    break;
+                }
+                let mv = legal[rng() as usize % legal.len()];
+                b.make_move(mv);
+            }
+            let gated = eval_4vec(&b, &mut lm);
+            compute_lines(&b, &mut lm);
+            let full = compute_utility(&run_all_queries(&lm, &b));
+            assert_eq!(gated, full, "gated vs full eval diverged on walk {walk}");
+        }
+    }
+
+    /// Zero-sum invariant: Σᵢ Uᵢ ≈ 0 for any position (off by at most 3 from integer-mean
+    /// rounding). This enables Sturtevant–Korf shallow pruning with SUM_UB = 3, which is
+    /// vastly tighter than the pre-normalisation bound of −5348.
+    #[test]
+    fn eval_is_approximately_zero_sum() {
+        let b = start();
+        let mut lm = Box::new(LineMap::new());
+        let v = eval_4vec(&b, &mut lm);
+        let sum: i32 = v.iter().map(|&x| x as i32).sum();
+        assert!(
+            sum.abs() <= 10,
+            "eval sum should be within ±10 of zero, got {sum}: {:?}",
+            v
+        );
+
+        // After a capture
+        let mut b2 = start();
+        b2.set_piece(crate::board::types::Square::from_rank_file(7, 0), None);
+        let v2 = eval_4vec(&b2, &mut lm);
+        let sum2: i32 = v2.iter().map(|&x| x as i32).sum();
+        assert!(
+            sum2.abs() <= 10,
+            "eval sum should be within ±10 of zero after capture, got {sum2}: {:?}",
+            v2
+        );
+    }
+
+    #[test]
+    fn eval_after_capture_changes_scores() {
+        let mut b = start();
+        // Remove Blue queen (a8 = file 0, rank 7)
+        b.set_piece(crate::board::types::Square::from_rank_file(7, 0), None);
+
+        let mut lm = Box::new(LineMap::new());
+        let v = eval_4vec(&b, &mut lm);
+
+        // Blue should be worse off than the others
+        assert!(
+            v[1] < v[0],
+            "Blue should be worse than Red after losing queen"
+        );
+        assert!(
+            v[1] < v[2],
+            "Blue should be worse than Yellow after losing queen"
+        );
+        assert!(
+            v[1] < v[3],
+            "Blue should be worse than Green after losing queen"
+        );
+    }
+
+    /// Calibration gate (EXP-006): a single quiet move should swing the mover's static eval by
+    /// ~tens of centipawns (positional delta), not thousands. Thousands = the scale bug.
+    /// This test asserts the bound on a known quiet move from the starting position.
+    #[test]
+    fn quiet_move_eval_stability() {
+        use crate::board::Move;
+        use crate::board::types::Square;
+        use crate::move_gen::generate_pseudo_legal;
+
+        let mut b = start();
+        let mut lm = Box::new(LineMap::new());
+
+        // Red's quiet move: g2-g3 (pawn push, no capture)
+        let quiet_mv = Move {
+            from: Square::from_algebraic("g2").unwrap(),
+            to: Square::from_algebraic("g3").unwrap(),
+            promotion: None,
+            flags: crate::board::MoveFlags::default(),
+        };
+
+        let before = eval_4vec(&b, &mut lm)[0]; // Red's score
+        b.make_move(quiet_mv);
+        let after = eval_4vec(&b, &mut lm)[0];
+        let swing = (before as i32 - after as i32).abs();
+
+        // After recalibration, quiet moves should swing by ~tens, not thousands.
+        // Allow some slack for the hand-tuned v0: bound at 200 cp.
+        assert!(
+            swing <= 200,
+            "quiet move g2-g3 swings Red's eval by {swing} cp (before={before} after={after}); \
+             target is ~tens, max 200 during recalibration"
+        );
+    }
+}

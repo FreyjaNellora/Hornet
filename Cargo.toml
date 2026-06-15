@@ -1,0 +1,7 @@
+# Workspace root. The ENGINE (`hornet-engine`) stays zero-dependency (std-only); the VIEWER
+# (`hornet-view`) is the only crate with external deps (egui/eframe) — the dependency boundary
+# the user asked for. The viewer is a pure observer: it spawns the engine binary and drives it
+# over the protocol; all game decisions live in the engine.
+[workspace]
+resolver = "2"
+members = ["hornet-engine", "hornet-view"]
