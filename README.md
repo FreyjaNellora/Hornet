@@ -15,34 +15,83 @@ collapsing them.
 
 ## Play it
 
-You need **Rust** (latest stable). Install it in one step from **<https://rustup.rs>** — that gives
-you `cargo`, used below. Works on Windows, macOS, and Linux.
+**No coding required.** You'll install one free tool (Rust), download Hornet, then build and run it —
+about 10–15 minutes, most of it just waiting on the build to finish. The steps below are written for
+**Windows**; **macOS / Linux** notes are called out where they differ. If you've never done any of
+this, that's fine — follow it line by line.
 
-**1. Get the code**
+**Step 1 — Open a terminal** (a terminal is just a window where you type commands)
+
+- **Windows:** click Start, type `PowerShell`, and open it.
+- **macOS:** press ⌘ + Space, type `Terminal`, press Enter.
+- **Linux:** open your Terminal app.
+
+**Step 2 — Install Rust** (the free toolkit that builds Hornet)
+
+Open **<https://rustup.rs>** in your web browser, then:
+
+- **Windows:** download `rustup-init.exe` and double-click it. A black window opens — just press
+  **Enter** to accept the default option (`1`) and wait for it to finish. If it says it needs the
+  **Visual C++ Build Tools** ("Desktop development with C++"), say **yes** and let it install — that's
+  the piece that turns code into a program your computer can actually run.
+- **macOS / Linux:** copy the one-line command the page shows you, paste it into your terminal, press
+  Enter, and accept the defaults.
+
+When it's done, **close the terminal window and open a brand-new one** (it only "sees" Rust in a fresh
+window). To check it worked, type this and press Enter:
 
 ```sh
-git clone https://github.com/FreyjaNellora/Hornet.git
-cd Hornet
+cargo --version
 ```
 
-(Or download the ZIP from the GitHub page and unzip it.)
+You should see a version number (something like `cargo 1.9x.x`). If you instead see "command not
+found", close the terminal, open a fresh one, and try again.
 
-**2. Build it** — compiles both the engine and the viewer (first build takes a few minutes):
+**Step 3 — Download Hornet** (the easy way — no extra tools needed)
+
+1. Go to **<https://github.com/FreyjaNellora/Hornet>**.
+2. Click the green **`Code`** button, then **Download ZIP**.
+3. Unzip the file (**Windows:** right-click it → **Extract All**). Note where it lands — for example
+   `Downloads\Hornet-main`.
+
+*(Already have `git`? You can instead run `git clone https://github.com/FreyjaNellora/Hornet.git`.)*
+
+**Step 4 — Point your terminal at that folder**
+
+In the terminal, type `cd ` (the letters `c`, `d`, then a **space**), then **drag the unzipped Hornet
+folder onto the terminal window** — it fills in the path for you. Press Enter. (Or just type the path
+yourself, e.g. `cd Downloads\Hornet-main`.)
+
+**Step 5 — Build it** — this turns the code into a program. The first build takes a few minutes;
+that's normal:
 
 ```sh
 cargo build --release
 ```
 
-**3. Play:**
+Lots of lines scroll past. When you see **`Finished`** near the end, it worked.
+
+**Step 6 — Play:**
 
 ```sh
 cargo run -p hornet-view --release
 ```
 
-A window opens and the engine starts automatically. That's it.
+A window opens with the board and the engine starts on its own. That's it — pick your color, click
+**New game**, and play (see **How to play** below).
 
-> **Tip:** always run step 2 before step 3 — the viewer launches the engine binary that the build
-> produces. If you skip it, the viewer will tell you to `cargo build --release` first.
+### If something goes wrong
+
+- **`cargo: command not found`** — close the terminal and open a new one (Rust only appears in
+  terminals you open *after* installing it). Still nothing? Re-run the installer from
+  <https://rustup.rs>.
+- **A build error mentioning a "linker" or `link.exe`** (Windows) — the Visual C++ Build Tools were
+  skipped during Rust's install. Install the **"Desktop development with C++"** workload (through the
+  Visual Studio Installer), open a new terminal, and run `cargo build --release` again.
+- **A build error saying your Rust is too old, or something about an "edition"** — run `rustup update`,
+  then build again (Hornet needs Rust **1.85 or newer**).
+- **Linux: the window won't open** — install your distro's desktop graphics libraries (on
+  Debian/Ubuntu: `libxcb1 libxkbcommon0 libgl1`).
 
 ### How to play
 
@@ -54,10 +103,6 @@ A window opens and the engine starts automatically. That's it.
 - **Pause / Step** freeze the engine so you can study a position; the right panel shows its candidate
   moves, the expected line, and the score breakdown (what it's thinking).
 - Set search depth with **4 / 8 / 12 / 16** — higher is stronger but slower.
-
-> **Linux note:** the viewer needs the usual desktop graphics libraries. If the window fails to open,
-> install your distro's standard X11/Wayland + OpenGL dev packages (e.g. on Debian/Ubuntu:
-> `libxcb1 libxkbcommon0 libgl1`).
 
 ---
 
